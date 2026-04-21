@@ -1,10 +1,10 @@
 import os
 from logging.config import fileConfig
-from dotenv import load_dotenv  # Нужно установить: pip install python-dotenv
 
+from alembic import context
+from dotenv import load_dotenv  # Нужно установить: pip install python-dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from alembic import context
 
 # 1. Сначала загружаем переменные из .env
 load_dotenv()
