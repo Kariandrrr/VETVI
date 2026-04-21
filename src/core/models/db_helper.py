@@ -1,6 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
 from urllib.parse import quote_plus
 
 from sqlalchemy.ext.asyncio import (
