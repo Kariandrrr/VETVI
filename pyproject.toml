@@ -17,6 +17,7 @@ bcrypt = "^5.0.0"
 python-multipart = "^0.0.22"
 psycopg2-binary = "^2.9.11"
 python-slugify = "^8.0.4"
+python-dotenv = "^1.2.2"
 
 [dependency-groups]
 dev = [
