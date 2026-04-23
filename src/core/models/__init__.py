@@ -16,6 +16,5 @@ __all__ = [
     "Post",
     "MediaFile",
     "Tag",
-    "post_tags",
     "Invitation",
 ]
