@@ -15,7 +15,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import Mapped, mapped_column
-from .base import Base, PostType
+from .base import Base
+from .enums import PostType
 
 post_tags = Table(
     "post_tags",

@@ -1,9 +1,12 @@
 import uuid
 from datetime import datetime
+
 from sqlalchemy import String, Text, ForeignKey, DateTime, UniqueConstraint, Index, func
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import Mapped, mapped_column
-from .base import Base, MembershipRole
+
+from .base import Base
+from .enums import MembershipRole
 
 
 class FamilyGroup(Base):

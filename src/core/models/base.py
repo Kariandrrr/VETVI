@@ -1,4 +1,3 @@
-import enum
 import sys
 
 from sqlalchemy import MetaData
@@ -21,29 +20,3 @@ class Base(DeclarativeBase):
         return f"{camel_case_to_snake_case(cls.__name__)}s"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-
-
-class MembershipRole(enum.Enum):
-    admin = "admin"
-    editor = "editor"
-    viewer = "viewer"
-
-
-class GenderEnum(enum.Enum):
-    male = "male"
-    female = "female"
-    other = "other"
-    unknown = "unknown"
-
-
-class RelationshipType(enum.Enum):
-    parent_child = "parent_child"
-    spouse = "spouse"
-
-
-class PostType(enum.Enum):
-    text = "text"
-    photo = "photo"
-    audio = "audio"
-    video = "video"
-    document = "document"
