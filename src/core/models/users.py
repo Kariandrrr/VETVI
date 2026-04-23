@@ -1,9 +1,19 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Boolean, DateTime, func
+from typing import List, TYPE_CHECKING
+
+from sqlalchemy import String, Boolean, DateTime, func, Enum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from .base import Base
+from .enums import MembershipRole
+
+if TYPE_CHECKING:
+    from .families import FamilyGroup, FamilyMembership
+    from .members import FamilyMember
 
 
 class User(Base):
@@ -15,13 +25,22 @@ class User(Base):
     email: Mapped[str] = mapped_column(
         String(255), nullable=False, unique=True, index=True
     )
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    hashed_password: Mapped[bytes] = mapped_column(String(255), nullable=False)
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(500))
+    role: Mapped[MembershipRole] = mapped_column(
+        Enum(MembershipRole), default=MembershipRole.viewer, nullable=False
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    groups_created: Mapped[List["FamilyGroup"]] = relationship(back_populates="creator")
+    memberships: Mapped[List["FamilyMembership"]] = relationship(back_populates="user")
+    family_links: Mapped[List["FamilyMember"]] = relationship(
+        back_populates="linked_user"
     )

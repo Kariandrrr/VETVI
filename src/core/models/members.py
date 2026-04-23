@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime, date
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     String,
@@ -13,10 +16,14 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID, ENUM
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 from .enums import GenderEnum, RelationshipType
+
+if TYPE_CHECKING:
+    from .users import User
+    from .families import FamilyGroup
 
 
 class FamilyMember(Base):
@@ -57,6 +64,9 @@ class FamilyMember(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    group: Mapped["FamilyGroup"] = relationship(back_populates="members")
+    linked_user: Mapped["User"] = relationship(back_populates="family_links")
 
 
 class Relationship(Base):

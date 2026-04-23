@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, ForeignKey, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID, ENUM
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 from .enums import MembershipRole
+
+if TYPE_CHECKING:
+    from .families import FamilyGroup
 
 
 class Invitation(Base):
@@ -31,3 +37,5 @@ class Invitation(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+    group: Mapped["FamilyGroup"] = relationship(back_populates="invitations")
