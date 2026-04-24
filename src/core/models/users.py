@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 from typing import List, TYPE_CHECKING
 
+from pydantic import EmailStr
 from sqlalchemy import String, Boolean, DateTime, func, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -22,10 +23,10 @@ class User(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    email: Mapped[str] = mapped_column(
+    email: Mapped[EmailStr] = mapped_column(
         String(255), nullable=False, unique=True, index=True
     )
-    hashed_password: Mapped[bytes] = mapped_column(String(255), nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(500))
     role: Mapped[MembershipRole] = mapped_column(
@@ -42,5 +43,6 @@ class User(Base):
     groups_created: Mapped[List["FamilyGroup"]] = relationship(back_populates="creator")
     memberships: Mapped[List["FamilyMembership"]] = relationship(back_populates="user")
     family_links: Mapped[List["FamilyMember"]] = relationship(
-        back_populates="linked_user"
+        back_populates="linked_user",
+        primaryjoin="User.id == FamilyMember.linked_user_id",
     )

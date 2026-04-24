@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, date
-from typing import TYPE_CHECKING, List
+from typing import List
 
 from sqlalchemy import (
     String,
@@ -22,11 +22,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 from .enums import PostType
-
-if TYPE_CHECKING:
-    from .families import FamilyGroup
-    from .members import FamilyMember
-
 
 post_tags = Table(
     "post_tags",

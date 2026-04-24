@@ -122,5 +122,8 @@ async def get_db_context() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with get_db_context() as session:
+    session: AsyncSession = db_helper.session_factory()
+    try:
         yield session
+    finally:
+        await session.close()

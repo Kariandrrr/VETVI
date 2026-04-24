@@ -66,7 +66,11 @@ class FamilyMember(Base):
     )
 
     group: Mapped["FamilyGroup"] = relationship(back_populates="members")
-    linked_user: Mapped["User"] = relationship(back_populates="family_links")
+    linked_user: Mapped["User"] = relationship(
+        back_populates="family_links",
+        foreign_keys=[linked_user_id],
+    )
+    creator: Mapped["User"] = relationship(foreign_keys=[created_by])
 
 
 class Relationship(Base):
