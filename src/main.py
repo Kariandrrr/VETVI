@@ -5,8 +5,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.core.models import db_helper
-from core.config import settings
+from .core.config import settings
+from .core.models import db_helper
+from .routers import log_in_router
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -41,6 +42,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(log_in_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True, host=settings.run.host, port=settings.run.port)
+    uvicorn.run(
+        "src.main:app", reload=True, host=settings.run.host, port=settings.run.port
+    )
