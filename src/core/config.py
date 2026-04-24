@@ -108,7 +108,6 @@ class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     gunicorn: GunicornConfig = GunicornConfig()
     logging: LoggingConfig = LoggingConfig()
-    api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig = DatabaseConfig()
     auth_jwt: AuthJWT = AuthJWT()
 

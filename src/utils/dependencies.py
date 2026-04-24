@@ -1,14 +1,15 @@
+from uuid import UUID
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from uuid import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .utils_jwt import decode_jwt
 from ..core.models.db_helper import get_db
-from ..core.models.users import User
-from ..core.models.families import FamilyMembership
 from ..core.models.enums import MembershipRole
+from ..core.models.families import FamilyMembership
+from ..core.models.users import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -39,16 +40,16 @@ async def get_current_user(
     return user
 
 
-async def get_current_active_user(
-    current_user: User = Depends(get_current_user),
-) -> User:
-    if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+# async def get_current_active_user(
+#     current_user: User = Depends(get_current_user),
+# ) -> User:
+#     if not current_user.is_active:
+#         raise HTTPException(status_code=400, detail="Inactive user")
+#     return current_user
 
 
 def admin_only(
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ) -> User:
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
@@ -62,7 +63,7 @@ class GroupRoleChecker:
     async def __call__(
         self,
         family_group_id: UUID,
-        current_user: User = Depends(get_current_active_user),
+        current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db),
     ):
         query = select(FamilyMembership).where(
