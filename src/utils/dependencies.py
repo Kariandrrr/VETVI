@@ -11,7 +11,7 @@ from ..core.models.enums import MembershipRole
 from ..core.models.families import FamilyMembership
 from ..core.models.users import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 async def get_current_user(
@@ -32,7 +32,7 @@ async def get_current_user(
         raise credentials_exception
 
     result = await db.execute(select(User).where(User.id == user_id))
-    user = await result.scalar_one_or_none()
+    user = result.scalar_one_or_none()
 
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
@@ -51,7 +51,7 @@ async def get_current_user(
 def admin_only(
     current_user: User = Depends(get_current_user),
 ) -> User:
-    if current_user.role != "admin":
+    if current_user.role.value != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return current_user
 
