@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, computed_field, Field
+from pydantic import BaseModel, computed_field, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 LOG_DEFAULT_FORMAT = (
@@ -15,6 +15,8 @@ WORKER_LOG_DEFAULT_FORMAT = "[%(asctime)s.%(msecs)03d][%(processName)s] %(module
 class RunConfig(BaseModel):
     host: str = "0.0.0.0"
     port: int = 8000
+    debug: bool = True
+    cors_origins: list[str] = ["http://localhost:5173"]
 
 
 class GunicornConfig(BaseModel):
@@ -78,7 +80,7 @@ class CookieSettings(BaseModel):
     name_access: str = "access_token"
     name_refresh: str = "refresh_token"
 
-    secure: bool = True
+    secure: bool = False
     http_only: bool = True
     same_site: Literal["lax", "strict", "none"] = "lax"
     domain: str | None = None
@@ -110,6 +112,12 @@ class Settings(BaseSettings):
     logging: LoggingConfig = LoggingConfig()
     db: DatabaseConfig = DatabaseConfig()
     auth_jwt: AuthJWT = AuthJWT()
+
+    @model_validator(mode="after")
+    def set_cookie_secure_policy(self) -> "Settings":
+        if not self.run.debug:
+            self.auth_jwt.cookie.secure = True
+        return self
 
 
 settings = Settings()
