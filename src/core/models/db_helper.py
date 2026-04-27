@@ -1,6 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator
 from urllib.parse import quote_plus
 
 from sqlalchemy.ext.asyncio import (
@@ -122,5 +122,8 @@ async def get_db_context() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with get_db_context() as session:
+    session: AsyncSession = db_helper.session_factory()
+    try:
         yield session
+    finally:
+        await session.close()
