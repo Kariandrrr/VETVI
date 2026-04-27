@@ -4,22 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="let it be">
-      <change afterPath="$PROJECT_DIR$/src/api/auth.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/AddMemberDialog.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/FamilyMemberNode.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/FamilyTree.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/ProtectedRoute.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/auth/RegisterForm.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/context/AuthContext.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/hooks/useAuth.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/LoginPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/RegisterPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/auth.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="some basic pages - Home, Login, Register">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +69,7 @@
       <option name="presentableId" value="Default" />
       <updated>1777217828530</updated>
       <workItem from="1777217829674" duration="5000" />
-      <workItem from="1777280269533" duration="6778000" />
+      <workItem from="1777280269533" duration="7625000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -107,7 +95,63 @@
       <option name="project" value="LOCAL" />
       <updated>1777290080149</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="system stuff(">
+      <option name="closed" value="true" />
+      <created>1777290934443</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1777290934446</updated>
+    </task>
+    <task id="LOCAL-00005" summary="ui components">
+      <option name="closed" value="true" />
+      <created>1777290962784</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1777290962784</updated>
+    </task>
+    <task id="LOCAL-00006" summary="let it be">
+      <option name="closed" value="true" />
+      <created>1777290992251</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1777290992251</updated>
+    </task>
+    <task id="LOCAL-00007" summary="base components - ProtectedRoute, FamilyMemberNode, FamilyTree, AddMemberDialog">
+      <option name="closed" value="true" />
+      <created>1777291116739</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1777291116739</updated>
+    </task>
+    <task id="LOCAL-00008" summary="auth Forms - Login and Register">
+      <option name="closed" value="true" />
+      <created>1777291184438</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1777291184438</updated>
+    </task>
+    <task id="LOCAL-00009" summary="auth logic">
+      <option name="closed" value="true" />
+      <created>1777291204596</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1777291204596</updated>
+    </task>
+    <task id="LOCAL-00010" summary="some basic pages - Home, Login, Register">
+      <option name="closed" value="true" />
+      <created>1777291230043</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1777291230043</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -115,7 +159,13 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="gitignore" />
+    <MESSAGE value="system stuff(" />
+    <MESSAGE value="ui components" />
     <MESSAGE value="let it be" />
-    <option name="LAST_COMMIT_MESSAGE" value="let it be" />
+    <MESSAGE value="base components - ProtectedRoute, FamilyMemberNode, FamilyTree, AddMemberDialog" />
+    <MESSAGE value="auth Forms - Login and Register" />
+    <MESSAGE value="auth logic" />
+    <MESSAGE value="some basic pages - Home, Login, Register" />
+    <option name="LAST_COMMIT_MESSAGE" value="some basic pages - Home, Login, Register" />
   </component>
 </project>

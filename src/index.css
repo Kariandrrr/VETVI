@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --accent: #6ee7b7;
+  --accent-bg: #d1fae5;
+  --accent-border: #34d399;
+
+  --text-h: #1f2937;
+  --social-bg: #f3f4f6;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+
+  --border: #e5e7eb;
+}
+
+.dark {
+  --accent: #34d399;
+  --accent-bg: #064e3b;
+  --accent-border: #10b981;
+
+  --text-h: #f3f4f6;
+  --social-bg: #1f2937;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+  --border: #374151;
+}
