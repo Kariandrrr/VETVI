@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/hooks/useAuth';
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 
@@ -72,166 +72,110 @@ export const RegisterForm = () => {
         navigate('/');
       }, 1500);
     } catch (error) {
-      // Ошибка уже обработана в контексте
+        console.error("Caught error in RegisterForm:", error);
     }
   };
 
   const isLoading = form.formState.isSubmitting;
 
-  return (
-    <div className="w-full max-w-md mx-auto p-6 space-y-6">
+return (
+    <div className="w-full max-w-lg mx-auto glass-card p-10 space-y-10 relative overflow-hidden group">
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--primary)] rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+
       {/* Заголовок */}
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent">
-          Присоединяйтесь
+      <div className="space-y-3 text-center relative z-10">
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-inner">
+            <Sparkles className="w-8 h-8 text-[var(--primary)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+        </div>
+        <h1 className="text-4xl font-extrabold tracking-tighter bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
+          Начните историю
         </h1>
-        <p className="text-slate-600 dark:text-slate-400">
-          Создайте аккаунт для входа в приложение
+        <p className="text-slate-400 text-lg max-w-sm mx-auto leading-normal">
+          Создайте аккаунт и визуализируйте связи вашего рода
         </p>
       </div>
 
-      {/* Алерты */}
       {authError && (
-        <Alert className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800">
-          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-          <AlertDescription className="text-red-800 dark:text-red-200">
-            {authError}
-          </AlertDescription>
+        <Alert variant="destructive" className="rounded-2xl bg-red-950/30 border-red-800 text-red-200">
+          <AlertCircle className="h-5 w-5" />
+          <AlertDescription>{authError}</AlertDescription>
         </Alert>
       )}
 
       {successMessage && (
-        <Alert className="border-emerald-200 bg-emerald-50 dark:bg-emerald-950 dark:border-emerald-800">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          <AlertDescription className="text-emerald-800 dark:text-emerald-200">
-            {successMessage}
-          </AlertDescription>
+        <Alert className="border-[var(--secondary)] bg-cyan-950/30 text-[var(--secondary)] rounded-2xl">
+          <CheckCircle2 className="h-5 w-5" />
+          <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
       )}
 
       {/* Форма */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Display Name */}
-          <FormField
-            control={form.control}
-            name="display_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300">
-                  Ваше имя
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Иван Петров"
-                    {...field}
-                    disabled={isLoading}
-                    className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400 dark:border-emerald-800 dark:focus:border-emerald-600"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <form
+            onSubmit={form.handleSubmit(onSubmit, (errors) => console.log('Validation Errors:', errors))}
+            className="space-y-6 relative z-10"
+        >
+          {/* Поля формы */}
+          {[
+            { name: 'display_name', label: 'Ваше имя', placeholder: 'Алексей Смирнов', type: 'text' },
+            { name: 'email', label: 'Электронная почта', placeholder: 'alex@vetvi.ru', type: 'email' },
+            { name: 'password', label: 'Придумайте пароль', placeholder: '••••••••', type: 'password' },
+            { name: 'confirmPassword', label: 'Повторите пароль', placeholder: '••••••••', type: 'password' },
+          ].map((fieldData, index) => (
+            <FormField
+              key={fieldData.name}
+              control={form.control}
+              name={fieldData.name as keyof RegisterFormData}
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-sm font-semibold text-slate-200 tracking-wide uppercase px-1">
+                    {fieldData.label}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type={fieldData.type}
+                      placeholder={fieldData.placeholder}
+                      disabled={isLoading}
+                      className="neon-input rounded-2xl h-12 bg-black/20 border-[var(--glass-border)] text-white placeholder:text-slate-600 focus:bg-black/40"
+                    />
+                  </FormControl>
+                  {fieldData.name === 'password' && index === 2 && (
+                     <p className="text-xs text-slate-500 pt-1 px-1">
+                        A-z, 0-9, мин. 8 символов
+                     </p>
+                  )}
+                  <FormMessage className="text-xs text-red-400 px-1" />
+                </FormItem>
+              )}
+            />
+          ))}
 
-          {/* Email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300">
-                  Email
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="ivan@example.com"
-                    type="email"
-                    {...field}
-                    disabled={isLoading}
-                    className="border-cyan-200 focus:border-cyan-400 focus:ring-cyan-400 dark:border-cyan-800 dark:focus:border-cyan-600"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Password */}
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300">
-                  Пароль
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="••••••••"
-                    type="password"
-                    {...field}
-                    disabled={isLoading}
-                    className="border-purple-200 focus:border-purple-400 focus:ring-purple-400 dark:border-purple-800 dark:focus:border-purple-600"
-                  />
-                </FormControl>
-                <FormMessage />
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Минимум 8 символов, буквы и цифры
-                </p>
-              </FormItem>
-            )}
-          />
-
-          {/* Confirm Password */}
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-slate-700 dark:text-slate-300">
-                  Подтверждение пароля
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="••••••••"
-                    type="password"
-                    {...field}
-                    disabled={isLoading}
-                    className="border-purple-200 focus:border-purple-400 focus:ring-purple-400 dark:border-purple-800 dark:focus:border-purple-600"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Submit Button */}
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500 text-white font-semibold py-2 rounded-lg transition-all duration-200 shadow-lg shadow-emerald-200 dark:shadow-emerald-950"
+            className="w-full h-14 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-indigo-700 hover:to-indigo-600 text-white transition-all duration-300 font-bold text-lg tracking-tight shadow-[var(--neon-glow-primary)] hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]"
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Регистрация...
+                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                Инициализация...
               </>
             ) : (
-              'Создать аккаунт'
+              'Присоединиться к Vetvi'
             )}
           </Button>
         </form>
       </Form>
 
       {/* Ссылка на вход */}
-      <p className="text-center text-slate-600 dark:text-slate-400">
-        Уже есть аккаунт?{' '}
+      <p className="text-center text-slate-400 relative z-10">
+        Уже в системе?{' '}
         <Link
           to="/login"
-          className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-semibold transition-colors"
+          className="text-[var(--secondary)] hover:text-white font-semibold transition-colors decoration-dotted hover:underline"
         >
-          Войти
+          Войти в аккаунт
         </Link>
       </p>
     </div>

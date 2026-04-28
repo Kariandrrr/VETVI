@@ -4,10 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="some basic pages - Home, Login, Register">
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="little fix of styles">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/auth/RegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/auth/RegisterForm.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/LoginPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/RegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/RegisterPage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +28,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Kariandrrr&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Kariandrrr/vetvi_web&quot;,
+    &quot;accountId&quot;: &quot;3bfebd37-6662-4e32-9e4f-a9ec5ab93885&quot;
+  }
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -36,24 +51,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "go.import.settings.migrated": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "ts.external.directory.path": "D:\\Projects1\\portfolio\\VETVI\\front\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\Projects1\\portfolio\\VETVI\\front\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -69,7 +84,8 @@
       <option name="presentableId" value="Default" />
       <updated>1777217828530</updated>
       <workItem from="1777217829674" duration="5000" />
-      <workItem from="1777280269533" duration="7625000" />
+      <workItem from="1777280269533" duration="7883000" />
+      <workItem from="1777373044656" duration="3286000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -151,7 +167,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777291230043</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="little fix of styles">
+      <option name="closed" value="true" />
+      <created>1777291827303</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1777291827303</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -166,6 +190,7 @@
     <MESSAGE value="auth Forms - Login and Register" />
     <MESSAGE value="auth logic" />
     <MESSAGE value="some basic pages - Home, Login, Register" />
-    <option name="LAST_COMMIT_MESSAGE" value="some basic pages - Home, Login, Register" />
+    <MESSAGE value="little fix of styles" />
+    <option name="LAST_COMMIT_MESSAGE" value="little fix of styles" />
   </component>
 </project>
