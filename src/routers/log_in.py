@@ -11,7 +11,7 @@ from ..core.models.db_helper import get_db
 from ..core.models.users import User
 from ..core.schemas.user import UserRead, UserCreate, UserUpdate, Token
 from ..crud.user import get_user_by_username_or_email, create_user
-from ..utils.dependencies import get_current_user
+from src.deps.user import get_current_user
 from ..utils.utils_jwt import encode_jwt, validate_password, hash_password, decode_jwt
 
 router = APIRouter(
