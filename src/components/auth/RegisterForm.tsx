@@ -14,9 +14,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/hooks/useAuth';
-import { AlertCircle, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
+import logo from '@/assets/logo.png';
+
 
 
 const registerSchema = z
@@ -82,10 +84,14 @@ return (
     <div className="w-full max-w-lg mx-auto glass-card p-10 space-y-10 relative overflow-hidden group">
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--primary)] rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
 
-      {/* Заголовок */}
-      <div className="space-y-3 text-center relative z-10">
-        <div className="mx-auto w-16 h-16 rounded-2xl bg-[var(--glass-bg)] border border-[var(--glass-border)] flex items-center justify-center shadow-inner">
-            <Sparkles className="w-8 h-8 text-[var(--primary)] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+      {/* Заголовок с Логотипом */}
+      <div className="space-y-4 text-center relative z-10">
+        <div className="mx-auto mb-6">
+            <img
+              src={logo}
+              alt="VETVI Logo"
+              className="mx-auto w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-transform duration-500 hover:scale-110"
+            />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tighter bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
           Начните историю
@@ -95,6 +101,7 @@ return (
         </p>
       </div>
 
+      {/* ... остальная часть кода без изменений (алерты и форма) ... */}
       {authError && (
         <Alert variant="destructive" className="rounded-2xl bg-red-950/30 border-red-800 text-red-200">
           <AlertCircle className="h-5 w-5" />
@@ -109,13 +116,11 @@ return (
         </Alert>
       )}
 
-      {/* Форма */}
       <Form {...form}>
         <form
-            onSubmit={form.handleSubmit(onSubmit, (errors) => console.log('Validation Errors:', errors))}
+            onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6 relative z-10"
         >
-          {/* Поля формы */}
           {[
             { name: 'display_name', label: 'Ваше имя', placeholder: 'Алексей Смирнов', type: 'text' },
             { name: 'email', label: 'Электронная почта', placeholder: 'alex@vetvi.ru', type: 'email' },
@@ -168,7 +173,6 @@ return (
         </form>
       </Form>
 
-      {/* Ссылка на вход */}
       <p className="text-center text-slate-400 relative z-10">
         Уже в системе?{' '}
         <Link

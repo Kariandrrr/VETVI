@@ -1,9 +1,10 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Plus, Users, Settings, Zap } from 'lucide-react';
+import { LogOut, Plus, Settings, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FamilyTree } from '@/components/FamilyTree';
 import { useState } from 'react';
+import logo from '@/assets/logo.png';
 
 export const HomePage = () => {
   const { user, logout } = useAuth();
@@ -22,9 +23,15 @@ return (
           <div className="flex items-center justify-between h-16 gap-6">
             {/* Logo */}
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-indigo-700 flex items-center justify-center shadow-[var(--neon-glow-primary)]">
-                <Users className="w-6 h-6 text-white" />
+              {/* Контейнер для логотипа */}
+              <div className="relative group">
+                <img
+                  src={logo}
+                  alt="VETVI Logo"
+                  className="w-12 h-12 object-contain drop-shadow-[0_0_12px_rgba(168,85,247,0.6)] transition-transform duration-300 group-hover:scale-110"
+                />
               </div>
+
               <div className="hidden md:block">
                 <h1 className="text-2xl font-black text-white tracking-tighter bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
                   VETVI
