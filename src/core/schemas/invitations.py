@@ -21,7 +21,7 @@ class InvitationCreate(InvitationBase):
 class InvitationRead(InvitationBase, BaseSchema):
     id: UUID
     invited_by: UUID
-    token: bytes
+    token: str
     times_used: int
     is_active: bool
     created_at: datetime
