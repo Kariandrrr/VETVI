@@ -25,7 +25,7 @@ class Invitation(Base):
         ForeignKey("family_groups.id", ondelete="CASCADE")
     )
     invited_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
-    token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    token: Mapped[str | bytes] = mapped_column(String(64), unique=True, index=True)
     assigned_role: Mapped[MembershipRole] = mapped_column(
         ENUM(MembershipRole, name="membership_role", inherit_schema=True),
         server_default="editor",
