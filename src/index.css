@@ -3,14 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --background: rgba(46, 46, 95, 0.88);
-  --foreground: #f8fafc;
+  /* Базовый фон - глубокий космос */
+  --background: rgba(46, 46, 95, 0.88); /* Slate 955 */
+  --foreground: #f8fafc; /* Slate 50 */
 
   /* Неоновые акценты */
-  --primary: #a855f7; /
+  --primary: #a855f7; /* Violet 500 */
   --primary-foreground: #ffffff;
 
-  --secondary: #22d3ee;
+  --secondary: #22d3ee; /* Cyan 400 */
   --secondary-foreground: #0f172a;
 
   /* Элементы стекла */
@@ -25,7 +26,7 @@
   --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
 }
 
-/* для светлой темы */
+/* На всякий случай для светлой темы, но фокус на темной */
 .light {
   --background: #ffffff;
   --foreground: #0f172a;
@@ -42,6 +43,7 @@
   }
 }
 
+/* Полезный класс для эффекта стекла */
 @layer components {
   .glass-card {
     @apply bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-[var(--glass-blur)] rounded-3xl shadow-[var(--shadow-card)];
