@@ -16,6 +16,7 @@ async def create_family_group(
         description=group_in.description,
         created_by=owner_id,
     )
+    db.add(db_group)
     await db.flush()
 
     membership = FamilyMembership(
@@ -28,13 +29,20 @@ async def create_family_group(
     return db_group
 
 
-async def get_family_group(db: AsyncSession, user_id: UUID) -> FamilyGroup:
+async def get_single_family_by_id(
+    db: AsyncSession, family_id: UUID
+) -> FamilyGroup | None:
+    result = await db.execute(select(FamilyGroup).where(FamilyGroup.id == family_id))
+    return result.scalar_one_or_none()
+
+
+async def get_user_family_list(db: AsyncSession, user_id: UUID) -> list[FamilyGroup]:
     result = await db.execute(
         select(FamilyGroup)
         .join(FamilyMembership)
         .where(FamilyMembership.user_id == user_id)
     )
-    return result.scalars().all()
+    return list(result.scalars().all())
 
 
 async def update_family_group(
@@ -78,7 +86,7 @@ async def remove_member_from_family(
     db: AsyncSession,
     family_group_id: UUID,
     user_id: UUID,
-) -> None:
+):
     stmt = delete(FamilyMembership).where(
         and_(
             FamilyMembership.user_id == user_id,
@@ -88,13 +96,16 @@ async def remove_member_from_family(
 
     await db.execute(stmt)
     await db.commit()
-    return None
 
 
 async def delete_family_group(
     db: AsyncSession,
     family_group_id: UUID,
 ) -> None:
-    stmt = delete(FamilyGroup).where(FamilyGroup.id == family_group_id)
-    await db.execute(stmt)
+    await db.execute(
+        delete(FamilyMembership).where(
+            FamilyMembership.family_group_id == family_group_id
+        )
+    )
+    await db.execute(delete(FamilyGroup).where(FamilyGroup.id == family_group_id))
     await db.commit()

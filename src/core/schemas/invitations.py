@@ -11,7 +11,7 @@ class InvitationBase(BaseModel):
     family_group_id: UUID
     assigned_role: MembershipRole = MembershipRole.editor
     max_uses: int = 1
-    expires_at: datetime
+    expires_at: datetime | None = None
 
 
 class InvitationCreate(InvitationBase):

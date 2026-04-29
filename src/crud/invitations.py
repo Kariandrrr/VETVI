@@ -1,5 +1,5 @@
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from sqlalchemy import select, and_
@@ -17,7 +17,15 @@ async def create_invitation(
 ) -> Invitation:
     token = secrets.token_urlsafe(32)
 
-    expires_at = invite_in.expires_at or (datetime.now() + timedelta(days=7))
+    now_utc = datetime.now(timezone.utc)
+
+    if invite_in.expires_at is None or invite_in.expires_at <= now_utc:
+        expires_at = now_utc + timedelta(days=7)
+    else:
+        expires_at = invite_in.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+
     db_invite = Invitation(
         family_group_id=invite_in.family_group_id,
         invited_by=user_id,
@@ -47,8 +55,19 @@ async def get_invitation_by_token(
 async def accept_invitation(
     db: AsyncSession,
     user_id: UUID,
-    invite: Invitation,
+    invite_id: UUID,
 ) -> bool:
+    stmt_check = select(Invitation).where(Invitation.id == invite_id).with_for_update()
+    result = await db.execute(stmt_check)
+    invite = result.scalar_one_or_none()
+
+    if (
+        not invite
+        or not invite.is_active
+        or (invite.expires_at < datetime.now(timezone.utc))
+    ):
+        return False
+
     stmt_check = select(FamilyMembership).where(
         and_(
             FamilyMembership.user_id == user_id,
@@ -65,8 +84,8 @@ async def accept_invitation(
         role=invite.assigned_role,
     )
     db.add(new_membership)
-    invite.times_used += 1
 
+    invite.times_used += 1
     if invite.times_used >= invite.max_uses:
         invite.is_active = False
 
