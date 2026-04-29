@@ -54,12 +54,12 @@ class GroupRoleChecker:
 
     async def __call__(
         self,
-        family_group_id: UUID,
+        family_id: UUID,
         current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db),
     ):
         query = select(FamilyMembership).where(
-            FamilyMembership.family_group_id == family_group_id,
+            FamilyMembership.family_group_id == family_id,
             FamilyMembership.user_id == current_user.id,
         )
         result = await db.execute(query)
