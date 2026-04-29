@@ -4,9 +4,10 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..core.models import User
 from ..core.models.enums import MembershipRole
 from ..core.models.families import FamilyMembership
-from ..deps.user import get_current_user
+from ..deps.user import get_current_user, get_db
 
 
 async def if_family_member(
@@ -46,8 +47,8 @@ class RoleChecker:
     async def __call__(
         self,
         family_id: UUID,
-        current_user: Depends(get_current_user),
-        db: AsyncSession,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db),
     ):
         role = await get_user_role_in_family(db, current_user.id, family_id)
         if role is None:
