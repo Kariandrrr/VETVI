@@ -1,6 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Plus, Settings, Zap } from 'lucide-react';
+import {LogOut, Plus, Settings, Users, Zap} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FamilyTree } from '@/components/FamilyTree';
 import { useState } from 'react';
@@ -113,6 +113,14 @@ return (
             />
           </div>
         </div>
+
+          <Button
+          onClick={() => navigate('/families')}
+          className="bg-violet-600 hover:bg-violet-500"
+        >
+          <Users className="w-5 h-5 mr-2" />
+          Семейные группы
+        </Button>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-16">
           <StatsCard
