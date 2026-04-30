@@ -1,14 +1,22 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .base import BaseSchema
+from ..models import FamilyMembership, MembershipRole
 
 
 class FamilyGroupBase(BaseModel):
     name: str
     description: str | None = None
+
+
+class FamilyMembershipRead(BaseModel):
+    user_id: UUID
+    role: MembershipRole
+    joined_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FamilyGroupCreate(FamilyGroupBase):
@@ -20,6 +28,8 @@ class FamilyGroupRead(FamilyGroupBase, BaseSchema):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+    membership: list[FamilyMembershipRead] = []
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FamilyGroupUpdate(BaseModel):
