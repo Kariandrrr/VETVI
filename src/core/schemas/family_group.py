@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 from .base import BaseSchema
-from ..models import FamilyMembership, MembershipRole
+from ..models.enums import MembershipRole
 
 
 class FamilyGroupBase(BaseModel):
