@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from sqlalchemy import select, and_, delete
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.models.enums import MembershipRole
@@ -39,10 +40,11 @@ async def get_single_family_by_id(
 async def get_user_family_list(db: AsyncSession, user_id: UUID) -> list[FamilyGroup]:
     result = await db.execute(
         select(FamilyGroup)
-        .join(FamilyMembership)
+        .join(FamilyMembership, FamilyGroup.id == FamilyMembership.family_group_id)
         .where(FamilyMembership.user_id == user_id)
+        .options(selectinload(FamilyGroup.memberships))
     )
-    return list(result.scalars().all())
+    return list(result.scalars().unique().all())
 
 
 async def update_family_group(
