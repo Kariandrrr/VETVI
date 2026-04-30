@@ -4,10 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="change style to dark theme and fix login of register.2">
-      <change afterPath="$PROJECT_DIR$/src/assets/logo.png" afterDir="false" />
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit">
+      <change afterPath="$PROJECT_DIR$/src/api/family.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/api/invitations.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/InviteModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/hooks/useFamilies.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/pages/JoinPage.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/families.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/auth.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -24,6 +34,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -55,7 +70,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "famiygrops",
     "go.import.settings.migrated": "true",
     "last_opened_file_path": "D:/Projects1/portfolio/VETVI/front/src/assets",
     "node.js.detected.package.eslint": "true",
@@ -89,7 +104,9 @@
       <updated>1777217828530</updated>
       <workItem from="1777217829674" duration="5000" />
       <workItem from="1777280269533" duration="7883000" />
-      <workItem from="1777373044656" duration="5382000" />
+      <workItem from="1777373044656" duration="6844000" />
+      <workItem from="1777549056263" duration="3790000" />
+      <workItem from="1777558726499" duration="8133000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -195,11 +212,30 @@
       <option name="project" value="LOCAL" />
       <updated>1777376870414</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit">
+      <option name="closed" value="true" />
+      <created>1777378885574</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1777378885574</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="gitignore" />
@@ -213,6 +249,7 @@
     <MESSAGE value="little fix of styles" />
     <MESSAGE value="change style to dark theme and fix login of register" />
     <MESSAGE value="change style to dark theme and fix login of register.2" />
-    <option name="LAST_COMMIT_MESSAGE" value="change style to dark theme and fix login of register.2" />
+    <MESSAGE value="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit" />
+    <option name="LAST_COMMIT_MESSAGE" value="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit" />
   </component>
 </project>
