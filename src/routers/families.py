@@ -23,7 +23,9 @@ async def create_families_group(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await family_service.create_family_group(db, family_in, current_user.id)
+    family = await family_service.create_family_group(db, family_in, current_user.id)
+    await db.refresh(family, attribute_names=["memberships"])
+    return family
 
 
 @router.get("/me", response_model=List[FamilyGroupRead])
