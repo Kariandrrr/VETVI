@@ -7,7 +7,7 @@ from ..crud import invitations as invite_service
 router = APIRouter()
 
 
-@router.post("/join/{token}")
+@router.post("/{token}")
 async def join_by_token(
     token: str,
     db: AsyncSession = Depends(get_db),

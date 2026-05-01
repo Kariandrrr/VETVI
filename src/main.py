@@ -40,7 +40,7 @@ app.add_middleware(
 app.include_router(log_in_router, prefix="/auth", tags=["register"])
 app.include_router(families_router, prefix="/families", tags=["families"])
 app.include_router(invitations_router, prefix="/families", tags=["invitations"])
-app.include_router(join_router, tags=["join"])
+app.include_router(join_router, prefix="/join", tags=["join"])
 
 
 if __name__ == "__main__":

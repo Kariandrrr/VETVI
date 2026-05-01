@@ -7,7 +7,7 @@ from .join import router as join_router
 
 router = APIRouter()
 
-router.include_router(log_in_router, prefix="/auth", tags=["register"])
-router.include_router(families_router, prefix="/families", tags=["families"])
-router.include_router(invitations_router, prefix="/families", tags=["invitations"])
-router.include_router(join_router, tags=["join"])
+router.include_router(log_in_router)
+router.include_router(families_router)
+router.include_router(invitations_router)
+router.include_router(join_router)
