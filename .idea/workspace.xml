@@ -4,20 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit">
-      <change afterPath="$PROJECT_DIR$/src/api/family.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/api/invitations.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/InviteModal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/hooks/useFamilies.ts" afterDir="false" />
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="add routers">
       <change afterPath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/JoinPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/families.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/auth.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -64,25 +53,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "famiygrops",
-    "go.import.settings.migrated": "true",
-    "last_opened_file_path": "D:/Projects1/portfolio/VETVI/front/src/assets",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "ts.external.directory.path": "D:\\Projects1\\portfolio\\VETVI\\front\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;famiygrops&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Projects1/portfolio/VETVI/front/src/assets&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\Projects1\\portfolio\\VETVI\\front\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Projects1\portfolio\VETVI\front\src\assets" />
@@ -106,7 +95,8 @@
       <workItem from="1777280269533" duration="7883000" />
       <workItem from="1777373044656" duration="6844000" />
       <workItem from="1777549056263" duration="3790000" />
-      <workItem from="1777558726499" duration="8133000" />
+      <workItem from="1777558726499" duration="8742000" />
+      <workItem from="1777623008752" duration="2250000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -220,7 +210,87 @@
       <option name="project" value="LOCAL" />
       <updated>1777378885574</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="little fix">
+      <option name="closed" value="true" />
+      <created>1777567653034</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567653034</updated>
+    </task>
+    <task id="LOCAL-00016" summary="components - family modal">
+      <option name="closed" value="true" />
+      <created>1777567678453</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567678453</updated>
+    </task>
+    <task id="LOCAL-00017" summary="components - invite modal">
+      <option name="closed" value="true" />
+      <created>1777567704880</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567704880</updated>
+    </task>
+    <task id="LOCAL-00018" summary="correct family types">
+      <option name="closed" value="true" />
+      <created>1777567724688</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567724688</updated>
+    </task>
+    <task id="LOCAL-00019" summary="family api">
+      <option name="closed" value="true" />
+      <created>1777567798107</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567798107</updated>
+    </task>
+    <task id="LOCAL-00020" summary="invitation api">
+      <option name="closed" value="true" />
+      <created>1777567821265</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567821266</updated>
+    </task>
+    <task id="LOCAL-00021" summary="page - join family by url (token)">
+      <option name="closed" value="true" />
+      <created>1777567849605</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567849605</updated>
+    </task>
+    <task id="LOCAL-00022" summary="hooks for family">
+      <option name="closed" value="true" />
+      <created>1777567864705</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567864705</updated>
+    </task>
+    <task id="LOCAL-00023" summary="change the button 'create a new family group'">
+      <option name="closed" value="true" />
+      <created>1777567891107</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567891107</updated>
+    </task>
+    <task id="LOCAL-00024" summary="add routers">
+      <option name="closed" value="true" />
+      <created>1777567903109</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567903109</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -250,6 +320,16 @@
     <MESSAGE value="change style to dark theme and fix login of register" />
     <MESSAGE value="change style to dark theme and fix login of register.2" />
     <MESSAGE value="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit" />
-    <option name="LAST_COMMIT_MESSAGE" value="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit" />
+    <MESSAGE value="little fix" />
+    <MESSAGE value="components - family modal" />
+    <MESSAGE value="components - invite modal" />
+    <MESSAGE value="correct family types" />
+    <MESSAGE value="family api" />
+    <MESSAGE value="invitation api" />
+    <MESSAGE value="page - join family by url (token)" />
+    <MESSAGE value="hooks for family" />
+    <MESSAGE value="change the button 'create a new family group'" />
+    <MESSAGE value="add routers" />
+    <option name="LAST_COMMIT_MESSAGE" value="add routers" />
   </component>
 </project>

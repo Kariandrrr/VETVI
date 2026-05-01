@@ -44,12 +44,12 @@ return (
 
             <div className="flex items-center gap-3">
               <Button
-                onClick={() => setShowAddMember(!showAddMember)}
-                className="bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)] rounded-full h-11 px-6 hidden sm:flex font-bold shadow-[var(--neon-glow-secondary)] hover:shadow-[0_0_20px_rgba(34,211,238,0.6)] transition-all"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Новый родственник
-              </Button>
+                  onClick={() => setShowAddMember(!showAddMember)}
+                  className="bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)]"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Новый родственник
+                </Button>
 
               <Button
                 variant="ghost"
@@ -114,13 +114,13 @@ return (
           </div>
         </div>
 
-          <Button
-          onClick={() => navigate('/families')}
-          className="bg-violet-600 hover:bg-violet-500"
-        >
-          <Users className="w-5 h-5 mr-2" />
-          Семейные группы
-        </Button>
+         <Button
+              onClick={() => navigate('/families')}
+              className="bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)]"
+            >
+              <Users className="w-5 h-5 mr-2" />
+              Семейные группы
+            </Button>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-16">
           <StatsCard
