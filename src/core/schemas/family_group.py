@@ -28,7 +28,7 @@ class FamilyGroupRead(FamilyGroupBase, BaseSchema):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
-    membership: list[FamilyMembershipRead] = []
+    memberships: list[FamilyMembershipRead] = []
     model_config = ConfigDict(from_attributes=True)
 
 
