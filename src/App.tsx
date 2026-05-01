@@ -8,6 +8,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { JoinPage } from '@/pages/JoinPage';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,18 @@ function App() {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+
+            <Toaster
+              position="bottom-right"
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: 'var(--glass-bg)',
+                  border: '1px solid var(--glass-border)',
+                  color: 'var(--foreground)',
+                }
+              }}
+            />
         </AuthProvider>
       </QueryClientProvider>
     </Router>
