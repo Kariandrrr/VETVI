@@ -1,26 +1,25 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Users, Share2, Trash2, ShieldAlert } from 'lucide-react';
+import { Plus, Users, Share2, Trash2, ShieldAlert, Key } from 'lucide-react';
 import { useFamilies, useDeleteFamily } from '@/hooks/useFamilies';
-import { useAuth } from '@/hooks/useAuth'; // ✅ Добавили хук для получения юзера
-import { CreateFamilyModal } from '@/components/CreateFamilyModal'; // ✅ Не забудьте импортировать, если используется
+import { useAuth } from '@/hooks/useAuth';
+import { CreateFamilyModal } from '@/components/CreateFamilyModal';
+import { FamilyTokenModal } from '@/components/FamilyTokenModal';
 import { InviteModal } from '@/components/InviteModal';
 import type { FamilyGroupRead } from '@/types/families';
 
 export const FamiliesPage = () => {
-  // ✅ Исправлена деструктуризация useState
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFamilyForInvite, setSelectedFamilyForInvite] = useState<string | null>(null);
+  const [selectedFamilyForToken, setSelectedFamilyForToken] = useState<string | null>(null);
 
-  // ✅ Исправлено: 'data' переименована в 'familiesRaw' для ясности
+
   const { data: familiesRaw, isLoading, error } = useFamilies();
 
-  // ✅ Получаем текущего пользователя для проверки прав
   const { user } = useAuth();
 
   const { mutate: deleteFamily, isPending: isDeleting } = useDeleteFamily();
 
-  // ✅ Безопасно извлекаем массив из AxiosResponse
   const families: FamilyGroupRead[] = Array.isArray(familiesRaw)
     ? familiesRaw
     : (familiesRaw as { data?: FamilyGroupRead[] })?.data ?? [];
@@ -35,18 +34,25 @@ export const FamiliesPage = () => {
     setSelectedFamilyForInvite(familyId);
   };
 
+  const primaryBtnClass =
+    "px-6 py-3 gap-2 bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] hover:from-cyan-400 hover:to-purple-400 text-white font-medium rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center";
+
+  const secondaryBtnClass =
+    "px-4 py-2 bg-white/5 border-[var(--glass-border)] hover:bg-[var(--primary)]/20 hover:border-[var(--primary)] text-white rounded-lg transition-all duration-200 hover:shadow-[0_0_15px_rgba(168,85,247,0.2)] hover:-translate-y-0.5";
+
   if (error) {
     return (
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 text-lg">Ошибка загрузки семейных групп</p>
-          <Button onClick={() => window.location.reload()} className="mt-4">
+          <Button onClick={() => window.location.reload()} className="mt-4 px-6 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white hover:bg-white/10 rounded-xl transition-all">
             Перезагрузить
           </Button>
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-[var(--background)] p-6">
@@ -55,16 +61,13 @@ export const FamiliesPage = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
           <div>
             <h1 className="text-4xl font-black tracking-tighter text-white">
-              Семейные Группы
+              Семейные группы
             </h1>
             <p className="text-slate-400 mt-1">
               Совместная работа над родословной
             </p>
           </div>
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            className="gap-2 bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)]"
-          >
+          <Button onClick={() => setShowCreateModal(true)} className={primaryBtnClass}>
             <Plus className="w-5 h-5" />
             Создать новую группу
           </Button>
@@ -87,7 +90,8 @@ export const FamiliesPage = () => {
             <p className="text-slate-400 max-w-md mx-auto mb-8">
               Создайте первую группу, чтобы приглашать родственников и вместе работать над семейным деревом
             </p>
-            <Button onClick={() => setShowCreateModal(true)} size="lg">
+            <Button onClick={() => setShowCreateModal(true)} size="lg" className={primaryBtnClass}>
+              <Plus className="w-5 h-5" />
               Создать первую группу
             </Button>
           </div>
@@ -97,11 +101,9 @@ export const FamiliesPage = () => {
         {!isLoading && families.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {families.map((family) => {
-              // Проверка роли (используем 'any', если типы фронтенда еще не обновлены до memberships)
               const memberships = family.memberships ?? [];
               const membership = memberships.find((m) => m.user_id === user?.id);
               const isFamilyAdmin = membership?.role === 'admin';
-
               const memberCount = memberships.length;
 
               return (
@@ -121,17 +123,36 @@ export const FamiliesPage = () => {
                       )}
                     </div>
 
-                    {/* ✅ Кнопка доступна только админам */}
+                    {/* Кнопка шаринга */}
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => isFamilyAdmin && openInviteModal(family.id)}
                       disabled={!isFamilyAdmin}
-                      className={`text-slate-400 hover:text-white ${!isFamilyAdmin && 'opacity-40 cursor-not-allowed'}`}
+                      className={`text-slate-400 hover:text-white ${!isFamilyAdmin && 'opacity-40 cursor-not-allowed'} transition-all`}
                       title={isFamilyAdmin ? 'Пригласить участника' : 'Только администратор'}
                     >
                       <Share2 className="w-5 h-5" />
                     </Button>
+                      <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setSelectedFamilyForToken(family.id)}
+                          disabled={!isFamilyAdmin}
+                          className={`text-slate-400 hover:text-white ${!isFamilyAdmin && 'opacity-40 cursor-not-allowed'} transition-all`}
+                          title={isFamilyAdmin ? 'Пригласительная ссылка' : 'Только администратор'}
+                        >
+                          <Key className="w-5 h-5" />
+                        </Button>
+                      <FamilyTokenModal
+                          open={!!selectedFamilyForToken}
+                          onOpenChange={(isOpen) => {
+                            if (!isOpen) setSelectedFamilyForToken(null);
+                          }}
+                          familyId={selectedFamilyForToken || ''}
+                          familyName={families.find(f => f.id === selectedFamilyForToken)?.name || ''}
+                          token={null}
+                        />
                   </div>
 
                   <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--glass-border)]">
@@ -143,18 +164,14 @@ export const FamiliesPage = () => {
                     <div className="flex gap-2 items-center">
                       {isFamilyAdmin ? (
                         <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openInviteModal(family.id)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => openInviteModal(family.id)} className={secondaryBtnClass}>
                             Пригласить
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             disabled={isDeleting}
-                            className="text-red-400 hover:text-red-500 hover:bg-red-950/30 disabled:opacity-50"
+                            className="text-red-400 hover:text-red-500 hover:bg-red-950/30 disabled:opacity-50 transition-all rounded-lg px-3 py-2"
                             onClick={() => handleDelete(family.id, family.name)}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -175,13 +192,9 @@ export const FamiliesPage = () => {
         )}
       </div>
 
-      {/* Модальные окна */}
-      <CreateFamilyModal
-        open={showCreateModal}
-        onOpenChange={setShowCreateModal}
-      />
 
-      {/* ✅ Один InviteModal вместо двух */}
+      {/* Модальные окна */}
+      <CreateFamilyModal open={showCreateModal} onOpenChange={setShowCreateModal} />
       <InviteModal
         familyId={selectedFamilyForInvite || ''}
         open={!!selectedFamilyForInvite}
