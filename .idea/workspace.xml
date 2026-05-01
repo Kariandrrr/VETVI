@@ -4,10 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="add routers">
-      <change afterPath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" afterDir="false" />
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="finally work - the page of Family Group, the role division, the number of family members in one family group">
+      <change afterPath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/InviteModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InviteModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/JoinPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/JoinPage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +104,8 @@
       <workItem from="1777373044656" duration="6844000" />
       <workItem from="1777549056263" duration="3790000" />
       <workItem from="1777558726499" duration="8742000" />
-      <workItem from="1777623008752" duration="2250000" />
+      <workItem from="1777623008752" duration="2352000" />
+      <workItem from="1777647701021" duration="8244000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -290,7 +299,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777567903109</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="finally work - the page of Family Group, the role division, the number of family members in one family group">
+      <option name="closed" value="true" />
+      <created>1777625431735</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1777625431735</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -330,6 +347,7 @@
     <MESSAGE value="hooks for family" />
     <MESSAGE value="change the button 'create a new family group'" />
     <MESSAGE value="add routers" />
-    <option name="LAST_COMMIT_MESSAGE" value="add routers" />
+    <MESSAGE value="finally work - the page of Family Group, the role division, the number of family members in one family group" />
+    <option name="LAST_COMMIT_MESSAGE" value="finally work - the page of Family Group, the role division, the number of family members in one family group" />
   </component>
 </project>
