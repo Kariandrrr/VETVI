@@ -1,14 +1,13 @@
-import axios, { AxiosError } from 'axios';
-import type {UserCreate, UserRead, Token} from '@/types/auth';
+import axios, {AxiosError} from 'axios';
+import type {Token, UserCreate, UserRead} from '@/types/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: API_URL,
   withCredentials: true,
 });
 
-// Добавляем access token в headers
 axiosInstance.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) {
@@ -17,7 +16,6 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-// Обработка refresh token
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
