@@ -5,12 +5,11 @@ export const invitationsAPI = {
   createInvite: async (familyId: string, maxUses: number = 1): Promise<InvitationRead> => {
     const response = await axiosInstance.post(`/invitations/families/${familyId}/invites`, {
       max_uses: maxUses,
-      assigned_role: 'editor' // или роль из селекта
+      assigned_role: 'editor'
     });
     return response.data;
   },
 
-  // Принять инвайт по токену (для любого залогиненного юзера)
   joinByToken: async (token: string) => {
     const response = await axiosInstance.post(`/invitations/join/${token}`);
     return response.data;

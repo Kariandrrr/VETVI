@@ -1,14 +1,14 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '@/context/AuthContext';
-import { RegisterPage } from '@/pages/RegisterPage';
-import { LoginPage } from '@/pages/LoginPage';
-import { HomePage } from '@/pages/HomePage';
-import { FamiliesPage } from '@/pages/FamiliesPage';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { JoinPage } from '@/pages/JoinPage';
+import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
+import {AuthProvider} from '@/context/AuthContext';
+import {RegisterPage} from '@/pages/RegisterPage';
+import {LoginPage} from '@/pages/LoginPage';
+import {HomePage} from '@/pages/HomePage';
+import {FamiliesPage} from '@/pages/FamiliesPage';
+import {ProtectedRoute} from '@/components/ProtectedRoute';
+import {JoinPage} from '@/pages/JoinPage';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {Toaster} from 'sonner';
 
 const queryClient = new QueryClient();
 

@@ -1,10 +1,10 @@
-import { axiosInstance } from '@/api/auth';
-import { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import type { AxiosError } from 'axios';
-import { toast } from 'sonner';
+import {axiosInstance} from '@/api/auth';
+import {useEffect, useRef, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
+import {Button} from '@/components/ui/button';
+import {CheckCircle, Loader2, XCircle} from 'lucide-react';
+import type {AxiosError} from 'axios';
+import {toast} from 'sonner';
 
 export const JoinPage = () => {
   const { token } = useParams<{ token: string }>();

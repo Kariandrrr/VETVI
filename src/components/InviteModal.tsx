@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Copy, Check, Sparkles, X } from 'lucide-react';
-import { useCreateInvite } from '../hooks/useFamilies';
-import type { MembershipRole } from '@/types/families';
-import { toast } from 'sonner';
-import type { AxiosError } from 'axios';
+import {useState} from 'react';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {Check, Copy, Sparkles, X} from 'lucide-react';
+import {useCreateInvite} from '../hooks/useFamilies';
+import type {MembershipRole} from '@/types/families';
+import {toast} from 'sonner';
+import type {AxiosError} from 'axios';
 
 interface InvitationResponse {
   token?: string;
@@ -40,7 +40,6 @@ export const InviteModal = ({ familyId, open, onOpenChange }: Props) => {
       },
       {
         onSuccess: (response: unknown) => {
-          // Безопасное извлечение токена
           const res = response as { data?: InvitationResponse };
           const body = res.data ?? (response as InvitationResponse);
 

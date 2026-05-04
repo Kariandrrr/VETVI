@@ -4,15 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="fix">
-      <change afterPath="$PROJECT_DIR$/src/hooks/useInvites.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/types/common.ts" afterDir="false" />
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="add hooks for invitations">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/family.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/family.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/invitations.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/invitations.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/AddMemberDialog.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AddMemberDialog.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FamilyMemberNode.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FamilyMemberNode.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FamilyTree.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FamilyTree.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/InviteModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InviteModal.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ProtectedRoute.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ProtectedRoute.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/auth/RegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/auth/RegisterForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useFamilies.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useFamilies.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useInvites.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useInvites.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/JoinPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/JoinPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/LoginPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/RegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/RegisterPage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,7 +119,7 @@
       <workItem from="1777623008752" duration="2352000" />
       <workItem from="1777647701021" duration="8616000" />
       <workItem from="1777830988315" duration="6208000" />
-      <workItem from="1777896936697" duration="3615000" />
+      <workItem from="1777896936697" duration="5211000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -386,7 +401,31 @@
       <option name="project" value="LOCAL" />
       <updated>1777657230606</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="add type for uuid">
+      <option name="closed" value="true" />
+      <created>1777900728751</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1777900728751</updated>
+    </task>
+    <task id="LOCAL-00037" summary="date fns">
+      <option name="closed" value="true" />
+      <created>1777900747883</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1777900747883</updated>
+    </task>
+    <task id="LOCAL-00038" summary="add hooks for invitations">
+      <option name="closed" value="true" />
+      <created>1777900769997</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1777900769997</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -404,9 +443,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="little fix of styles" />
-    <MESSAGE value="change style to dark theme and fix login of register" />
-    <MESSAGE value="change style to dark theme and fix login of register.2" />
     <MESSAGE value="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit" />
     <MESSAGE value="little fix" />
     <MESSAGE value="components - family modal" />
@@ -429,6 +465,9 @@
     <MESSAGE value="token and toast" />
     <MESSAGE value="join by token area" />
     <MESSAGE value="fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix" />
+    <MESSAGE value="add type for uuid" />
+    <MESSAGE value="date fns" />
+    <MESSAGE value="add hooks for invitations" />
+    <option name="LAST_COMMIT_MESSAGE" value="add hooks for invitations" />
   </component>
 </project>

@@ -1,4 +1,4 @@
-import {axiosInstance} from '@/api/auth' ;
+import {axiosInstance} from '@/api/auth';
 import type {FamilyGroupCreate, FamilyGroupRead, InvitationCreate, InvitationRead} from '@/types/families';
 
 const BASE_URL = '/families';

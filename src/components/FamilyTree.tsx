@@ -1,27 +1,26 @@
-import React, { useState, useCallback } from 'react';
+import React, {useCallback, useState} from 'react';
 import ReactFlow, {
-    type Node,
-    type Edge,
-  Controls,
-  Background,
-  MiniMap,
-  addEdge,
+    addEdge,
+    Background,
     type Connection,
-  useNodesState,
-  useEdgesState,
+    Controls,
+    type Edge,
+    MiniMap,
+    type Node,
+    useEdgesState,
+    useNodesState,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { FamilyMemberNode } from './FamilyMemberNode';
-import { AddMemberDialog } from './AddMemberDialog';
-import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import {FamilyMemberNode} from './FamilyMemberNode';
+import {AddMemberDialog} from './AddMemberDialog';
+import {Button} from '@/components/ui/button';
+import {Trash2} from 'lucide-react';
 
 interface FamilyTreeProps {
   showAddMember: boolean;
   onAddMemberClose: () => void;
 }
 
-// Инициальные узлы - пример
 const initialNodes: Node[] = [
   {
     id: '1',

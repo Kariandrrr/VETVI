@@ -1,11 +1,10 @@
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import {LogOut, Plus, Settings, Users, Zap} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { JoinByLinkModal } from '@/components/JoinByLinkModal';
-import { Link2 } from 'lucide-react';
-import { FamilyTree } from '@/components/FamilyTree';
-import { useState } from 'react';
+import {useAuth} from '@/hooks/useAuth';
+import {Button} from '@/components/ui/button';
+import {Link2, LogOut, Plus, Settings, Users, Zap} from 'lucide-react';
+import {useNavigate} from 'react-router-dom';
+import {JoinByLinkModal} from '@/components/JoinByLinkModal';
+import {FamilyTree} from '@/components/FamilyTree';
+import {useState} from 'react';
 import logo from '@/assets/logo.png';
 
 export const HomePage = () => {

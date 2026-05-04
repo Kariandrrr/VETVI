@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { axiosInstance } from '@/api/auth';
-import type { UUID } from '@/types/common';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {axiosInstance} from '@/api/auth';
+import type {UUID} from '@/types/common';
 
 export interface Invitation {
   id: UUID;
@@ -25,21 +25,6 @@ export const useFamilyInvites = (familyId: string) => {
     enabled: !!familyId,
   });
 };
-
-export const useRevokeInvite = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ familyId, inviteId }: { familyId: string; inviteId: string }) => {
-      await axiosInstance.post(`/families/invites/${familyId}/${inviteId}/revoke`, {});
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['invites', variables.familyId] });
-    },
-  });
-};
-
-
 
 interface DeleteInviteParams {
   familyId: string | number;

@@ -1,5 +1,5 @@
-import axios, { AxiosError } from 'axios';
-import type {UserCreate, UserRead, Token} from '@/types/auth';
+import axios, {AxiosError} from 'axios';
+import type {Token, UserCreate, UserRead} from '@/types/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
 
