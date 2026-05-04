@@ -46,3 +46,4 @@ Thumbs.db
 
 # Local files
 *.local
+.idea/workspace.xml
