@@ -1,6 +1,6 @@
 import React from 'react';
-import { Handle, Position } from 'reactflow';
-import { UserCircle } from 'lucide-react';
+import {Handle, Position} from 'reactflow';
+import {UserCircle} from 'lucide-react';
 
 interface FamilyMemberNodeData {
   label: string;

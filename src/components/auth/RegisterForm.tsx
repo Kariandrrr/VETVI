@@ -1,24 +1,15 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from '@/components/ui/form';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/hooks/useAuth';
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Link } from 'react-router-dom';
+import {useAuth} from '@/hooks/useAuth';
+import {AlertCircle, CheckCircle2, Loader2} from 'lucide-react';
+import {Alert, AlertDescription} from '@/components/ui/alert';
 import logo from '@/assets/logo.png';
-
 
 
 const registerSchema = z

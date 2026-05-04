@@ -1,27 +1,26 @@
-import React, { useState, useCallback } from 'react';
+import React, {useCallback, useState} from 'react';
 import ReactFlow, {
-    type Node,
-    type Edge,
-  Controls,
-  Background,
-  MiniMap,
-  addEdge,
+    addEdge,
+    Background,
     type Connection,
-  useNodesState,
-  useEdgesState,
+    Controls,
+    type Edge,
+    MiniMap,
+    type Node,
+    useEdgesState,
+    useNodesState,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { FamilyMemberNode } from './FamilyMemberNode';
-import { AddMemberDialog } from './AddMemberDialog';
-import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import {FamilyMemberNode} from './FamilyMemberNode';
+import {AddMemberDialog} from './AddMemberDialog';
+import {Button} from '@/components/ui/button';
+import {Trash2} from 'lucide-react';
 
 interface FamilyTreeProps {
   showAddMember: boolean;
   onAddMemberClose: () => void;
 }
 
-// Инициальные узлы - пример
 const initialNodes: Node[] = [
   {
     id: '1',
@@ -52,16 +51,21 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({
     [setEdges]
   );
 
-  const handleAddMember = (data: any) => {
-    const newNode: Node = {
-      id: `member-${Date.now()}`,
-      data: { label: data.name, relationship: data.relationship },
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
-      type: 'familyMember',
+    interface MemberData {
+      name: string;
+      relationship: string;
+    }
+
+    const handleAddMember = (data: MemberData) => {
+      const newNode: Node = {
+        id: `member-${Date.now()}`,
+        data: { label: data.name, relationship: data.relationship },
+        position: { x: Math.random() * 400, y: Math.random() * 400 },
+        type: 'familyMember',
+      };
+      setNodes((nds) => [...nds, newNode]);
+      onAddMemberClose();
     };
-    setNodes((nds) => [...nds, newNode]);
-    onAddMemberClose();
-  };
 
   const handleDeleteNode = (nodeId: string) => {
     setNodes((nds) => nds.filter((node) => node.id !== nodeId));

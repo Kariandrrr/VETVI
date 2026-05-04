@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="change style to dark theme and fix login of register.2">
-      <change afterPath="$PROJECT_DIR$/src/assets/logo.png" afterDir="false" />
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="new form of joining by link">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,12 +16,17 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -49,25 +52,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "go.import.settings.migrated": "true",
-    "last_opened_file_path": "D:/Projects1/portfolio/VETVI/front/src/assets",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "ts.external.directory.path": "D:\\Projects1\\portfolio\\VETVI\\front\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;famiygrops&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Projects1/portfolio/VETVI/front/src/assets&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\Projects1\\portfolio\\VETVI\\front\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Projects1\portfolio\VETVI\front\src\assets" />
@@ -89,7 +92,13 @@
       <updated>1777217828530</updated>
       <workItem from="1777217829674" duration="5000" />
       <workItem from="1777280269533" duration="7883000" />
-      <workItem from="1777373044656" duration="5382000" />
+      <workItem from="1777373044656" duration="6844000" />
+      <workItem from="1777549056263" duration="3790000" />
+      <workItem from="1777558726499" duration="8742000" />
+      <workItem from="1777623008752" duration="2352000" />
+      <workItem from="1777647701021" duration="8616000" />
+      <workItem from="1777830988315" duration="6208000" />
+      <workItem from="1777896936697" duration="6246000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -195,24 +204,297 @@
       <option name="project" value="LOCAL" />
       <updated>1777376870414</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit">
+      <option name="closed" value="true" />
+      <created>1777378885574</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1777378885574</updated>
+    </task>
+    <task id="LOCAL-00015" summary="little fix">
+      <option name="closed" value="true" />
+      <created>1777567653034</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567653034</updated>
+    </task>
+    <task id="LOCAL-00016" summary="components - family modal">
+      <option name="closed" value="true" />
+      <created>1777567678453</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567678453</updated>
+    </task>
+    <task id="LOCAL-00017" summary="components - invite modal">
+      <option name="closed" value="true" />
+      <created>1777567704880</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567704880</updated>
+    </task>
+    <task id="LOCAL-00018" summary="correct family types">
+      <option name="closed" value="true" />
+      <created>1777567724688</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567724688</updated>
+    </task>
+    <task id="LOCAL-00019" summary="family api">
+      <option name="closed" value="true" />
+      <created>1777567798107</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567798107</updated>
+    </task>
+    <task id="LOCAL-00020" summary="invitation api">
+      <option name="closed" value="true" />
+      <created>1777567821265</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567821266</updated>
+    </task>
+    <task id="LOCAL-00021" summary="page - join family by url (token)">
+      <option name="closed" value="true" />
+      <created>1777567849605</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567849605</updated>
+    </task>
+    <task id="LOCAL-00022" summary="hooks for family">
+      <option name="closed" value="true" />
+      <created>1777567864705</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567864705</updated>
+    </task>
+    <task id="LOCAL-00023" summary="change the button 'create a new family group'">
+      <option name="closed" value="true" />
+      <created>1777567891107</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567891107</updated>
+    </task>
+    <task id="LOCAL-00024" summary="add routers">
+      <option name="closed" value="true" />
+      <created>1777567903109</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567903109</updated>
+    </task>
+    <task id="LOCAL-00025" summary="finally work - the page of Family Group, the role division, the number of family members in one family group">
+      <option name="closed" value="true" />
+      <created>1777625431735</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1777625431735</updated>
+    </task>
+    <task id="LOCAL-00026" summary="add toaster">
+      <option name="closed" value="true" />
+      <created>1777656886796</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656886796</updated>
+    </task>
+    <task id="LOCAL-00027" summary="add new botton, fix the design of the older ones">
+      <option name="closed" value="true" />
+      <created>1777656938423</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656938423</updated>
+    </task>
+    <task id="LOCAL-00028" summary="component (forgot to version earlier)">
+      <option name="closed" value="true" />
+      <created>1777656965350</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656965350</updated>
+    </task>
+    <task id="LOCAL-00029" summary="delete comments">
+      <option name="closed" value="true" />
+      <created>1777656979045</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656979045</updated>
+    </task>
+    <task id="LOCAL-00030" summary="add toast">
+      <option name="closed" value="true" />
+      <created>1777657032568</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657032568</updated>
+    </task>
+    <task id="LOCAL-00031" summary="fix the token logic">
+      <option name="closed" value="true" />
+      <created>1777657052516</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657052516</updated>
+    </task>
+    <task id="LOCAL-00032" summary="the token logic">
+      <option name="closed" value="true" />
+      <created>1777657075935</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657075935</updated>
+    </task>
+    <task id="LOCAL-00033" summary="token and toast">
+      <option name="closed" value="true" />
+      <created>1777657093554</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657093554</updated>
+    </task>
+    <task id="LOCAL-00034" summary="join by token area">
+      <option name="closed" value="true" />
+      <created>1777657210594</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657210594</updated>
+    </task>
+    <task id="LOCAL-00035" summary="fix">
+      <option name="closed" value="true" />
+      <created>1777657230606</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657230606</updated>
+    </task>
+    <task id="LOCAL-00036" summary="add type for uuid">
+      <option name="closed" value="true" />
+      <created>1777900728751</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1777900728751</updated>
+    </task>
+    <task id="LOCAL-00037" summary="date fns">
+      <option name="closed" value="true" />
+      <created>1777900747883</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1777900747883</updated>
+    </task>
+    <task id="LOCAL-00038" summary="add hooks for invitations">
+      <option name="closed" value="true" />
+      <created>1777900769997</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1777900769997</updated>
+    </task>
+    <task id="LOCAL-00039" summary="correct imports">
+      <option name="closed" value="true" />
+      <created>1777902278435</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1777902278435</updated>
+    </task>
+    <task id="LOCAL-00040" summary="new form for creating family">
+      <option name="closed" value="true" />
+      <created>1777903066734</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903066734</updated>
+    </task>
+    <task id="LOCAL-00041" summary="new design for FamilyPage, the table for saving all invites">
+      <option name="closed" value="true" />
+      <created>1777903112247</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903112247</updated>
+    </task>
+    <task id="LOCAL-00042" summary="new design for the table">
+      <option name="closed" value="true" />
+      <created>1777903139550</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903139550</updated>
+    </task>
+    <task id="LOCAL-00043" summary="fix of error">
+      <option name="closed" value="true" />
+      <created>1777903150667</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903150667</updated>
+    </task>
+    <task id="LOCAL-00044" summary="new form of joining by link">
+      <option name="closed" value="true" />
+      <created>1777903233586</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903233586</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="gitignore" />
-    <MESSAGE value="system stuff(" />
-    <MESSAGE value="ui components" />
-    <MESSAGE value="let it be" />
-    <MESSAGE value="base components - ProtectedRoute, FamilyMemberNode, FamilyTree, AddMemberDialog" />
-    <MESSAGE value="auth Forms - Login and Register" />
-    <MESSAGE value="auth logic" />
-    <MESSAGE value="some basic pages - Home, Login, Register" />
-    <MESSAGE value="little fix of styles" />
-    <MESSAGE value="change style to dark theme and fix login of register" />
-    <MESSAGE value="change style to dark theme and fix login of register.2" />
-    <option name="LAST_COMMIT_MESSAGE" value="change style to dark theme and fix login of register.2" />
+    <MESSAGE value="invitation api" />
+    <MESSAGE value="page - join family by url (token)" />
+    <MESSAGE value="hooks for family" />
+    <MESSAGE value="change the button 'create a new family group'" />
+    <MESSAGE value="add routers" />
+    <MESSAGE value="finally work - the page of Family Group, the role division, the number of family members in one family group" />
+    <MESSAGE value="add toaster" />
+    <MESSAGE value="add new botton, fix the design of the older ones" />
+    <MESSAGE value="component (forgot to version earlier)" />
+    <MESSAGE value="delete comments" />
+    <MESSAGE value="add toast" />
+    <MESSAGE value="fix the token logic" />
+    <MESSAGE value="the token logic" />
+    <MESSAGE value="token and toast" />
+    <MESSAGE value="join by token area" />
+    <MESSAGE value="fix" />
+    <MESSAGE value="add type for uuid" />
+    <MESSAGE value="date fns" />
+    <MESSAGE value="add hooks for invitations" />
+    <MESSAGE value="correct imports" />
+    <MESSAGE value="new form for creating family" />
+    <MESSAGE value="new design for FamilyPage, the table for saving all invites" />
+    <MESSAGE value="new design for the table" />
+    <MESSAGE value="fix of error" />
+    <MESSAGE value="new form of joining by link" />
+    <option name="LAST_COMMIT_MESSAGE" value="new form of joining by link" />
   </component>
 </project>
