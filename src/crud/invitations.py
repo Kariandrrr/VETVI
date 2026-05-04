@@ -2,7 +2,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.models.families import FamilyMembership
@@ -48,6 +48,15 @@ async def get_invitation_by_token(
     token: str,
 ) -> Invitation | None:
     stmt = select(Invitation).where(Invitation.token == token)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
+
+
+async def get_invitation_by_id(
+    db: AsyncSession,
+    invite_id: UUID,
+) -> Invitation | None:
+    stmt = select(Invitation).where(Invitation.id == invite_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
@@ -102,16 +111,11 @@ async def get_family_invitation(
     return result.scalars().all()
 
 
-async def revoke_invitation(
+async def delete_invite(
     db: AsyncSession,
     invite_id: UUID,
 ) -> bool:
-    stmt = select(Invitation).where(Invitation.id == invite_id)
+    stmt = delete(Invitation).where(Invitation.id == invite_id).returning(Invitation.id)
     result = await db.execute(stmt)
-    invite = result.scalar_one_or_none()
-
-    if invite:
-        invite.is_active = False
-        await db.commit()
-        return True
-    return False
+    await db.commit()
+    return result.scalar() is not None
