@@ -51,16 +51,21 @@ export const FamilyTree: React.FC<FamilyTreeProps> = ({
     [setEdges]
   );
 
-  const handleAddMember = (data: any) => {
-    const newNode: Node = {
-      id: `member-${Date.now()}`,
-      data: { label: data.name, relationship: data.relationship },
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
-      type: 'familyMember',
+    interface MemberData {
+      name: string;
+      relationship: string;
+    }
+
+    const handleAddMember = (data: MemberData) => {
+      const newNode: Node = {
+        id: `member-${Date.now()}`,
+        data: { label: data.name, relationship: data.relationship },
+        position: { x: Math.random() * 400, y: Math.random() * 400 },
+        type: 'familyMember',
+      };
+      setNodes((nds) => [...nds, newNode]);
+      onAddMemberClose();
     };
-    setNodes((nds) => [...nds, newNode]);
-    onAddMemberClose();
-  };
 
   const handleDeleteNode = (nodeId: string) => {
     setNodes((nds) => nds.filter((node) => node.id !== nodeId));
