@@ -4,18 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="finally work - the page of Family Group, the role division, the number of family members in one family group">
-      <change afterPath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" afterDir="false" />
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="fix">
+      <change afterPath="$PROJECT_DIR$/src/hooks/useInvites.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/types/common.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/InviteModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InviteModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/JoinPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/JoinPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,8 +22,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="TypeScript File" />
         <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -105,7 +102,9 @@
       <workItem from="1777549056263" duration="3790000" />
       <workItem from="1777558726499" duration="8742000" />
       <workItem from="1777623008752" duration="2352000" />
-      <workItem from="1777647701021" duration="8244000" />
+      <workItem from="1777647701021" duration="8616000" />
+      <workItem from="1777830988315" duration="6208000" />
+      <workItem from="1777896936697" duration="3615000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -307,7 +306,87 @@
       <option name="project" value="LOCAL" />
       <updated>1777625431735</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="add toaster">
+      <option name="closed" value="true" />
+      <created>1777656886796</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656886796</updated>
+    </task>
+    <task id="LOCAL-00027" summary="add new botton, fix the design of the older ones">
+      <option name="closed" value="true" />
+      <created>1777656938423</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656938423</updated>
+    </task>
+    <task id="LOCAL-00028" summary="component (forgot to version earlier)">
+      <option name="closed" value="true" />
+      <created>1777656965350</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656965350</updated>
+    </task>
+    <task id="LOCAL-00029" summary="delete comments">
+      <option name="closed" value="true" />
+      <created>1777656979045</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1777656979045</updated>
+    </task>
+    <task id="LOCAL-00030" summary="add toast">
+      <option name="closed" value="true" />
+      <created>1777657032568</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657032568</updated>
+    </task>
+    <task id="LOCAL-00031" summary="fix the token logic">
+      <option name="closed" value="true" />
+      <created>1777657052516</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657052516</updated>
+    </task>
+    <task id="LOCAL-00032" summary="the token logic">
+      <option name="closed" value="true" />
+      <created>1777657075935</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657075935</updated>
+    </task>
+    <task id="LOCAL-00033" summary="token and toast">
+      <option name="closed" value="true" />
+      <created>1777657093554</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657093554</updated>
+    </task>
+    <task id="LOCAL-00034" summary="join by token area">
+      <option name="closed" value="true" />
+      <created>1777657210594</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657210594</updated>
+    </task>
+    <task id="LOCAL-00035" summary="fix">
+      <option name="closed" value="true" />
+      <created>1777657230606</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1777657230606</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -325,14 +404,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="gitignore" />
-    <MESSAGE value="system stuff(" />
-    <MESSAGE value="ui components" />
-    <MESSAGE value="let it be" />
-    <MESSAGE value="base components - ProtectedRoute, FamilyMemberNode, FamilyTree, AddMemberDialog" />
-    <MESSAGE value="auth Forms - Login and Register" />
-    <MESSAGE value="auth logic" />
-    <MESSAGE value="some basic pages - Home, Login, Register" />
     <MESSAGE value="little fix of styles" />
     <MESSAGE value="change style to dark theme and fix login of register" />
     <MESSAGE value="change style to dark theme and fix login of register.2" />
@@ -348,6 +419,16 @@
     <MESSAGE value="change the button 'create a new family group'" />
     <MESSAGE value="add routers" />
     <MESSAGE value="finally work - the page of Family Group, the role division, the number of family members in one family group" />
-    <option name="LAST_COMMIT_MESSAGE" value="finally work - the page of Family Group, the role division, the number of family members in one family group" />
+    <MESSAGE value="add toaster" />
+    <MESSAGE value="add new botton, fix the design of the older ones" />
+    <MESSAGE value="component (forgot to version earlier)" />
+    <MESSAGE value="delete comments" />
+    <MESSAGE value="add toast" />
+    <MESSAGE value="fix the token logic" />
+    <MESSAGE value="the token logic" />
+    <MESSAGE value="token and toast" />
+    <MESSAGE value="join by token area" />
+    <MESSAGE value="fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix" />
   </component>
 </project>
