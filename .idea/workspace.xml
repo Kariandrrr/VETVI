@@ -4,30 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="add hooks for invitations">
+    <list default="true" id="c10c7fb0-b3a7-47c7-82c1-02a575a5150d" name="Changes" comment="new form of joining by link">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/auth.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/family.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/family.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/invitations.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/invitations.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/AddMemberDialog.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AddMemberDialog.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CreateFamilyModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FamilyMemberNode.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FamilyMemberNode.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FamilyTokenModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FamilyTree.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FamilyTree.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/InviteModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/InviteModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/JoinByLinkModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ProtectedRoute.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ProtectedRoute.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/auth/LoginForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/auth/RegisterForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/auth/RegisterForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/useFamilies.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useFamilies.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/useInvites.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useInvites.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/FamiliesPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/HomePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/JoinPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/JoinPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/LoginPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/RegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/RegisterPage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +98,7 @@
       <workItem from="1777623008752" duration="2352000" />
       <workItem from="1777647701021" duration="8616000" />
       <workItem from="1777830988315" duration="6208000" />
-      <workItem from="1777896936697" duration="5211000" />
+      <workItem from="1777896936697" duration="6246000" />
     </task>
     <task id="LOCAL-00001" summary="gitignore">
       <option name="closed" value="true" />
@@ -425,7 +404,55 @@
       <option name="project" value="LOCAL" />
       <updated>1777900769997</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="correct imports">
+      <option name="closed" value="true" />
+      <created>1777902278435</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1777902278435</updated>
+    </task>
+    <task id="LOCAL-00040" summary="new form for creating family">
+      <option name="closed" value="true" />
+      <created>1777903066734</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903066734</updated>
+    </task>
+    <task id="LOCAL-00041" summary="new design for FamilyPage, the table for saving all invites">
+      <option name="closed" value="true" />
+      <created>1777903112247</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903112247</updated>
+    </task>
+    <task id="LOCAL-00042" summary="new design for the table">
+      <option name="closed" value="true" />
+      <created>1777903139550</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903139550</updated>
+    </task>
+    <task id="LOCAL-00043" summary="fix of error">
+      <option name="closed" value="true" />
+      <created>1777903150667</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903150667</updated>
+    </task>
+    <task id="LOCAL-00044" summary="new form of joining by link">
+      <option name="closed" value="true" />
+      <created>1777903233586</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1777903233586</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -443,12 +470,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add logo to HomePage, LoginPage and RegisterPage. Correct the style a bit" />
-    <MESSAGE value="little fix" />
-    <MESSAGE value="components - family modal" />
-    <MESSAGE value="components - invite modal" />
-    <MESSAGE value="correct family types" />
-    <MESSAGE value="family api" />
     <MESSAGE value="invitation api" />
     <MESSAGE value="page - join family by url (token)" />
     <MESSAGE value="hooks for family" />
@@ -468,6 +489,12 @@
     <MESSAGE value="add type for uuid" />
     <MESSAGE value="date fns" />
     <MESSAGE value="add hooks for invitations" />
-    <option name="LAST_COMMIT_MESSAGE" value="add hooks for invitations" />
+    <MESSAGE value="correct imports" />
+    <MESSAGE value="new form for creating family" />
+    <MESSAGE value="new design for FamilyPage, the table for saving all invites" />
+    <MESSAGE value="new design for the table" />
+    <MESSAGE value="fix of error" />
+    <MESSAGE value="new form of joining by link" />
+    <option name="LAST_COMMIT_MESSAGE" value="new form of joining by link" />
   </component>
 </project>
