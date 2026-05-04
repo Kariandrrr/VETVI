@@ -14,10 +14,7 @@ from ..crud.user import get_user_by_username_or_email, create_user
 from src.deps.user import get_current_user
 from ..utils.utils_jwt import encode_jwt, validate_password, hash_password, decode_jwt
 
-router = APIRouter(
-    prefix="/auth",
-    tags=["auth"],
-)
+router = APIRouter()
 
 
 @router.post("/register", response_model=UserRead, status_code=201)

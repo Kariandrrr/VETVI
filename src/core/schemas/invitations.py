@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from .base import BaseSchema
 from ..models.enums import MembershipRole
@@ -11,7 +11,14 @@ class InvitationBase(BaseModel):
     family_group_id: UUID
     assigned_role: MembershipRole = MembershipRole.editor
     max_uses: int = 1
-    expires_at: datetime
+    expires_at: datetime | None = None
+
+
+class InvitationCreateInput(BaseModel):
+    email: EmailStr | None = None
+    assigned_role: MembershipRole = MembershipRole.editor
+    max_uses: int = 1
+    expires_at: datetime | None = None
 
 
 class InvitationCreate(InvitationBase):
@@ -21,7 +28,7 @@ class InvitationCreate(InvitationBase):
 class InvitationRead(InvitationBase, BaseSchema):
     id: UUID
     invited_by: UUID
-    token: bytes
+    token: str
     times_used: int
     is_active: bool
     created_at: datetime
