@@ -100,6 +100,21 @@ class Relationship(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
+    group: Mapped["FamilyGroup"] = relationship(
+        "FamilyGroup", back_populates="relationships"
+    )
+
+    from_member: Mapped["FamilyMember"] = relationship(
+        "FamilyMember",
+        foreign_keys=[from_member_id],
+        back_populates="outgoing_relationships",
+    )
+    to_member: Mapped["FamilyMember"] = relationship(
+        "FamilyMember",
+        foreign_keys=[to_member_id],
+        back_populates="incoming_relationships",
+    )
+
     __table_args__ = (
         UniqueConstraint(
             "family_group_id",
