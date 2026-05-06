@@ -18,7 +18,7 @@ from ..deps.user import get_db, get_current_user
 router = APIRouter()
 
 
-@router.post("/{family_id}/invites", response_model=InvitationRead)
+@router.post("/{family_id}/invites", response_model=InvitationRead, status_code=201)
 async def create_invite(
     family_id: UUID,
     invite_in: InvitationCreateInput,
@@ -56,7 +56,7 @@ async def get_family_invites(
     return invites
 
 
-@router.delete("/invites/{family_id}/{invite_id}")
+@router.delete("/invites/{family_id}/{invite_id}", status_code=204)
 async def delete_invite(
     invite_id: UUID,
     db: AsyncSession = Depends(get_db),

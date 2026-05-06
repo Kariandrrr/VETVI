@@ -17,7 +17,7 @@ from ..deps.user import get_db, get_current_user
 router = APIRouter()
 
 
-@router.post("/", response_model=FamilyGroupRead)
+@router.post("/", response_model=FamilyGroupRead, status_code=201)
 async def create_families_group(
     family_in: FamilyGroupCreate,
     db: AsyncSession = Depends(get_db),
@@ -52,7 +52,7 @@ async def get_family_details(
     return family
 
 
-@router.delete("/{family_id}/members/{user_id}")
+@router.delete("/{family_id}/members/{user_id}", status_code=204)
 async def remove_family_member(
     family_id: UUID,
     user_id: UUID,
@@ -65,7 +65,7 @@ async def remove_family_member(
     return {"status": "member removed"}
 
 
-@router.delete("/{family_id}")
+@router.delete("/{family_id}", status_code=204)
 async def delete_family_group(
     family_id: UUID,
     db: AsyncSession = Depends(get_db),

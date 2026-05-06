@@ -1,5 +1,6 @@
 import enum
 
+
 class MembershipRole(enum.Enum):
     admin = "admin"
     editor = "editor"
@@ -16,6 +17,7 @@ class GenderEnum(enum.Enum):
 class RelationshipType(enum.Enum):
     parent_child = "parent_child"
     spouse = "spouse"
+    sibling = "sibling"
 
 
 class PostType(enum.Enum):

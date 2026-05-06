@@ -28,5 +28,5 @@ class RelationshipRead(RelationshipBase, BaseSchema):
 
 class RelationshipUpdate(BaseModel):
     rel_type: RelationshipType | None = None
-    marriage_date: date | None
-    divorce_date: date | None
+    marriage_date: date | None = None
+    divorce_date: date | None = None

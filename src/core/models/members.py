@@ -71,7 +71,21 @@ class FamilyMember(Base):
         foreign_keys=[linked_user_id],
     )
     creator: Mapped["User"] = relationship(foreign_keys=[created_by])
+    outgoing_relationships: Mapped[list["Relationship"]] = relationship(
+        "Relationship",
+        foreign_keys="[Relationship.from_member_id]",
+        back_populates="from_member",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
+    incoming_relationships: Mapped[list["Relationship"]] = relationship(
+        "Relationship",
+        foreign_keys="[Relationship.to_member_id]",
+        back_populates="to_member",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 class Relationship(Base):
     __tablename__ = "relationships"
@@ -98,6 +112,21 @@ class Relationship(Base):
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
+    )
+
+    group: Mapped["FamilyGroup"] = relationship(
+        "FamilyGroup", back_populates="relationships"
+    )
+
+    from_member: Mapped["FamilyMember"] = relationship(
+        "FamilyMember",
+        foreign_keys=[from_member_id],
+        back_populates="outgoing_relationships",
+    )
+    to_member: Mapped["FamilyMember"] = relationship(
+        "FamilyMember",
+        foreign_keys=[to_member_id],
+        back_populates="incoming_relationships",
     )
 
     __table_args__ = (

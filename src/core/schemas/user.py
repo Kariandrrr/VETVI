@@ -28,7 +28,7 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     display_name: str | None = None
     avatar_url: str | None = None
-    password: str | bytes | None
+    password: str | bytes | None = None
 
 
 class Token(BaseModel):

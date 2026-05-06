@@ -21,18 +21,24 @@ class DBHelper:
         url: str,
         echo: bool = False,
         echo_pool: bool = False,
-        pool_size: int = 5,
-        max_overflow: int = 10,
+        pool_size: int | None = None,
+        max_overflow: int | None = None,
     ) -> None:
-        self.engine: AsyncEngine = create_async_engine(
-            url=url,
-            echo=echo,
-            echo_pool=echo_pool,
-            pool_size=pool_size,
-            max_overflow=max_overflow,
-            pool_pre_ping=True,
-            pool_recycle=3600,
-        )
+
+        kwargs = {
+            "echo": echo,
+            "echo_pool": echo_pool,
+            "pool_pre_ping": True,
+        }
+
+        if pool_size is not None:
+            kwargs["pool_size"] = pool_size
+        if max_overflow is not None:
+            kwargs["max_overflow"] = max_overflow
+
+        kwargs["pool_recycle"] = 3600
+
+        self.engine: AsyncEngine = create_async_engine(url=url, **kwargs)
 
         self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
             bind=self.engine,
@@ -59,53 +65,29 @@ class DBHelper:
             yield session
 
 
-def build_db_url(db_cfg) -> str:
-    driver = getattr(db_cfg, "driver", None) or "postgresql+asyncpg"
-    host = getattr(db_cfg, "host", None) or "localhost"
-    port = getattr(db_cfg, "port", None)
-    if port is None:
-        port = 5432
-    else:
-        try:
-            port = int(port)
-        except Exception:
-            raise ValueError(f"Invalid DB port: {port!r}")
-
-    user = getattr(db_cfg, "user", None)
-    password = getattr(db_cfg, "password", None)
-    dbname = getattr(db_cfg, "dbname", None) or ""
-
-    auth = ""
-    if user:
-        u = quote_plus(str(user))
-        p = quote_plus(str(password)) if password else ""
-        auth = f"{u}:{p}@" if p else f"{u}@"
-
-    # Собираем URL
-    # Если dbname пустой, оставляем без /dbname
-    db_part = f"/{dbname}" if dbname else ""
-    return f"{driver}://{auth}{host}:{port}{db_part}"
-
-
-try:
-    db_url: str = build_db_url(settings.db)
-except Exception as e:
-    log.error("Failed to build DB URL from settings: %s", e)
-    raise
+db_url: str = settings.db.url
 
 safe_url = db_url
-if settings.db.password:
+if settings.db.password and settings.db.password in db_url:
     safe_url = db_url.replace(str(settings.db.password), "****")
 log.info("Database URL: %s", safe_url)
 
 
-db_helper: DBHelper = DBHelper(
-    url=db_url,
-    echo=bool(settings.db.echo),
-    echo_pool=bool(settings.db.echo_pool),
-    pool_size=int(getattr(settings.db, "pool_size", 5) or 5),
-    max_overflow=int(getattr(settings.db, "max_overflow", 10) or 10),
-)
+engine_kwargs = {
+    "url": settings.db.url,
+    "echo": settings.db.echo,
+    "echo_pool": settings.db.echo_pool,
+}
+
+if "sqlite" not in settings.db.url:
+    engine_kwargs.update(
+        {
+            "pool_size": settings.db.pool_size,
+            "max_overflow": settings.db.max_overflow,
+        }
+    )
+
+db_helper: DBHelper = DBHelper(**engine_kwargs)
 
 
 @asynccontextmanager
@@ -127,3 +109,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
     finally:
         await session.close()
+
+
+engine = db_helper.engine
