@@ -13,7 +13,7 @@ from .enums import MembershipRole
 
 if TYPE_CHECKING:
     from .users import User
-    from .members import FamilyMember
+    from .members import FamilyMember, Relationship
     from .invitation import Invitation
 
 
@@ -37,6 +37,11 @@ class FamilyGroup(Base):
     memberships: Mapped[List["FamilyMembership"]] = relationship(back_populates="group")
     members: Mapped[List["FamilyMember"]] = relationship(back_populates="group")
     invitations: Mapped[List["Invitation"]] = relationship(back_populates="group")
+    relationships: Mapped[List["Relationship"]] = relationship(
+        "Relationship",
+        back_populates="group",
+        cascade="all, delete-orphan",
+    )
 
 
 class FamilyMembership(Base):
