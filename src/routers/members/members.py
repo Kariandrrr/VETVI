@@ -17,7 +17,7 @@ from src.deps.user import get_db, get_current_user
 router = APIRouter()
 
 
-@router.post("/members", response_model=FamilyMemberRead)
+@router.post("/members", response_model=FamilyMemberRead, status_code=201)
 async def create_family_member(
     member_in: FamilyMemberCreate,
     db: AsyncSession = Depends(get_db),
@@ -75,7 +75,7 @@ async def update_family_member(
             MembershipRole.editor,
         ]
     )(
-        family_id=member_in.family_group_id,
+        family_id=db_member.family_group_id,
         current_user=current_user,
         db=db,
     )
@@ -86,7 +86,7 @@ async def update_family_member(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/members/{member_id}")
+@router.delete("/members/{member_id}", status_code=204)
 async def delete_family_member(
     member_id: UUID,
     db: AsyncSession = Depends(get_db),

@@ -73,7 +73,7 @@ async def create_family_member(
     )
 
     if is_duplicate:
-        raise ValueError(f"Family Member with ID {member_in.id} already exists")
+        raise ValueError(f"Family Member with this name and birth date already exists")
 
     db_member = FamilyMember(
         family_group_id=member_in.family_group_id,
@@ -301,8 +301,8 @@ async def create_relationship(
         raise ValueError("One or two members do not exist")
 
     if (
-        from_member.family_group_id != relationship_in.from_family_group_id
-        or to_member.family_group_id != relationship_in.to_family_group_id
+        from_member.family_group_id != relationship_in.family_group_id
+        or to_member.family_group_id != relationship_in.family_group_id
     ):
         raise ValueError("Members must relate to one family group")
 

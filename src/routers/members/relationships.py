@@ -17,14 +17,14 @@ from src.deps.user import get_db, get_current_user
 router = APIRouter()
 
 
-@router.post("/relationships", response_model=RelationshipRead)
+@router.post("/relationships", response_model=RelationshipRead, status_code=201)
 async def create_relationship(
     relationship_in: RelationshipCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     await RoleChecker([MembershipRole.admin, MembershipRole.editor])(
-        family_id=relationship_in.family_id,
+        family_id=relationship_in.family_group_id,
         current_user=current_user,
         db=db,
     )
@@ -83,7 +83,7 @@ async def update_relationship(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/relationships/{relationship_id}")
+@router.delete("/relationships/{relationship_id}", status_code=204)
 async def delete_relationship(
     relationship_id: UUID,
     db: AsyncSession = Depends(get_db),
