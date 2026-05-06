@@ -75,7 +75,9 @@ async def login(
 @router.post("/refresh")
 async def refresh_token(
     response: Response,
-    refresh_token: str | None = Cookie(None),
+    refresh_token: str | None = Cookie(
+        None, alias=settings.auth_jwt.cookie.name_refresh
+    ),
     db: AsyncSession = Depends(get_db),
 ):
     if not refresh_token:
