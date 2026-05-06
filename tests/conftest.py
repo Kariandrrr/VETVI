@@ -1,5 +1,5 @@
-from unittest.mock import patch
 import pytest
+
 from src.core.config import settings
 from src.core.models.base import Base
 from src.core.models.db_helper import engine
