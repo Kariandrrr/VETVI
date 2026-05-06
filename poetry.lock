@@ -1830,6 +1830,27 @@ pytest = ">=5.0.0"
 python-dotenv = ">=0.9.1"
 
 [[package]]
+name = "pytest-order"
+version = "1.4.0"
+description = "pytest plugin to run tests in a specific order"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "pytest_order-1.4.0-py3-none-any.whl", hash = "sha256:05b1710cf16bb2123294eec5bdfaee513322ff1926c0dfa86eb8be632eb264a1"},
+    {file = "pytest_order-1.4.0.tar.gz", hash = "sha256:327fb6eee1ae771051da13d2a0d9306d947e87f9ab8f4d6302e5d122c7472691"},
+]
+
+[package.dependencies]
+pytest = [
+    {version = ">=6.2.4", markers = "python_version < \"3.14\""},
+    {version = ">=7.4", markers = "python_version >= \"3.14\""},
+]
+
+[package.extras]
+dev = ["pytest-dependency (>=0.5.1)", "pytest-mock (>=1.11.0)", "pytest-xdist (>=1.29.0)"]
+
+[[package]]
 name = "python-dotenv"
 version = "1.2.2"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -2570,4 +2591,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "c2013888950b4903d139f1460326624fba7ade7cd9056e4e903903b0306de69e"
+content-hash = "dc1ae3e90e28e1f8337ae0f51794807bfc401dfa0bd55b3a6f655ed4afa16608"
