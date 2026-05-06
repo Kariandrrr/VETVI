@@ -38,3 +38,24 @@ async def client(db_session):
         yield ac
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="function")
+async def auth_client(client):
+    user_data = {
+        "email": "test_user@example.com",
+        "password": "strongpassword123",
+        "display_name": "Tester",
+    }
+
+    await client.post("/auth/register", json=user_data)
+
+    login_resp = await client.post(
+        "/auth/login",
+        data={"username": user_data["email"], "password": user_data["password"]},
+    )
+    token = login_resp.json()["access_token"]
+
+    client.headers.update({"Authorization": f"Bearer {token}"})
+
+    yield client
