@@ -71,8 +71,9 @@ class DatabaseConfig(BaseModel):
     @computed_field
     @property
     def url(self) -> str:
-        if self.driver and "sqlite" in self.driver:
-            return f"{self.driver}:///{self.dbname}"
+        if "sqlite" in self.driver:
+            path = self.dbname if self.dbname else ":memory:"
+            return f"{self.driver}:///{path}"
         return f"{self.driver}://{self.user}:{self.password}@{self.host}:{self.port}/{self.dbname}"
 
 
@@ -103,7 +104,10 @@ class AuthJWT(BaseModel):
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=(".env.template", ".env"),
+        env_file=(
+            ".env.template",
+            ".env",
+        ),
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
