@@ -58,6 +58,22 @@ async def get_family_member(
     return member
 
 
+@router.get("/{family_id}/members", response_model=list[FamilyMemberRead])
+async def get_family_members_list(
+    family_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await RoleChecker(
+        [MembershipRole.viewer, MembershipRole.admin, MembershipRole.editor]
+    )(
+        family_id=family_id,
+        current_user=current_user,
+        db=db,
+    )
+    return await member_service.get_members_by_family_id(db, family_id)
+
+
 @router.put("/members/{member_id}", response_model=FamilyMemberRead)
 async def update_family_member(
     member_id: UUID,

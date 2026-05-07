@@ -32,6 +32,18 @@ async def get_family_member_in_group(
     return result.scalar_one_or_none()
 
 
+async def get_members_by_family_id(
+    db: AsyncSession,
+    family_group_id: UUID,
+):
+    result = await db.execute(
+        select(FamilyMember).where(
+            FamilyMember.family_group_id == family_group_id,
+        )
+    )
+    return result.scalars().all()
+
+
 async def check_member_uniqueness_in_group(
     db: AsyncSession,
     family_group_id: UUID,
