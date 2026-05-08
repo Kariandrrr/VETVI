@@ -1,28 +1,53 @@
+import {useState} from 'react';
 import {useAuth} from '@/hooks/useAuth';
 import {Button} from '@/components/ui/button';
 import {Link2, LogOut, Plus, Settings, Users, Zap} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import {JoinByLinkModal} from '@/components/JoinByLinkModal';
+import {SelectFamilyModal} from '@/components/SelectFamilyModal';
+import {AddMemberModal} from '@/components/AddMemberModal';
 import {FamilyTree} from '@/components/FamilyTree';
-import {useState} from 'react';
 import logo from '@/assets/logo.png';
 
 export const HomePage = () => {
-  const {  logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
+
+  const [showSelectFamily, setShowSelectFamily] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
+
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-const primaryBtnClass =
+  const handleNewMemberClick = () => {
+    setShowSelectFamily(true);
+  };
+
+  const handleFamilySelected = (familyId: string) => {
+    setSelectedFamilyId(familyId);
+    setShowSelectFamily(false);
+    setTimeout(() => setShowAddMember(true), 300);
+  };
+
+  const handleAddSuccess = () => {
+    // TODO: Вызовите здесь рефетч дерева или инвалидацию кэша React Query
+    console.log('🌳 Relative added. Invalidate family-tree & members cache...');
+
+    setShowAddMember(false);
+    setSelectedFamilyId(null);
+  };
+
+  const primaryBtnClass =
     "px-6 py-3 bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] hover:from-cyan-400 hover:to-purple-400 text-white font-medium rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2";
-const [showJoinModal, setShowJoinModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-2xl bg-black/30 border-b border-[var(--glass-border)]">
         <div className="max-w-[1600px] mx-auto px-6 py-4">
           <div className="flex items-center justify-between h-16 gap-6">
@@ -46,24 +71,23 @@ const [showJoinModal, setShowJoinModal] = useState(false);
             </div>
 
             <div className="flex items-center gap-3">
-              <Button onClick={() => setShowAddMember(!showAddMember)} className={primaryBtnClass}>
+              <Button onClick={handleNewMemberClick} className={primaryBtnClass}>
                 <Plus className="w-5 h-5" />
                 Новый родственник
               </Button>
 
-        <Button onClick={() => navigate('/families')} className={primaryBtnClass}>
-          <Users className="w-5 h-5" />
-          Семейные группы
-        </Button>
+              <Button onClick={() => navigate('/families')} className={primaryBtnClass}>
+                <Users className="w-5 h-5" />
+                Семейные группы
+              </Button>
 
-                <Button
-            onClick={() => setShowJoinModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
-          >
-            <Link2 className="w-5 h-5" />
-            <span className="hidden md:inline">Вступить по ссылке</span>
-          </Button>
-
+              <Button
+                onClick={() => setShowJoinModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+              >
+                <Link2 className="w-5 h-5" />
+                <span className="hidden md:inline">Вступить по ссылке</span>
+              </Button>
 
               <Button
                 variant="ghost"
@@ -81,14 +105,14 @@ const [showJoinModal, setShowJoinModal] = useState(false);
               >
                 <LogOut className="w-5 h-5" />
               </Button>
-                <JoinByLinkModal open={showJoinModal} onOpenChange={setShowJoinModal} />
             </div>
           </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-[1600px] mx-auto px-6 py-16 space-y-16 relative">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[var(--primary)] rounded-full blur-[180px] opacity-10"></div>
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[var(--primary)] rounded-full blur-[180px] opacity-10" />
 
         <div className="p-10 glass-card relative group">
           <div className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-[var(--glass-bg)] flex items-center justify-center border border-[var(--glass-border)]">
@@ -113,7 +137,7 @@ const [showJoinModal, setShowJoinModal] = useState(false);
               </p>
             </div>
             <Button
-              onClick={() => setShowAddMember(!showAddMember)}
+              onClick={handleNewMemberClick}
               className="sm:hidden bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)] rounded-full h-12 w-full font-bold shadow-[var(--neon-glow-secondary)] transition-all"
             >
               <Plus className="w-5 h-5 mr-2" />
@@ -122,20 +146,39 @@ const [showJoinModal, setShowJoinModal] = useState(false);
           </div>
 
           <div className="p-4 min-h-[650px] bg-black/10">
-            <FamilyTree
-              showAddMember={showAddMember}
-              onAddMemberClose={() => setShowAddMember(false)}
-            />
+            {/*
+               Примечание: FamilyTree должен получать members и relationships.
+              На главной странице можно передать данные избранной семьи или оставить пустыми до выбора.
+            */}
+            <FamilyTree members={[]} relationships={[]} />
           </div>
         </div>
 
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-16">
-          <StatsCard icon="👨‍👩‍👧‍👦" title="Всего в архиве" value="0" description="Членов семьи" />
+          <StatsCard icon="👨👩‍👧‍" title="Всего в архиве" value="0" description="Членов семьи" />
           <StatsCard icon="🌳" title="Глубина истории" value="0" description="Поколений" />
           <StatsCard icon="🔗" title="Установлено" value="0" description="Связей" />
         </div>
       </main>
+
+      {/*  Модальные окна (рендерятся в корне, управляются стейтом) */}
+      <SelectFamilyModal
+        open={showSelectFamily}
+        onOpenChange={setShowSelectFamily}
+        onSelect={handleFamilySelected}
+      />
+
+      {selectedFamilyId && (
+        <AddMemberModal
+          key={`add-member-${selectedFamilyId}`}
+          familyId={selectedFamilyId}
+          open={showAddMember}
+          onOpenChange={setShowAddMember}
+          onAddSuccess={handleAddSuccess}
+        />
+      )}
+
+      <JoinByLinkModal open={showJoinModal} onOpenChange={setShowJoinModal} />
     </div>
   );
 };
@@ -147,14 +190,9 @@ interface StatsCardProps {
   description: string;
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({
-  icon,
-  title,
-  value,
-  description,
-}) => (
+const StatsCard: React.FC<StatsCardProps> = ({ icon, title, value, description }) => (
   <div className="glass-card p-10 hover:border-[var(--primary)] hover:scale-[1.02] transition-all duration-300 group relative overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     <div className="flex items-start justify-between gap-6 relative z-10">
       <div className="space-y-2">
         <p className="text-sm text-slate-500 font-semibold tracking-wider uppercase">{title}</p>
