@@ -40,3 +40,17 @@ export const useDeleteFamily = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['families'] }),
   });
 };
+
+
+export const useMyFamilies = () => {
+  const query = useQuery({
+    queryKey: ['my-families'],
+    queryFn: () => familyApi.getMyFamilies().then(res => res.data),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  return {
+    families: query.data ?? [],
+    isLoading: query.isLoading,
+  };
+};
