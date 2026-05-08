@@ -1,6 +1,7 @@
 import {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
-import {Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react';
+import {ArrowRight, Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react'; // ✅ Добавляем ArrowRight
 import {useDeleteFamily, useFamilies} from '@/hooks/useFamilies';
 import {useAuth} from '@/hooks/useAuth';
 import {CreateFamilyModal} from '@/components/CreateFamilyModal';
@@ -10,10 +11,9 @@ import type {FamilyGroupRead} from '@/types/families';
 export const FamiliesPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
-
-  const { data: familiesRaw, isLoading, error } = useFamilies();
-  const { user } = useAuth();
+  const { data: familiesRaw, isLoading, error } = useFamilies();  const { user } = useAuth();
   const { mutate: deleteFamily, isPending: isDeleting } = useDeleteFamily();
+  const navigate = useNavigate();
 
   const families: FamilyGroupRead[] = Array.isArray(familiesRaw)
     ? familiesRaw
@@ -33,10 +33,7 @@ export const FamiliesPage = () => {
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 text-lg">Ошибка загрузки семейных групп</p>
-          <Button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-6 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white hover:bg-white/10 rounded-xl transition-all"
-          >
+          <Button onClick={() => window.location.reload()} className="mt-4 px-6 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white hover:bg-white/10 rounded-xl transition-all">
             Перезагрузить
           </Button>
         </div>
@@ -48,12 +45,12 @@ export const FamiliesPage = () => {
     <div className="min-h-screen bg-[var(--background)] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Заголовок */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter text-white">
+            <h1 className="text-5xl font-black tracking-tighter text-white mb-2">
               Семейные группы
             </h1>
-            <p className="text-slate-400 mt-1">
+            <p className="text-slate-400 text-lg">
               Совместная работа над родословной
             </p>
           </div>
@@ -65,19 +62,17 @@ export const FamiliesPage = () => {
 
         {/* Состояние загрузки */}
         {isLoading && (
-          <div className="glass-card p-12 text-center">
-            <p className="text-slate-400">Загрузка семейных групп...</p>
+          <div className="glass-card p-16 text-center">
+            <p className="text-slate-400 text-lg">Загрузка семейных групп...</p>
           </div>
         )}
 
         {/* Пустое состояние */}
         {!isLoading && families.length === 0 && (
-          <div className="glass-card p-20 text-center">
-            <Users className="w-24 h-24 mx-auto mb-6 text-slate-500" />
-            <h3 className="text-3xl font-semibold text-white mb-3">
-              Нет семейных групп
-            </h3>
-            <p className="text-slate-400 max-w-md mx-auto mb-8">
+          <div className="glass-card p-24 text-center">
+            <Users className="w-32 h-32 mx-auto mb-8 text-slate-500" />
+            <h3 className="text-4xl font-bold text-white mb-4">Нет семейных групп</h3>
+            <p className="text-slate-400 max-w-xl mx-auto mb-10 text-lg">
               Создайте первую группу, чтобы приглашать родственников и вместе работать над семейным деревом
             </p>
             <Button onClick={() => setShowCreateModal(true)} size="lg" className={primaryBtnClass}>
@@ -87,9 +82,9 @@ export const FamiliesPage = () => {
           </div>
         )}
 
-        {/* Список групп */}
+        {/* Список групп - УВЕЛИЧЕННЫЕ КАРТОЧКИ */}
         {!isLoading && families.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8"> {/* ✅ Изменили сетку на 2 колонки для больших карточек */}
             {families.map((family) => {
               const memberships = family.memberships ?? [];
               const membership = memberships.find((m) => m.user_id === user?.id);
@@ -99,57 +94,83 @@ export const FamiliesPage = () => {
               return (
                 <div
                   key={family.id}
-                  className="glass-card p-6 hover:border-[var(--primary)]/50 transition-all group"
+                  className="glass-card p-10 hover:border-[var(--primary)]/60 transition-all duration-300 group relative overflow-hidden"
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-white tracking-tight">
-                        {family.name}
-                      </h3>
-                      {family.description && (
-                        <p className="text-slate-400 mt-2 line-clamp-3 text-sm">
-                          {family.description}
-                        </p>
-                      )}
+                  {/* Фоновой градиент при наведении */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/5 to-[var(--secondary)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="relative z-10">
+                    {/* Заголовок карточки */}
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex-1 pr-4">
+                        <h3 className="text-3xl font-bold text-white tracking-tight mb-2">
+                          {family.name}
+                        </h3>
+                        {family.description && (
+                          <p className="text-slate-400 mt-3 line-clamp-3 text-base leading-relaxed">
+                            {family.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Кнопка управления приглашениями */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => isFamilyAdmin && setSelectedFamilyId(family.id)}
+                        disabled={!isFamilyAdmin}
+                        className={`w-12 h-12 rounded-xl transition-all ${
+                          isFamilyAdmin
+                            ? 'text-slate-400 hover:text-white hover:bg-[var(--glass-bg)]'
+                            : 'opacity-40 cursor-not-allowed text-slate-600'
+                        }`}
+                        title={isFamilyAdmin ? 'Управление приглашениями' : 'Только администратор'}
+                      >
+                        <Key className="w-6 h-6" />
+                      </Button>
                     </div>
 
-                    {/* ✅ ЕДИНАЯ КНОПКА: Управление приглашениями (Ключик) */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => isFamilyAdmin && setSelectedFamilyId(family.id)}
-                      disabled={!isFamilyAdmin}
-                      className={`text-slate-400 hover:text-white ${!isFamilyAdmin && 'opacity-40 cursor-not-allowed'} transition-all`}
-                      title={isFamilyAdmin ? 'Управление приглашениями' : 'Только администратор'}
-                    >
-                      <Key className="w-5 h-5" />
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--glass-border)]">
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <Users className="w-4 h-4" />
-                      <span>{memberCount} участников</span>
-                    </div>
-
-                    <div className="flex gap-2 items-center">
-                      {isFamilyAdmin ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={isDeleting}
-                          className="text-red-400 hover:text-red-500 hover:bg-red-950/30 disabled:opacity-50 transition-all rounded-lg px-3 py-2"
-                          onClick={() => handleDelete(family.id, family.name)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Удалить
-                        </Button>
-                      ) : (
-                        <div className="flex items-center gap-1.5 text-xs text-amber-400/80 bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20">
-                          <ShieldAlert className="w-3.5 h-3.5" />
-                          <span>Ограниченные права</span>
+                    {/* Статистика и действия */}
+                    <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--glass-border)]">
+                      <div className="flex items-center gap-3 text-slate-400">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-white" />
                         </div>
-                      )}
+                        <div>
+                          <p className="text-2xl font-bold text-white">{memberCount}</p>
+                          <p className="text-sm">
+                            {memberCount === 1 ? 'участник' : memberCount <= 4 ? 'участника' : 'участников'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 items-center">
+                        {/* ✅ НОВАЯ КНОПКА: Переход на страницу дерева */}
+                        <Button
+                          onClick={() => navigate(`/family/${family.id}`)}
+                          className="bg-[var(--secondary)] hover:bg-cyan-400 text-[var(--secondary-foreground)] rounded-xl px-5 py-2.5 font-semibold transition-all hover:-translate-y-0.5 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                        >
+                          Открыть дерево
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+
+                        {isFamilyAdmin ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={isDeleting}
+                            className="text-red-400 hover:text-red-500 hover:bg-red-950/30 disabled:opacity-50 transition-all rounded-xl px-4 py-2.5"
+                            onClick={() => handleDelete(family.id, family.name)}
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </Button>
+                        ) : (
+                          <div className="flex items-center gap-2 text-xs text-amber-400/80 bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-500/20">
+                            <ShieldAlert className="w-4 h-4" />
+                            <span>Ограниченные права</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -162,7 +183,6 @@ export const FamiliesPage = () => {
       {/* Модальные окна */}
       <CreateFamilyModal open={showCreateModal} onOpenChange={setShowCreateModal} />
 
-      {/* ✅ Модальное окно с ключиком (теперь объединяет создание и просмотр инвайтов) */}
       <FamilyTokenModal
         open={!!selectedFamilyId}
         onOpenChange={(isOpen) => {
