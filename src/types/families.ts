@@ -1,12 +1,20 @@
-export type MembershipRole = 'admin' | 'editor' | 'viewer';
+export type MembershipRole = 'viewer' | 'editor' | 'admin';
+export type Gender = 'male' | 'female' | 'unknown';
+export type RelationshipType = 'parent' | 'child' | 'spouse' | 'sibling' | 'other';
 
 export interface FamilyMember {
   id: string;
-  user_id: string;
-  role: MembershipRole;
-  display_name?: string;
-  avatar_url?: string;
-  joined_at: string;
+  family_group_id: string;
+  first_name: string;
+  last_name: string;
+  patronymic?: string | null;
+  maiden_name?: string | null;
+  gender: Gender;
+  birth_date?: string | null;
+  avatar_url?: string | null;
+  linked_user_id?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface FamilyMembershipRead {
@@ -47,3 +55,16 @@ export interface InvitationRead {
   times_used: number;
   is_active: boolean;
 }
+
+export interface Relationship {
+  id: string;
+  family_group_id: string;
+  source_id: string;
+  target_id: string;
+  relationship_type: RelationshipType | string;
+  created_at: string;
+}
+
+// Хелпер для отображения имени в UI
+export const getMemberFullName = (m: FamilyMember) =>
+  `${m.last_name} ${m.first_name} ${m.patronymic ?? ''}`.trim();
