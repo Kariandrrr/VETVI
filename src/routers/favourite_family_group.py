@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import update, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from ..core.models import FamilyMembership
 from ..core.models.users import User
@@ -54,3 +55,24 @@ async def unset_fav_family(
     await db.commit()
 
     return {"status": "success"}
+
+
+@router.get("/favourite", status_code=200)
+async def get_favourite_family(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    membership = await db.execute(
+        select(FamilyMembership)
+        .options(selectinload(FamilyMembership.group))
+        .where(
+            FamilyMembership.user_id == current_user.id,
+            FamilyMembership.is_favourite == True,
+        )
+    )
+    membership = membership.scalar_one_or_none()
+
+    if not membership:
+        raise HTTPException(status_code=404, detail="No favourite family set")
+
+    return membership.group
