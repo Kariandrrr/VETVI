@@ -1,17 +1,19 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
-import {ArrowRight, Info, Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react';
+import {ArrowRight, Heart, Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react';
 import {useDeleteFamily, useFamilies} from '@/hooks/useFamilies';
 import {useAuth} from '@/hooks/useAuth';
 import {CreateFamilyModal} from '@/components/CreateFamilyModal';
 import {FamilyTokenModal} from '@/components/FamilyTokenModal';
+import {familyApi} from '@/api/family';
+import {toast} from 'sonner';
 import type {FamilyGroupRead} from '@/types/families';
 
 export const FamiliesPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
-  const { data: familiesRaw, isLoading, error } = useFamilies();
+  const { data: familiesRaw, isLoading, error, refetch } = useFamilies();
   const { user } = useAuth();
   const { mutate: deleteFamily, isPending: isDeleting } = useDeleteFamily();
   const navigate = useNavigate();
@@ -25,6 +27,23 @@ export const FamiliesPage = () => {
       deleteFamily(familyId);
     }
   };
+
+  const handleToggleFavorite = async (familyId: string, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
+        await familyApi.unsetFavoriteFamily();
+        toast.success('Избранная группа снята');
+      } else {
+        await familyApi.setFavoriteFamily(familyId);
+        toast.success('Группа добавлена в избранное');
+      }
+      await refetch();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error('Ошибка', { description: 'Не удалось изменить избранную группу' });
+    }
+  };
+
 
   const primaryBtnClass =
     "px-6 py-3 gap-2 bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] hover:from-cyan-400 hover:to-purple-400 text-white font-medium rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center";
@@ -45,7 +64,8 @@ export const FamiliesPage = () => {
     );
   }
 
-  return (
+
+ return (
     <div className="min-h-screen bg-[var(--background)] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Заголовок */}
@@ -96,11 +116,13 @@ export const FamiliesPage = () => {
               const membership = memberships.find((m) => m.user_id === user?.id);
               const isFamilyAdmin = membership?.role === 'admin';
               const memberCount = memberships.length;
-
+              const isFavorite = membership?.is_favourite ?? false;
               return (
                 <div
                   key={family.id}
-                  className="glass-card p-10 hover:border-[var(--primary)]/60 transition-all duration-300 group relative overflow-hidden"
+                  className={`glass-card p-10 hover:border-[var(--primary)]/60 transition-all duration-300 group relative overflow-hidden ${
+                    isFavorite ? 'border-[var(--primary)]/60 shadow-[0_0_20px_rgba(168,85,247,0.2)]' : ''
+                  }`}
                 >
                   {/* Фоновой градиент при наведении */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/5 to-[var(--secondary)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -109,9 +131,14 @@ export const FamiliesPage = () => {
                     {/* Заголовок карточки */}
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex-1 pr-4">
-                        <h3 className="text-3xl font-bold text-white tracking-tight mb-2">
-                          {family.name}
-                        </h3>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-3xl font-bold text-white tracking-tight">
+                            {family.name}
+                          </h3>
+                          {isFavorite && (
+                            <Heart className="w-6 h-6 text-[var(--primary)] fill-[var(--primary)]" />
+                          )}
+                        </div>
                         {family.description && (
                           <p className="text-slate-400 mt-3 line-clamp-3 text-base leading-relaxed">
                             {family.description}
@@ -138,33 +165,49 @@ export const FamiliesPage = () => {
 
                     {/* Статистика и действия */}
                     <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--glass-border)]">
-                      {/* ✅ ИСПРАВЛЕНО: Убрали group/tooltip с родительского контейнера */}
-                      <div className="flex items-center gap-3 text-slate-400">
+                      <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center">
                           <Users className="w-5 h-5 text-white" />
                         </div>
                         <div>
                           <p className="text-2xl font-bold text-white">{memberCount}</p>
-                          <p className="text-sm">
+                          <p className="text-sm text-slate-400">
                             {memberCount === 1 ? 'участник' : memberCount <= 4 ? 'участника' : 'участников'} с доступом
                           </p>
-
-                          {/* ✅ Тултип строго на иконке Info */}
-                          <div className="group/tooltip relative inline-flex items-center justify-center w-4 h-4 ml-1 cursor-help">
-                            <Info className="w-4 h-4 text-slate-500 hover:text-slate-300 transition-colors" />
-
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 w-56 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-300 shadow-xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 pointer-events-none z-50">
-                              <p className="font-semibold text-white mb-1">Участники с доступом</p>
-                              <p className="leading-relaxed">
-                                Пользователи, которые могут зайти в эту семейную группу. Не все из них обязательно отображаются на древе.
-                              </p>
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--glass-bg)]" />
-                            </div>
-                          </div>
                         </div>
                       </div>
 
                       <div className="flex gap-3 items-center">
+                        {/* ✅ КНОПКА ИЗБРАННОГО с тултипом */}
+                        <div className="group/favorite relative">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleToggleFavorite(family.id, isFavorite)}
+                            className={`w-10 h-10 rounded-xl transition-all ${
+                              isFavorite
+                                ? 'text-[var(--primary)] hover:text-[var(--primary)]/80 bg-[var(--primary)]/10'
+                                : 'text-slate-400 hover:text-red-400 hover:bg-red-500/10'
+                            }`}
+                            title={isFavorite ? 'Убрать из избранного' : 'Сделать избранной группой'}
+                          >
+                            <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+                          </Button>
+
+                          {/* ✅ Тултип с пояснением */}
+                          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 w-64 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-300 shadow-xl opacity-0 invisible group-hover/favorite:opacity-100 group-hover/favorite:visible transition-all duration-200 pointer-events-none z-50">
+                            <p className="font-semibold text-white mb-1">
+                              {isFavorite ? 'Избранная группа' : 'Сделать избранной'}
+                            </p>
+                            <p className="leading-relaxed">
+                              {isFavorite
+                                ? 'Информация по этой группе отображается на главной странице'
+                                : 'Нажмите, чтобы эта группа отображалась на главной странице'}
+                            </p>
+                            <div className="absolute top-full right-4 border-4 border-transparent border-t-[var(--glass-bg)]" />
+                          </div>
+                        </div>
+
                         {/* Кнопка перехода на дерево */}
                         <Button
                           onClick={() => navigate(`/family/${family.id}`)}
