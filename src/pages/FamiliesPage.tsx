@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
-import {ArrowRight, Heart, Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react';
+import {ArrowRight, Heart, Home, Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react';
 import {useDeleteFamily, useFamilies} from '@/hooks/useFamilies';
 import {useAuth} from '@/hooks/useAuth';
 import {CreateFamilyModal} from '@/components/CreateFamilyModal';
@@ -38,12 +38,10 @@ export const FamiliesPage = () => {
         toast.success('Группа добавлена в избранное');
       }
       await refetch();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch {
       toast.error('Ошибка', { description: 'Не удалось изменить избранную группу' });
     }
   };
-
 
   const primaryBtnClass =
     "px-6 py-3 gap-2 bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] hover:from-cyan-400 hover:to-purple-400 text-white font-medium rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center";
@@ -64,8 +62,7 @@ export const FamiliesPage = () => {
     );
   }
 
-
- return (
+  return (
     <div className="min-h-screen bg-[var(--background)] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Заголовок */}
@@ -78,10 +75,21 @@ export const FamiliesPage = () => {
               Совместная работа над родословной
             </p>
           </div>
-          <Button onClick={() => setShowCreateModal(true)} className={primaryBtnClass}>
-            <Plus className="w-5 h-5" />
-            Создать новую группу
-          </Button>
+
+          {/* ✅ Группа кнопок */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <Button
+              onClick={() => navigate('/')}
+              className="px-6 py-3 gap-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white hover:bg-white/10 font-medium rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center"
+            >
+              <Home className="w-5 h-5" />
+              На главную
+            </Button>
+            <Button onClick={() => setShowCreateModal(true)} className={primaryBtnClass}>
+              <Plus className="w-5 h-5" />
+              Создать новую группу
+            </Button>
+          </div>
         </div>
 
         {/* Состояние загрузки */}
@@ -117,6 +125,7 @@ export const FamiliesPage = () => {
               const isFamilyAdmin = membership?.role === 'admin';
               const memberCount = memberships.length;
               const isFavorite = membership?.is_favourite ?? false;
+
               return (
                 <div
                   key={family.id}
@@ -245,7 +254,6 @@ export const FamiliesPage = () => {
 
       {/* Модальные окна */}
       <CreateFamilyModal open={showCreateModal} onOpenChange={setShowCreateModal} />
-
       <FamilyTokenModal
         open={!!selectedFamilyId}
         onOpenChange={(isOpen) => {
