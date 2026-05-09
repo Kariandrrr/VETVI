@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
-import {ArrowRight, Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react'; // ✅ Добавляем ArrowRight
+import {ArrowRight, Info, Key, Plus, ShieldAlert, Trash2, Users} from 'lucide-react';
 import {useDeleteFamily, useFamilies} from '@/hooks/useFamilies';
 import {useAuth} from '@/hooks/useAuth';
 import {CreateFamilyModal} from '@/components/CreateFamilyModal';
@@ -11,7 +11,8 @@ import type {FamilyGroupRead} from '@/types/families';
 export const FamiliesPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
-  const { data: familiesRaw, isLoading, error } = useFamilies();  const { user } = useAuth();
+  const { data: familiesRaw, isLoading, error } = useFamilies();
+  const { user } = useAuth();
   const { mutate: deleteFamily, isPending: isDeleting } = useDeleteFamily();
   const navigate = useNavigate();
 
@@ -33,7 +34,10 @@ export const FamiliesPage = () => {
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 text-lg">Ошибка загрузки семейных групп</p>
-          <Button onClick={() => window.location.reload()} className="mt-4 px-6 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white hover:bg-white/10 rounded-xl transition-all">
+          <Button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-6 py-2 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white hover:bg-white/10 rounded-xl transition-all"
+          >
             Перезагрузить
           </Button>
         </div>
@@ -71,7 +75,9 @@ export const FamiliesPage = () => {
         {!isLoading && families.length === 0 && (
           <div className="glass-card p-24 text-center">
             <Users className="w-32 h-32 mx-auto mb-8 text-slate-500" />
-            <h3 className="text-4xl font-bold text-white mb-4">Нет семейных групп</h3>
+            <h3 className="text-4xl font-bold text-white mb-4">
+              Нет семейных групп
+            </h3>
             <p className="text-slate-400 max-w-xl mx-auto mb-10 text-lg">
               Создайте первую группу, чтобы приглашать родственников и вместе работать над семейным деревом
             </p>
@@ -82,9 +88,9 @@ export const FamiliesPage = () => {
           </div>
         )}
 
-        {/* Список групп - УВЕЛИЧЕННЫЕ КАРТОЧКИ */}
+        {/* Список групп */}
         {!isLoading && families.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8"> {/* ✅ Изменили сетку на 2 колонки для больших карточек */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {families.map((family) => {
               const memberships = family.memberships ?? [];
               const membership = memberships.find((m) => m.user_id === user?.id);
@@ -132,6 +138,7 @@ export const FamiliesPage = () => {
 
                     {/* Статистика и действия */}
                     <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--glass-border)]">
+                      {/* ✅ ИСПРАВЛЕНО: Убрали group/tooltip с родительского контейнера */}
                       <div className="flex items-center gap-3 text-slate-400">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center">
                           <Users className="w-5 h-5 text-white" />
@@ -139,13 +146,26 @@ export const FamiliesPage = () => {
                         <div>
                           <p className="text-2xl font-bold text-white">{memberCount}</p>
                           <p className="text-sm">
-                            {memberCount === 1 ? 'участник' : memberCount <= 4 ? 'участника' : 'участников'}
+                            {memberCount === 1 ? 'участник' : memberCount <= 4 ? 'участника' : 'участников'} с доступом
                           </p>
+
+                          {/* ✅ Тултип строго на иконке Info */}
+                          <div className="group/tooltip relative inline-flex items-center justify-center w-4 h-4 ml-1 cursor-help">
+                            <Info className="w-4 h-4 text-slate-500 hover:text-slate-300 transition-colors" />
+
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 w-56 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-300 shadow-xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 pointer-events-none z-50">
+                              <p className="font-semibold text-white mb-1">Участники с доступом</p>
+                              <p className="leading-relaxed">
+                                Пользователи, которые могут зайти в эту семейную группу. Не все из них обязательно отображаются на древе.
+                              </p>
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--glass-bg)]" />
+                            </div>
+                          </div>
                         </div>
                       </div>
 
                       <div className="flex gap-3 items-center">
-                        {/* ✅ НОВАЯ КНОПКА: Переход на страницу дерева */}
+                        {/* Кнопка перехода на дерево */}
                         <Button
                           onClick={() => navigate(`/family/${family.id}`)}
                           className="bg-[var(--secondary)] hover:bg-cyan-400 text-[var(--secondary-foreground)] rounded-xl px-5 py-2.5 font-semibold transition-all hover:-translate-y-0.5 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
