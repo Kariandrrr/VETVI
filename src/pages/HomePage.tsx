@@ -1,23 +1,46 @@
 import {useState} from 'react';
 import {useAuth} from '@/hooks/useAuth';
+import {useFamilies} from '@/hooks/useFamilies';
+import {useFamilyTreeData} from '@/hooks/useFamilyTreeData';
 import {Button} from '@/components/ui/button';
-import {Link2, LogOut, Plus, Settings, Users, Zap} from 'lucide-react';
+import {Heart, Link2, LogOut, Plus, Settings, Users, Zap} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import {JoinByLinkModal} from '@/components/JoinByLinkModal';
 import {SelectFamilyModal} from '@/components/SelectFamilyModal';
 import {AddMemberModal} from '@/components/AddMemberModal';
 import {FamilyTree} from '@/components/FamilyTree';
 import logo from '@/assets/logo.png';
+import type {FamilyGroupRead, FamilyMembershipRead} from '@/types/families';
+
 
 export const HomePage = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-
   const [showSelectFamily, setShowSelectFamily] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
-
   const [showJoinModal, setShowJoinModal] = useState(false);
+
+  // 1. Загружаем все семьи пользователя
+  const { data: familiesRaw, isLoading: isLoadingFamilies } = useFamilies();
+
+  // 2. Нормализуем данные
+    const families = Array.isArray(familiesRaw)
+      ? familiesRaw
+      : (familiesRaw as { data?: FamilyGroupRead[] })?.data ?? [];
+
+    // 2. Добавляем типы для параметров колбэков
+    const favoriteFamily = families.find((f: FamilyGroupRead) =>
+      f.memberships?.some((m: FamilyMembershipRead) => m.is_favourite === true)
+    );
+
+  // 4. Загружаем данные дерева для избранной семьи
+  const {
+    members,
+    relationships,
+    isLoading: isLoadingTree,
+    refetch,
+  } = useFamilyTreeData(favoriteFamily?.id);
 
   const handleLogout = async () => {
     await logout();
@@ -35,9 +58,11 @@ export const HomePage = () => {
   };
 
   const handleAddSuccess = () => {
-    // TODO: Вызовите здесь рефетч дерева или инвалидацию кэша React Query
-    console.log('🌳 Relative added. Invalidate family-tree & members cache...');
-
+    // Обновляем дерево после добавления родственника
+    if (refetch) {
+      refetch();
+    }
+    console.log('🌳 Relative added. Tree refreshed.');
     setShowAddMember(false);
     setSelectedFamilyId(null);
   };
@@ -69,7 +94,6 @@ export const HomePage = () => {
                 </p>
               </div>
             </div>
-
             <div className="flex items-center gap-3">
               <Button onClick={handleNewMemberClick} className={primaryBtnClass}>
                 <Plus className="w-5 h-5" />
@@ -83,7 +107,7 @@ export const HomePage = () => {
 
               <Button
                 onClick={() => setShowJoinModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)]  hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
               >
                 <Link2 className="w-5 h-5" />
                 <span className="hidden md:inline">Вступить по ссылке</span>
@@ -114,6 +138,7 @@ export const HomePage = () => {
       <main className="max-w-[1600px] mx-auto px-6 py-16 space-y-16 relative">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-[var(--primary)] rounded-full blur-[180px] opacity-10" />
 
+        {/* Intro Card */}
         <div className="p-10 glass-card relative group">
           <div className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-[var(--glass-bg)] flex items-center justify-center border border-[var(--glass-border)]">
             <Zap className="w-7 h-7 text-[var(--secondary)] drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
@@ -122,18 +147,26 @@ export const HomePage = () => {
             Центр управления деревом
           </h2>
           <p className="text-slate-300 text-lg max-w-4xl leading-relaxed">
-            Это ваше цифровое пространство для исследования родословной. Визуализируйте, дополняйте и храните историю вашей семьи в защищенной и современной среде Vetvi. Начните с добавления первого родственника!
+            Это ваше цифровое пространство для исследования родословной. Визуализируйте,
+            дополняйте и храните историю вашей семьи в защищенной и современной среде Vetvi.
+            Начните с добавления первого родственника!
           </p>
         </div>
 
-        <div className="glass-card overflow-hidden">
+        {/* ✅ СЕКЦИЯ ДЕРЕВА (ОБНОВЛЕННАЯ) */}
+        <div className="glass-card overflow-hidden relative">
           <div className="border-b border-[var(--glass-border)] p-10 flex items-center justify-between gap-6 flex-wrap">
             <div>
-              <h2 className="text-3xl font-extrabold text-white tracking-tighter">
-                Семейный архив
+              <h2 className="text-3xl font-extrabold text-white tracking-tighter flex items-center gap-3">
+                {favoriteFamily ? favoriteFamily.name : "Семейный архив"}
+                {favoriteFamily && (
+                  <Heart className="w-6 h-6 text-[var(--primary)] fill-[var(--primary)]" />
+                )}
               </h2>
               <p className="text-slate-400 text-lg mt-1 max-w-md">
-                Интерактивная карта ваших родственных отношений
+                {favoriteFamily
+                  ? "Интерактивная карта вашей избранной семьи"
+                  : "Выберите избранную группу на странице семейных групп"}
               </p>
             </div>
             <Button
@@ -145,23 +178,48 @@ export const HomePage = () => {
             </Button>
           </div>
 
-          <div className="p-4 min-h-[650px] bg-black/10">
-            {/*
-               Примечание: FamilyTree должен получать members и relationships.
-              На главной странице можно передать данные избранной семьи или оставить пустыми до выбора.
-            */}
-            <FamilyTree members={[]} relationships={[]} />
+          <div className="p-4 min-h-[650px] bg-black/10 relative">
+            {/* Состояние загрузки */}
+            {isLoadingFamilies || isLoadingTree ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)] mb-4" />
+                <p>Загрузка семейного древа...</p>
+              </div>
+            ) : !favoriteFamily ? (
+              /* Нет избранной семьи */
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <Heart className="w-20 h-20 mb-4 text-slate-600" />
+                <p className="mb-6 text-lg">У вас пока нет избранной семьи.</p>
+                <Button onClick={() => navigate('/families')} className={primaryBtnClass}>
+                  Перейти к группам
+                </Button>
+              </div>
+            ) : members.length === 0 ? (
+              /* Семья есть, но дерево пустое */
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <Users className="w-16 h-16 mb-4 text-slate-600" />
+                <p className="mb-6 text-lg">В этой семье пока нет участников.</p>
+                <Button onClick={handleNewMemberClick} className={primaryBtnClass}>
+                  <Plus className="w-5 h-5 mr-2" />
+                  Добавить первого родственника
+                </Button>
+              </div>
+            ) : (
+              /* ✅ Отображение самого дерева */
+              <FamilyTree members={members} relationships={relationships} />
+            )}
           </div>
         </div>
 
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-16">
-          <StatsCard icon="👨👩‍👧‍" title="Всего в архиве" value="0" description="Членов семьи" />
+          <StatsCard icon="👨👩‍‍👦" title="Всего в архиве" value={members.length.toString()} description="Членов семьи" />
           <StatsCard icon="🌳" title="Глубина истории" value="0" description="Поколений" />
-          <StatsCard icon="🔗" title="Установлено" value="0" description="Связей" />
+          <StatsCard icon="🔗" title="Установлено" value={relationships.length.toString()} description="Связей" />
         </div>
       </main>
 
-      {/*  Модальные окна (рендерятся в корне, управляются стейтом) */}
+      {/* Модальные окна */}
       <SelectFamilyModal
         open={showSelectFamily}
         onOpenChange={setShowSelectFamily}
