@@ -3,18 +3,22 @@ export type Gender = 'male' | 'female' | 'unknown';
 export type RelationshipType = 'parent' | 'child' | 'spouse' | 'sibling' | 'other';
 
 export interface FamilyMember {
-  id: string;
-  family_group_id: string;
-  first_name: string;
-  last_name: string;
-  patronymic?: string | null;
-  maiden_name?: string | null;
-  gender: Gender;
-  birth_date?: string | null;
-  avatar_url?: string | null;
-  linked_user_id?: string | null;
-  created_at: string;
-  updated_at: string;
+    id: string;
+    family_group_id: string;
+    first_name: string;
+    last_name: string;
+    patronymic?: string | null;
+    maiden_name?: string | null;
+    gender: Gender;
+    birth_date?: string | null;
+    birth_place?: string | null;
+    death_date?: string | null;
+    death_place?: string | null;
+    is_alive?: boolean;
+    avatar_url?: string | null;
+    linked_user_id?: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface FamilyMembershipRead {
