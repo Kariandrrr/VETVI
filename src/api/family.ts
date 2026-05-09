@@ -38,4 +38,12 @@ export const familyApi = {
     axiosInstance.post<InvitationRead>(`${BASE_URL}/${familyId}/invites`, data),
   joinByToken: (token: string) =>
     axiosInstance.post(`/invitations/join/${token}`),
+
+     // Методы для избранной группы
+  setFavoriteFamily: (familyId: string) =>
+    axiosInstance.patch(`${BASE_URL}/${familyId}/favourite`),
+  unsetFavoriteFamily: () =>
+    axiosInstance.patch(`${BASE_URL}/favourite/unset`),
+      getFavoriteFamily: () =>
+    axiosInstance.get<FamilyGroupRead>(`${BASE_URL}/favourite`),
 };
