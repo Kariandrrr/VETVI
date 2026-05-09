@@ -25,6 +25,7 @@ export interface FamilyMembershipRead {
   user_id: string;
   role: MembershipRole;
   joined_at: string;
+  is_favourite?: boolean;
 }
 
 export interface FamilyGroupRead {
