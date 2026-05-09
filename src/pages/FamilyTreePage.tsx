@@ -2,25 +2,42 @@ import {useMemo, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
-import {ArrowLeft, ChevronDown, ChevronUp, Plus, Search, Users} from 'lucide-react';
+import {ArrowLeft, ChevronDown, ChevronUp, Info, Plus, Search, Users,} from 'lucide-react';
 import {useFamilyTreeData} from '@/hooks/useFamilyTreeData';
+import {useFamilies} from '@/hooks/useFamilies';
+import {useAuth} from '@/hooks/useAuth';
 import {FamilyTree} from '@/components/FamilyTree';
 import {AddMemberModal} from '@/components/AddMemberModal';
-import {getMemberFullName} from '@/types/families';
+import {type FamilyGroupRead, type FamilyMember, getMemberFullName} from '@/types/families';
 import logo from '@/assets/logo.png';
 
 export const FamilyTreePage = () => {
   const { id: familyId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { members, relationships, isLoading, refetch } = useFamilyTreeData(familyId);
+  const { user } = useAuth();
 
+  const { data: familiesRaw } = useFamilies();
+    const families = Array.isArray(familiesRaw)
+  ? familiesRaw
+  : (familiesRaw as { data?: FamilyGroupRead[] })?.data ?? [];
+
+  const currentFamily = families.find((f: FamilyGroupRead) => f.id === familyId);
+  const memberships = currentFamily?.memberships ?? [];
+  const membership = memberships.find((m: { user_id: string; role: string }) => m.user_id === user?.id);
+  const isAdmin = membership?.role === 'admin';
+
+  const { members, relationships, isLoading, refetch } = useFamilyTreeData(familyId);
   const [isTableExpanded, setIsTableExpanded] = useState(true);
   const [showAddMember, setShowAddMember] = useState(false);
   const [search, setSearch] = useState('');
 
-  const filtered = useMemo(() =>
-    members.filter(m => getMemberFullName(m).toLowerCase().includes(search.toLowerCase())),
-  [members, search]);
+  const filtered = useMemo(
+    () =>
+      members.filter((m: FamilyMember) =>
+        getMemberFullName(m).toLowerCase().includes(search.toLowerCase())
+      ),
+    [members, search]
+  );
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -29,24 +46,47 @@ export const FamilyTreePage = () => {
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
             <img src={logo} alt="VETVI" className="w-10 h-10 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
-            <h1 className="text-xl font-black text-white tracking-tighter bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">VETVI</h1>
+            <h1 className="text-xl font-black text-white tracking-tighter bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
+              VETVI
+            </h1>
           </div>
           <Button onClick={() => navigate('/families')} variant="ghost" className="text-slate-300 hover:text-white">
-            <ArrowLeft className="w-4 h-4 mr-2" /> К группам
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            К группам
           </Button>
         </div>
       </header>
 
       <main className="max-w-[1600px] mx-auto px-6 py-8 space-y-6">
         {/* 🔽 Таблица участников (в самом начале) */}
-        <div className="glass-card overflow-hidden transition-all duration-300">
+        <div className="glass-card overflow-visible transition-all duration-300">
           <div
             className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
             onClick={() => setIsTableExpanded(!isTableExpanded)}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 group/tooltip relative">
               <Users className="w-5 h-5 text-[var(--secondary)]" />
-              <span className="font-semibold text-white">Участники семьи ({filtered.length})</span>
+              <span className="font-semibold text-white">
+                На дереве ({members.length})
+                {search && ` • найдено: ${filtered.length}`}
+              </span>
+
+              {/* ✅ Тултип с пояснением */}
+              <div className="relative inline-flex items-center justify-center w-4 h-4 cursor-help">
+                <Info className="w-4 h-4 text-slate-500 hover:text-slate-300 transition-colors" />
+
+                {/* Всплывающее пояснение */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 w-64 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-300 shadow-xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 pointer-events-none z-50">
+                  <p className="font-semibold text-white mb-1">Узлы на древе</p>
+                  <ul className="mt-2 space-y-1 list-disc list-inside text-slate-400">
+                    <li>Зарегистрированные пользователи</li>
+                    <li>Родственники, добавленные вручную</li>
+                    <li>Умершие или ещё не приглашённые</li>
+                  </ul>
+                  {/* Стрелочка тултипа */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--glass-bg)]" />
+                </div>
+              </div>
             </div>
             {isTableExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
           </div>
@@ -71,18 +111,65 @@ export const FamilyTreePage = () => {
                 ) : filtered.length === 0 ? (
                   <div className="text-center py-8 text-slate-500">Участников не найдено</div>
                 ) : (
-                  filtered.map(member => (
-                    <div key={member.id} className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+                  filtered.map((member: FamilyMember) => (
+                    <div
+                      key={member.id}
+                      className="group flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                    >
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-white font-bold shrink-0">
-                        {member.avatar_url ? <img src={member.avatar_url} className="w-full h-full rounded-full object-cover" /> : `${member.first_name[0]}${member.last_name[0]}`.toUpperCase()}
+                        {member.avatar_url ? (
+                          <img src={member.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
+                        ) : (
+                          `${member.first_name[0]}${member.last_name[0]}`.toUpperCase()
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-medium truncate">{getMemberFullName(member)}</p>
-                        <p className="text-xs text-slate-400">{member.gender === 'male' ? 'Мужчина' : member.gender === 'female' ? 'Женщина' : 'Не указано'}</p>
+                        <p className="text-xs text-slate-400">
+                          {member.gender === 'male' ? 'Мужчина' : member.gender === 'female' ? 'Женщина' : 'Не указано'}
+                        </p>
                       </div>
-                      <Button size="sm" variant="outline" className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300">
-                        Профиль
-                      </Button>
+
+                      {/* ✅ КНОПКИ АДМИНА - появляются только для администраторов */}
+                      {isAdmin && (
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20"
+                            title="Редактировать"
+                          >
+                            ✏️
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/20"
+                            title="Удалить"
+                          >
+                            🗑️
+                          </Button>
+
+                            <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300"
+                        >
+                          Профиль
+                        </Button>
+                        </div>
+                      )}
+
+                      {/* Кнопка профиля для обычных пользователей */}
+                      {!isAdmin && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300"
+                        >
+                          Профиль
+                        </Button>
+                      )}
                     </div>
                   ))
                 )}
@@ -94,8 +181,12 @@ export const FamilyTreePage = () => {
         {/*  Дерево */}
         <div className="relative">
           <div className="absolute -top-4 right-4 z-10">
-            <Button onClick={() => setShowAddMember(true)} className="bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)] rounded-full h-10 font-bold shadow-[var(--neon-glow-secondary)] transition-all">
-              <Plus className="w-4 h-4 mr-2" /> Новый родственник
+            <Button
+              onClick={() => setShowAddMember(true)}
+              className="bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)] rounded-full h-10 font-bold shadow-[var(--neon-glow-secondary)] transition-all"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Новый родственник
             </Button>
           </div>
           <FamilyTree members={members} relationships={relationships} />
@@ -109,8 +200,8 @@ export const FamilyTreePage = () => {
           familyId={familyId}
           open={showAddMember}
           onOpenChange={setShowAddMember}
-          onAddSuccess={() => {
-            refetch();
+          onAddSuccess={async () => {
+            await refetch();
             setShowAddMember(false);
           }}
         />
