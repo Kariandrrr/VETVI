@@ -51,9 +51,6 @@ class FamilyGroup(Base):
         back_populates="group",
         cascade="all, delete-orphan",
     )
-    is_favourite: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False, server_default=func.false()
-    )
 
 
 class FamilyMembership(Base):
@@ -74,6 +71,9 @@ class FamilyMembership(Base):
     )
     joined_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
+    )
+    is_favourite: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, server_default=func.false()
     )
 
     __table_args__ = (
