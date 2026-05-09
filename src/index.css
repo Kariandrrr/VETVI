@@ -57,3 +57,16 @@
     box-shadow: var(--neon-glow-primary);
   }
 }
+
+/* Плавное появление тултипа */
+.group\/tooltip:hover [role="tooltip"],
+.group\/tooltip:focus-within [role="tooltip"] {
+  @apply opacity-100 visible;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 640px) {
+  .group\/tooltip [role="tooltip"] {
+    @apply left-auto right-0 translate-x-0 w-72;
+  }
+}
