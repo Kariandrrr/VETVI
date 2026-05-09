@@ -427,3 +427,16 @@ async def get_all_relationships(
         .where(Relationship.family_group_id == family_group_id)
     )
     return list(result.scalars().all())
+
+
+async def get_member_by_linked_user(
+    db: AsyncSession,
+    family_group_id: UUID,
+    user_id: UUID,
+) -> FamilyMember | None:
+    stmt = select(FamilyMember).where(
+        FamilyMember.family_group_id == family_group_id,
+        FamilyMember.linked_user_id == user_id,
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
