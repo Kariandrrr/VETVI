@@ -10,7 +10,7 @@ from src.core.schemas.family_members import (
     FamilyMemberRead,
     FamilyMemberUpdate,
 )
-from src.crud import members as member_service
+from src.crud.member_relationship import members as member_service
 from src.deps.family import RoleChecker
 from src.deps.user import get_db, get_current_user
 
