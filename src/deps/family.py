@@ -21,8 +21,13 @@ async def if_family_member(
             FamilyMembership.family_group_id == family_group_id,
         )
     )
-    result = await db.execute(stmt)
-    return result.scalar_one_or_none() is not None
+    member = await db.scalar(stmt)
+    if not member:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not allowed to see the content of this family group",
+        )
+    return member
 
 
 async def get_user_role_in_family(
