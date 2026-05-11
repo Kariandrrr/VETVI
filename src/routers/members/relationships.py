@@ -10,8 +10,8 @@ from src.core.schemas.relationship import (
     RelationshipRead,
     RelationshipUpdate,
 )
-from src.crud.member_relationship import members as member_service
-from src.crud.member_relationship import relationships as relationship_service
+from src.service.member_relationship import members as member_service
+from src.service.member_relationship import relationships as relationship_service
 from src.deps.family import RoleChecker
 from src.deps.user import get_db, get_current_user
 

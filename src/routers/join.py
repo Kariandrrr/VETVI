@@ -3,12 +3,12 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.crud.member_relationship.members import (
+from ..service.member_relationship.members import (
     create_family_member,
 )
-from src.crud.member_relationship.relationships import get_member_by_linked_user
+from ..service.member_relationship.relationships import get_member_by_linked_user
 from ..core.schemas.family_members import FamilyMemberCreate
-from ..crud import invitations as invite_service
+from ..service import invitations as invite_service
 from ..deps.user import get_db, get_current_user
 
 router = APIRouter()
