@@ -222,7 +222,7 @@ export const FamiliesPage = () => {
                           onClick={() => navigate(`/family/${family.id}`)}
                           className="bg-[var(--secondary)] hover:bg-cyan-400 text-[var(--secondary-foreground)] rounded-xl px-5 py-2.5 font-semibold transition-all hover:-translate-y-0.5 shadow-[0_0_15px_rgba(34,211,238,0.3)]"
                         >
-                          Открыть дерево
+                          Открыть древо
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
 

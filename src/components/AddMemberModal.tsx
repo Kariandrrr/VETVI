@@ -134,7 +134,7 @@ export const AddMemberModal = ({ familyId, open, onOpenChange, onAddSuccess }: P
                 Добавляем...
               </span>
             ) : (
-              'Добавить на дерево'
+              'Добавить на древо'
             )}
           </Button>
         </div>
