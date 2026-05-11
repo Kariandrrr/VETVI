@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo} from 'react'; // ✅ Добавили useEffect
+import { useCallback, useEffect, useMemo } from 'react';
 import ReactFlow, {
     addEdge,
     applyEdgeChanges,
@@ -15,8 +15,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
-import type {FamilyMember, Relationship} from '@/types/families';
-import {getMemberFullName} from '@/types/families';
+import type { FamilyMember, Relationship } from '@/types/families';
+import { getMemberFullName } from '@/types/families';
 
 const MemberNode = ({ data }: { data: { member: FamilyMember } }) => {
   if (!data || !data.member) {
@@ -87,9 +87,10 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
 interface Props {
   members: FamilyMember[];
   relationships: Relationship[];
+  fullscreen?: boolean;
 }
 
-export const FamilyTree = ({ members, relationships }: Props) => {
+export const FamilyTree = ({ members, relationships, fullscreen = false }: Props) => {
   const initialNodes = useMemo<Node[]>(() =>
     members.map((m) => ({
       id: m.id,
@@ -137,8 +138,14 @@ export const FamilyTree = ({ members, relationships }: Props) => {
     [setEdges],
   );
 
+
+  const containerHeight = fullscreen ? '100vh' : '600px';
+
   return (
-    <div key={members.length} className="w-full h-[600px] rounded-2xl overflow-hidden border border-[var(--glass-border)] bg-black/20">
+    <div
+      className="rounded-2xl overflow-hidden border border-[var(--glass-border)] bg-black/20"
+      style={{ height: containerHeight, width: '100%' }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

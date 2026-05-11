@@ -176,8 +176,7 @@ export const HomePage = () => {
                 </Button>
               </div>
             ) : (
-              <FamilyTree members={members} relationships={relationships} />
-            )}
+              <FamilyTree members={members} relationships={relationships} fullscreen={false} />            )}
           </div>
         </div>
 
@@ -197,9 +196,9 @@ export const HomePage = () => {
       <JoinByLinkModal open={showJoinModal} onOpenChange={setShowJoinModal} />
 
       {/* 🖥️ Полноэкранный оверлей */}
-      {isTreeFullscreen && favoriteFamily && (
-        <div className="fixed inset-0 z-[100] bg-[var(--background)] flex flex-col" onClick={() => setIsTreeFullscreen(false)}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/30 backdrop-blur-xl">
+            {isTreeFullscreen && favoriteFamily && (
+        <div className="fixed inset-0 z-[100] bg-[var(--background)] flex flex-col">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/30 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-3">
               <img src={logo} alt="VETVI" className="w-8 h-8" />
               <h3 className="text-xl font-bold text-white">{favoriteFamily.name}</h3>
@@ -209,15 +208,24 @@ export const HomePage = () => {
                 <span>👥 {members.length} участников</span>
                 <span>🔗 {relationships.length} связей</span>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsTreeFullscreen(false)} className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all" title="Свернуть (Esc)">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsTreeFullscreen(false)}
+                className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all"
+                title="Свернуть (Esc)"
+              >
                 <Minimize2 className="w-5 h-5" />
               </Button>
             </div>
           </div>
-          <div className="flex-1 overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
-            <FamilyTree members={members} relationships={relationships} />
+
+          {/* 👈 Контейнер для дерева - полная высота */}
+          <div className="flex-1 w-full p-4" onClick={(e) => e.stopPropagation()}>
+            <FamilyTree members={members} relationships={relationships} fullscreen={true} />
           </div>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-400 pointer-events-none">
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-400 pointer-events-none z-[101]">
             Нажмите <kbd className="px-2 py-0.5 rounded bg-black/30 font-mono">Esc</kbd> или кнопку ⤢ для выхода
           </div>
         </div>

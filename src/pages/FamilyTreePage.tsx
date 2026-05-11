@@ -55,6 +55,15 @@ export const FamilyTreePage = () => {
     [members, search]
   );
 
+  // Если нет данных или загрузка
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)]" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Header */}
@@ -104,9 +113,7 @@ export const FamilyTreePage = () => {
                 <Input placeholder="Поиск по имени..." value={search} onChange={(e) => setSearch(e.target.value)} className="bg-black/20 border-[var(--glass-border)] text-white h-10 pl-10" />
               </div>
               <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1">
-                {isLoading ? (
-                  <div className="text-center py-8 text-slate-500">Загрузка...</div>
-                ) : filtered.length === 0 ? (
+                {filtered.length === 0 ? (
                   <div className="text-center py-8 text-slate-500">Участников не найдено</div>
                 ) : (
                   filtered.map((member: FamilyMember) => (
@@ -142,19 +149,48 @@ export const FamilyTreePage = () => {
           )}
         </div>
 
-        {/* 🌳 Дерево */}
-        <div className="relative">
-          {/* 🔲 Кнопка расширения */}
-          <div className="absolute -top-4 right-16 z-10">
-            <Button variant="ghost" size="icon" onClick={() => setIsTreeFullscreen(true)} className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-slate-400 hover:text-white hover:bg-[var(--primary)]/20 transition-all" title="Развернуть на весь экран">
-              <Maximize2 className="w-5 h-5" />
-            </Button>
+        {/* 🌳 Дерево - с кнопкой полноэкранного режима */}
+        <div className="glass-card overflow-hidden relative">
+          {/* Заголовок с кнопками */}
+          <div className="border-b border-[var(--glass-border)] p-5 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-[var(--secondary)]" />
+                Семейное древо
+              </h2>
+              <p className="text-sm text-slate-400 mt-1">
+                {members.length} участников, {relationships.length} связей
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* 🔲 Кнопка полноэкранного режима */}
+              {members.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsTreeFullscreen(true)}
+                  className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-slate-400 hover:text-white hover:bg-[var(--primary)]/20 transition-all"
+                  title="Развернуть на весь экран"
+                >
+                  <Maximize2 className="w-5 h-5" />
+                </Button>
+              )}
+
+              <Button
+                onClick={() => setShowAddMember(true)}
+                className="bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)] rounded-full h-10 font-bold shadow-[var(--neon-glow-secondary)] transition-all"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Новый родственник
+              </Button>
+            </div>
           </div>
-          <Button onClick={() => setShowAddMember(true)} className="absolute -top-4 right-4 z-10 bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)] rounded-full h-10 font-bold shadow-[var(--neon-glow-secondary)] transition-all">
-            <Plus className="w-4 h-4 mr-2" />
-            Новый родственник
-          </Button>
-          <FamilyTree members={members} relationships={relationships} />
+
+          {/* Дерево */}
+          <div className="p-4 bg-black/10">
+            <FamilyTree members={members} relationships={relationships} fullscreen={false} />
+          </div>
         </div>
       </main>
 
@@ -174,8 +210,8 @@ export const FamilyTreePage = () => {
 
       {/* 🖥️ Полноэкранный оверлей */}
       {isTreeFullscreen && currentFamily && (
-        <div className="fixed inset-0 z-[100] bg-[var(--background)] flex flex-col" onClick={() => setIsTreeFullscreen(false)}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/30 backdrop-blur-xl">
+        <div className="fixed inset-0 z-[100] bg-[var(--background)] flex flex-col">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/30 backdrop-blur-xl shrink-0">
             <div className="flex items-center gap-3">
               <img src={logo} alt="VETVI" className="w-8 h-8" />
               <h3 className="text-xl font-bold text-white">{currentFamily.name}</h3>
@@ -186,15 +222,23 @@ export const FamilyTreePage = () => {
                 <span>👥 {members.length} участников</span>
                 <span>🔗 {relationships.length} связей</span>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsTreeFullscreen(false)} className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all" title="Свернуть (Esc)">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsTreeFullscreen(false)}
+                className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all"
+                title="Свернуть (Esc)"
+              >
                 <Minimize2 className="w-5 h-5" />
               </Button>
             </div>
           </div>
-          <div className="flex-1 overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
-            <FamilyTree members={members} relationships={relationships} />
+
+          <div className="flex-1 w-full" onClick={(e) => e.stopPropagation()}>
+            <FamilyTree members={members} relationships={relationships} fullscreen={true} />
           </div>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-400 pointer-events-none">
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-400 pointer-events-none z-[101]">
             Нажмите <kbd className="px-2 py-0.5 rounded bg-black/30 font-mono">Esc</kbd> или кнопку ⤢ для выхода
           </div>
         </div>
