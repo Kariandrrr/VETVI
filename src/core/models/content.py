@@ -69,6 +69,9 @@ class Post(Base):
     tags: Mapped[List["Tag"]] = relationship(
         secondary=post_tags, back_populates="posts"
     )
+    reactions = relationship(
+        "PostReaction", back_populates="post", cascade="all, delete-orphan"
+    )
 
 
 class MediaFile(Base):
@@ -114,3 +117,27 @@ class Tag(Base):
     posts: Mapped[List["Post"]] = relationship(
         secondary=post_tags, back_populates="tags"
     )
+
+
+class PostReaction(Base):
+    __tablename__ = "post_reactions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    post_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("posts.id", ondelete="CASCADE"), index=True
+    )
+    member_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("family_members.id", ondelete="CASCADE"), index=True
+    )
+    reaction_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    __table_args__ = (
+        UniqueConstraint("post_id", "member_id", name="unique_post_member_reaction"),
+    )
+
+    post: Mapped["Post"] = relationship(back_populates="reactions")
