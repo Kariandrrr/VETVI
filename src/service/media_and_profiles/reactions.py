@@ -1,4 +1,3 @@
-from typing import Optional, Dict, Any
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -42,7 +41,7 @@ async def toggle_reaction(
         FamilyMember.linked_user_id == user_id,
         FamilyMember.family_group_id.in_(
             select(FamilyMember.family_group_id).where(
-                FamilyMember.linked_user_id == post.user_id
+                FamilyMember.linked_user_id == post.author_id
             )
         ),
     )
@@ -98,7 +97,7 @@ async def get_post_reactions_summary(
     post_id: UUID,
     family_group_id: UUID,
     user_id: UUID,
-) -> Dict[str, Any]:
+) -> dict:
     stmt = select(Post).where(Post.id == post_id)
     result = await db.execute(stmt)
     post = result.scalar()
@@ -110,7 +109,7 @@ async def get_post_reactions_summary(
         FamilyMember.linked_user_id == user_id,
         FamilyMember.family_group_id.in_(
             select(FamilyMember.family_group_id).where(
-                FamilyMember.linked_user_id == post.user_id
+                FamilyMember.linked_user_id == post.author_id
             )
         ),
     )
@@ -143,7 +142,7 @@ async def get_my_reaction(
     post_id: UUID,
     member_id: UUID,
     user_id: UUID,
-) -> Optional[ReactionType]:
+) -> ReactionType | None:
 
     stmt = select(FamilyMember).where(
         FamilyMember.id == member_id, FamilyMember.linked_user_id == user_id
