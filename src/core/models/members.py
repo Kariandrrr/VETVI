@@ -19,7 +19,7 @@ from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
-from .enums import GenderEnum, RelationshipType
+from .enums import GenderEnum, RelationshipType, MembershipRole
 
 if TYPE_CHECKING:
     from .users import User
@@ -38,6 +38,7 @@ class FamilyMember(Base):
     linked_user_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
+    display_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     first_name: Mapped[str | None] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str | None] = mapped_column(String(100))
@@ -70,7 +71,14 @@ class FamilyMember(Base):
         back_populates="family_links",
         foreign_keys=[linked_user_id],
     )
+    role: Mapped[MembershipRole] = mapped_column(
+        ENUM(MembershipRole, name="membership_role_enum", inherit_schema=True),
+        default=MembershipRole.editor,
+        server_default=MembershipRole.editor.value,
+    )
+
     creator: Mapped["User"] = relationship(foreign_keys=[created_by])
+
     outgoing_relationships: Mapped[list["Relationship"]] = relationship(
         "Relationship",
         foreign_keys="[Relationship.from_member_id]",
@@ -86,6 +94,7 @@ class FamilyMember(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+
 
 class Relationship(Base):
     __tablename__ = "relationships"
