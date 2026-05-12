@@ -1,24 +1,34 @@
-from uuid import UUID
 from datetime import datetime, date
-from typing import Optional
-from pydantic import BaseModel, Field
+from uuid import UUID
+
+from pydantic import BaseModel, Field, ConfigDict
+
+from src.core.models.enums import MembershipRole
 
 
 class MemberProfileBase(BaseModel):
-    display_name: Optional[str] = Field(None, max_length=100)
-    bio: Optional[str] = Field(None, max_length=500)
-    avatar_url: Optional[str] = Field(None, max_length=500)
-    date_of_birth: Optional[date] = None
+    display_name: str | None = Field(None, max_length=100)
+    bio: str | None = Field(None, max_length=500)
+    avatar_url: str | None = Field(None, max_length=500)
+    date_of_birth: date | None = None
 
 
 class MemberProfileCreate(MemberProfileBase):
     user_id: UUID
     family_group_id: UUID
-    role: str = "member"
+    role: MembershipRole = MembershipRole.viewer
 
 
 class MemberProfileUpdate(MemberProfileBase):
-    pass
+    first_name: str | None = None
+    last_name: str | None = None
+    patronymic: str | None = None
+    maiden_name: str | None = None
+    gender: str | None = None
+    birth_place: str | None = None
+    death_date: date | None = None
+    death_place: str | None = None
+    is_alive: bool | None = None
 
 
 class MemberProfileRead(MemberProfileBase):
@@ -29,5 +39,14 @@ class MemberProfileRead(MemberProfileBase):
     joined_at: datetime
     linked_user_id: UUID
 
-    class Config:
-        from_attributes = True
+    first_name: str | None = None
+    last_name: str | None = None
+    patronymic: str | None = None
+    maiden_name: str | None = None
+    gender: str | None = None
+    birth_place: str | None = None
+    death_date: date | None = None
+    death_place: str | None = None
+    is_alive: bool = True
+
+    model_config = ConfigDict(from_attributes=True)
