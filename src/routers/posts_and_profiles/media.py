@@ -39,7 +39,7 @@ async def upload_media_to_post(
         FamilyMember.linked_user_id == current_user.id,
         FamilyMember.family_group_id.in_(
             select(FamilyMember.family_group_id).where(
-                FamilyMember.linked_user_id == post.user_id
+                FamilyMember.linked_user_id == post.author_id
             )
         ),
     )
@@ -81,7 +81,7 @@ async def stream_media(
         FamilyMember.linked_user_id == current_user.id,
         FamilyMember.family_group_id.in_(
             select(FamilyMember.family_group_id).where(
-                FamilyMember.linked_user_id == post.user_id
+                FamilyMember.linked_user_id == post.author_id
             )
         ),
     )

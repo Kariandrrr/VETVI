@@ -36,7 +36,7 @@ async def upload_media(
     file: UploadFile,
     user_id: UUID,
 ) -> MediaFileRead:
-    stmt = select(Post).where(Post.id == post_id, Post.user_id == user_id)
+    stmt = select(Post).where(Post.id == post_id, Post.author_id == user_id)
     result = await db.execute(stmt)
     post = result.scalars().first()
 
