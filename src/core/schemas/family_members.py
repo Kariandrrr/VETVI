@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from .base import BaseSchema
+from ..models.enums import MembershipRole
 from ..models.enums import GenderEnum
 
 
@@ -13,6 +14,7 @@ class FamilyMemberBase(BaseModel):
     patronymic: str | None = None
     maiden_name: str | None = None
     gender: GenderEnum = GenderEnum.unknown
+    role: MembershipRole = MembershipRole.viewer
     birth_date: date | None = None
     birth_place: str | None = None
     death_date: date | None = None
