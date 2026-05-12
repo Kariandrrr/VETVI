@@ -29,9 +29,10 @@ class PostType(enum.Enum):
 
 
 class ReactionType(enum.Enum):
-    LIKE = "like"
-    LOVE = "love"
-    HAHA = "haha"
-    WOW = "wow"
-    SAD = "sad"
-    ANGRY = "angry"
+    like = "like"
+    love = "love"
+    haha = "haha"
+    wow = "wow"
+    sad = "sad"
+    angry = "angry"
+    laugh = "laugh"
