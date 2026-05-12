@@ -1,17 +1,39 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
+from datetime import date
 from uuid import UUID
 
-from sqlalchemy import select, and_, delete
+from sqlalchemy import select, and_, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.models.enums import RelationshipType
 from src.core.models.members import FamilyMember, Relationship
 from src.core.schemas.family_members import FamilyMemberCreate, FamilyMemberUpdate
 
-if TYPE_CHECKING:
-    from .check_and_validate import check_member_uniqueness_in_group
+
+async def check_member_uniqueness_in_group(
+    db: AsyncSession,
+    family_group_id: UUID,
+    first_name: str,
+    last_name: str,
+    birth_date: date | None = None,
+    exclude_member_id: UUID = None,
+) -> bool:
+    conditions = [
+        FamilyMember.family_group_id == family_group_id,
+        func.lower(FamilyMember.first_name) == func.lower(first_name),
+        func.lower(FamilyMember.last_name) == func.lower(last_name),
+    ]
+
+    if birth_date:
+        conditions.append(FamilyMember.birth_date == birth_date)
+
+    if exclude_member_id:
+        conditions.append(FamilyMember.id != exclude_member_id)
+
+    stmt = select(FamilyMember).where(and_(*conditions))
+    result = await db.execute(stmt)
+    existing = result.scalar_one_or_none()
+
+    return existing is not None
 
 
 async def get_family_member_by_id(
@@ -78,6 +100,7 @@ async def create_family_member(
         is_alive=member_in.is_alive,
         bio=member_in.bio,
         avatar_url=member_in.avatar_url,
+        role=member_in.role,
         created_by=created_by,
     )
 
