@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -28,7 +27,7 @@ async def create_tag(
     return await tag_service.create_tag(db, family_group_id, tag_in.name)
 
 
-@router.get("/families/{family_group_id}/tags", response_model=List[TagRead])
+@router.get("/families/{family_group_id}/tags", response_model=list[TagRead])
 async def get_family_tags(
     family_group_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -56,7 +55,7 @@ async def update_tag(
 async def attach_tags_to_post(
     family_group_id: UUID,
     post_id: UUID,
-    tag_ids: List[UUID],
+    tag_ids: list[UUID],
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
     _=Depends(
@@ -73,7 +72,7 @@ async def attach_tags_to_post(
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    if post.user_id != current_user.id:
+    if post.author_id != current_user.id:
         stmt = select(FamilyMember).where(
             FamilyMember.linked_user_id == current_user.id,
             FamilyMember.family_group_id == family_group_id,

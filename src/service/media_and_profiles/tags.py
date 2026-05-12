@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -11,7 +10,6 @@ from ...core.schemas.media_tags import TagRead, TagUpdate
 
 
 async def create_tag(db: AsyncSession, family_group_id: UUID, name: str) -> TagRead:
-    # Исправлен синтаксис (убраны квадратные скобки)
     stmt = select(Tag).where(Tag.family_group_id == family_group_id, Tag.name == name)
     result = await db.execute(stmt)
 
@@ -62,7 +60,7 @@ async def update_tag(
 async def attach_tags_to_post(
     db: AsyncSession,
     post_id: UUID,
-    tag_ids: List[UUID],
+    tag_ids: list[UUID],
     family_group_id: UUID,
 ) -> Post:
     stmt = select(Post).options(selectinload(Post.tags)).where(Post.id == post_id)
