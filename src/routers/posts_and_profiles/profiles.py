@@ -1,9 +1,9 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...core.models import FamilyMember
 from ...core.models.enums import MembershipRole
 from ...core.schemas.member_profile import MemberProfileRead, MemberProfileUpdate
 from ...deps.family import RoleChecker, get_current_member_in_family
@@ -15,9 +15,22 @@ router = APIRouter()
 
 @router.get("/families/{family_group_id}/members/me", response_model=MemberProfileRead)
 async def get_my_profile(
-    current_member=Depends(get_current_member_in_family),
+    current_member: FamilyMember = Depends(get_current_member_in_family),
 ):
-    return MemberProfileRead.model_validate(current_member)
+    member_data = {
+        "id": current_member.id,
+        "user_id": current_member.linked_user_id,
+        "family_group_id": current_member.family_group_id,
+        "role": current_member.role,
+        "joined_at": current_member.created_at,
+        "linked_user_id": current_member.linked_user_id,
+        "display_name": None,
+        "bio": current_member.bio,
+        "avatar_url": current_member.avatar_url,
+        "date_of_birth": current_member.birth_date,
+    }
+
+    return MemberProfileRead.model_validate(member_data)
 
 
 @router.get(
@@ -37,7 +50,7 @@ async def get_member_profile(
 
 
 @router.get(
-    "/families/{family_group_id}/members", response_model=List[MemberProfileRead]
+    "/families/{family_group_id}/members", response_model=list[MemberProfileRead]
 )
 async def get_all_family_members(
     family_group_id: UUID,
@@ -48,7 +61,8 @@ async def get_all_family_members(
         )
     ),
 ):
-    return await profile_service.get_all_family_members(db, family_group_id)
+    members = await profile_service.get_all_family_members(db, family_group_id)
+    return members
 
 
 @router.patch(
@@ -61,6 +75,7 @@ async def update_member_profile(
     db: AsyncSession = Depends(get_db),
     current_member=Depends(get_current_member_in_family),
 ):
-    return await profile_service.update_member_profile(
+    member = await profile_service.update_member_profile(
         db, member_id, data, current_member.id, family_group_id
     )
+    return member
