@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -10,18 +9,60 @@ from sqlalchemy.orm import selectinload
 from ...core.models.content import Post
 from ...core.models.members import FamilyMember
 from ...core.schemas.post import PostCreate, PostUpdate, PostRead
+from ...core.schemas.reactions import ReactionSummary
+
+
+def _post_to_read(post: Post) -> PostRead:
+    reactions_count = {}
+    for reaction in post.reactions:
+        reaction_type = reaction.reaction_type
+        reactions_count[reaction_type] = reactions_count.get(reaction_type, 0) + 1
+
+    reaction_summaries = [
+        ReactionSummary(reaction_type=rt, count=count)
+        for rt, count in reactions_count.items()
+    ]
+
+    return PostRead.model_validate(
+        {
+            "id": post.id,
+            "author_id": post.author_id,
+            "attributed_to_member_id": post.attributed_to_member_id,
+            "post_type": post.post_type,
+            "title": post.title,
+            "body": post.body,
+            "created_at": post.created_at,
+            "updated_at": post.updated_at,
+            "media": post.media,
+            "tags": post.tags,
+            "reactions": reaction_summaries,
+        }
+    )
 
 
 async def create_post(
     db: AsyncSession,
     post_in: PostCreate,
-    user_id: UUID,
+    author_id: UUID,
 ) -> Post:
-    post = Post(user_id=user_id, **post_in.model_dump(exclude_unset=True))
+    post = Post(author_id=author_id, **post_in.model_dump(exclude_unset=True))
     db.add(post)
     await db.commit()
     await db.refresh(post)
-    return post
+
+    stmt = (
+        select(Post)
+        .options(
+            selectinload(Post.media),
+            selectinload(Post.tags),
+            selectinload(Post.reactions),
+        )
+        .where(Post.id == post.id)
+    )
+    result = await db.execute(stmt)
+    post_with_relations = result.scalar()
+
+    return post_with_relations
 
 
 async def get_user_posts(
@@ -29,7 +70,7 @@ async def get_user_posts(
     user_id: UUID,
     skip: int = 0,
     limit: int = 20,
-) -> List[PostRead]:
+) -> list[PostRead]:
     query = (
         select(Post)
         .options(
@@ -37,7 +78,7 @@ async def get_user_posts(
             selectinload(Post.tags),
             selectinload(Post.reactions),
         )
-        .where(Post.user_id == user_id)
+        .where(Post.author_id == user_id)
         .order_by(Post.created_at.desc())
         .offset(skip)
         .limit(limit)
@@ -46,7 +87,7 @@ async def get_user_posts(
     posts = await db.execute(query)
     posts = posts.scalars().all()
 
-    return [PostRead.model_validate(p) for p in posts]
+    return [_post_to_read(post) for post in posts]
 
 
 async def get_family_feed(
@@ -55,7 +96,7 @@ async def get_family_feed(
     viewer_user_id: UUID,
     skip: int = 0,
     limit: int = 20,
-) -> List[PostRead]:
+) -> list[PostRead]:
 
     stmt = select(FamilyMember).where(
         FamilyMember.linked_user_id == viewer_user_id,
@@ -83,7 +124,7 @@ async def get_family_feed(
             selectinload(Post.tags),
             selectinload(Post.reactions),
         )
-        .where(Post.user_id.in_(member_user_ids))
+        .where(Post.author_id.in_(member_user_ids))
         .order_by(Post.created_at.desc())
         .offset(skip)
         .limit(limit)
@@ -92,7 +133,7 @@ async def get_family_feed(
     posts = await db.execute(query)
     posts = posts.scalars().all()
 
-    return [PostRead.model_validate(p) for p in posts]
+    return [_post_to_read(post) for post in posts]
 
 
 async def get_post_by_id(
@@ -123,7 +164,15 @@ async def update_post(
     post_in: PostUpdate,
     requester_user_id: UUID,
 ) -> PostRead:
-    stmt = select(Post).where(Post.id == post_id, Post.user_id == requester_user_id)
+    stmt = (
+        select(Post)
+        .options(
+            selectinload(Post.media),
+            selectinload(Post.tags),
+            selectinload(Post.reactions),
+        )
+        .where(Post.id == post_id, Post.author_id == requester_user_id)
+    )
     result = await db.execute(stmt)
     post = result.scalar()
 
@@ -139,18 +188,6 @@ async def update_post(
     await db.commit()
     await db.refresh(post)
 
-    stmt = (
-        select(Post)
-        .options(
-            selectinload(Post.media),
-            selectinload(Post.tags),
-            selectinload(Post.reactions),
-        )
-        .where(Post.id == post_id)
-    )
-    result = await db.execute(stmt)
-    post = result.scalar()
-
     return PostRead.model_validate(post)
 
 
@@ -159,7 +196,7 @@ async def delete_post(
     post_id: UUID,
     requester_user_id: UUID,
 ) -> None:
-    stmt = select(Post).where(Post.id == post_id, Post.user_id == requester_user_id)
+    stmt = select(Post).where(Post.id == post_id, Post.author_id == requester_user_id)
     result = await db.execute(stmt)
     post = result.scalar()
 
