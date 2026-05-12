@@ -1,7 +1,6 @@
-from typing import Optional, Dict
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from ..models.enums import ReactionType
 
@@ -13,7 +12,7 @@ class ReactionCreate(BaseModel):
 class ReactionRead(BaseModel):
     post_id: UUID
     member_id: UUID
-    reaction_type: Optional[ReactionType]
+    reaction_type: ReactionType | None
     action: str
 
 
@@ -21,11 +20,10 @@ class ReactionSummary(BaseModel):
     reaction_type: str
     count: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PostReactionsResponse(BaseModel):
     post_id: UUID
-    reactions: Dict[str, int]
+    reactions: dict[str, int]
     total: int
