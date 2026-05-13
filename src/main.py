@@ -7,14 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .core.config import settings
 from .core.models import db_helper
-from .routers import (
-    log_in_router,
-    invitations_router,
-    families_router,
-    join_router,
-    members_relationships_router,
-    members_router,
-)
+from .routers import router
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -39,20 +32,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.run.cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["Content-Type", "Set-Cookie", "Authorization"],
 )
 
 
-app.include_router(log_in_router, prefix="/auth", tags=["register"])
-app.include_router(families_router, prefix="/families", tags=["families"])
-app.include_router(invitations_router, prefix="/families", tags=["invitations"])
-app.include_router(join_router, prefix="/join", tags=["join"])
-app.include_router(members_router, prefix="/families", tags=["members"])
-app.include_router(
-    members_relationships_router, prefix="/families", tags=["relationships"]
-)
-
+app.include_router(router)
 
 if __name__ == "__main__":
     uvicorn.run(

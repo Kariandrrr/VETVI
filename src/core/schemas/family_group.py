@@ -17,6 +17,7 @@ class FamilyMembershipRead(BaseModel):
     role: MembershipRole
     joined_at: datetime
     model_config = ConfigDict(from_attributes=True)
+    is_favourite: bool = False
 
 
 class FamilyGroupCreate(FamilyGroupBase):

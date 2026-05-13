@@ -14,10 +14,7 @@ from src.core.models.users import User
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db),
-) -> User:
+async def get_user_by_token_string(token: str, db: AsyncSession) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -25,7 +22,7 @@ async def get_current_user(
     )
     try:
         payload = decode_jwt(token)
-        user_id: str | None = payload.get("sub")
+        user_id: UUID | None = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except Exception:
@@ -44,6 +41,13 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="User not found")
 
     return user
+
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    return await get_user_by_token_string(token, db)
 
 
 def admin_only(

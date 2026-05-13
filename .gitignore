@@ -225,3 +225,6 @@ desktop.ini
 *.db-journal
 *.sqlite-journal
 /certs/
+
+/scripts/
+/uploads/

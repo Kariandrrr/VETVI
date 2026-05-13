@@ -4,7 +4,16 @@ import uuid
 from datetime import datetime
 from typing import List, TYPE_CHECKING
 
-from sqlalchemy import String, Text, ForeignKey, DateTime, UniqueConstraint, Index, func
+from sqlalchemy import (
+    String,
+    Text,
+    ForeignKey,
+    DateTime,
+    UniqueConstraint,
+    Index,
+    func,
+    Boolean,
+)
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -62,6 +71,9 @@ class FamilyMembership(Base):
     )
     joined_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
+    )
+    is_favourite: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, server_default=func.false()
     )
 
     __table_args__ = (

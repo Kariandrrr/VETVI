@@ -26,3 +26,13 @@ class PostType(enum.Enum):
     audio = "audio"
     video = "video"
     document = "document"
+
+
+class ReactionType(enum.Enum):
+    like = "like"
+    love = "love"
+    haha = "haha"
+    wow = "wow"
+    sad = "sad"
+    angry = "angry"
+    laugh = "laugh"

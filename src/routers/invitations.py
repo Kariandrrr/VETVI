@@ -11,7 +11,7 @@ from ..core.schemas.invitations import (
     InvitationRead,
     InvitationCreateInput,
 )
-from ..crud import invitations as invite_service
+from ..service import invitations as invite_service
 from ..deps.family import RoleChecker
 from ..deps.user import get_db, get_current_user
 

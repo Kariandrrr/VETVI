@@ -10,7 +10,8 @@ from src.core.schemas.relationship import (
     RelationshipRead,
     RelationshipUpdate,
 )
-from src.crud import members as member_service
+from src.service.member_relationship import members as member_service
+from src.service.member_relationship import relationships as relationship_service
 from src.deps.family import RoleChecker
 from src.deps.user import get_db, get_current_user
 
@@ -29,7 +30,7 @@ async def create_relationship(
         db=db,
     )
     try:
-        relationship = await member_service.create_relationship(
+        relationship = await relationship_service.create_relationship(
             db, relationship_in, current_user.id
         )
         return relationship
@@ -75,7 +76,7 @@ async def update_relationship(
     )
 
     try:
-        relationship = await member_service.update_relationship(
+        relationship = await relationship_service.update_relationship(
             db, db_relationship, relationship_in
         )
         return relationship
@@ -99,7 +100,7 @@ async def delete_relationship(
         db=db,
     )
 
-    await member_service.delete_relationship(db, relationship_id)
+    await relationship_service.delete_relationship(db, relationship_id)
     return {"message": "Relationship deleted"}
 
 
@@ -126,7 +127,9 @@ async def get_members_relationships(
     if not db_member:
         raise HTTPException(status_code=404, detail="Member not found")
 
-    relationship = member_service.get_members_relationships(db, family_id, member_id)
+    relationship = relationship_service.get_members_relationships(
+        db, family_id, member_id
+    )
     return relationship
 
 
@@ -143,5 +146,5 @@ async def get_all_group_relationships(
         current_user=current_user,
         db=db,
     )
-    relationships = await member_service.get_all_relationships(db, family_id)
+    relationships = await relationship_service.get_all_relationships(db, family_id)
     return relationships

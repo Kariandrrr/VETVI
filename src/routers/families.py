@@ -10,7 +10,7 @@ from ..core.schemas.family_group import (
     FamilyGroupCreate,
     FamilyGroupRead,
 )
-from ..crud import families as family_service
+from ..service import families as family_service
 from ..deps.family import RoleChecker
 from ..deps.user import get_db, get_current_user
 
