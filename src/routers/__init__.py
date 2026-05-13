@@ -13,6 +13,7 @@ from .posts_and_profiles.posts import router as posts_and_profiles_posts_router
 from .posts_and_profiles.profiles import router as posts_and_profiles_profiles_router
 from .posts_and_profiles.reactions import router as posts_and_profiles_reactions_router
 from .posts_and_profiles.tags import router as posts_and_profiles_tags_router
+from .posts_and_profiles.ws_media import router as posts_and_profiles_ws_media_router
 
 router = APIRouter()
 
@@ -38,3 +39,4 @@ router.include_router(
     posts_and_profiles_reactions_router, prefix="/reactions", tags=["posts"]
 )
 router.include_router(posts_and_profiles_tags_router, prefix="/tags", tags=["posts"])
+router.include_router(posts_and_profiles_ws_media_router)
