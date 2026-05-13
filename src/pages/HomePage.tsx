@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFamilies } from '@/hooks/useFamilies';
 import { useFamilyTreeData } from '@/hooks/useFamilyTreeData';
 import { Button } from '@/components/ui/button';
-import { Heart, Link2, LogOut, Plus, Settings, Users, Zap, Maximize2, Minimize2 } from 'lucide-react';
+import {Heart, Link2, LogOut, Plus, Settings, Users, Zap, Maximize2, Minimize2, Newspaper} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { JoinByLinkModal } from '@/components/JoinByLinkModal';
 import { SelectFamilyModal } from '@/components/SelectFamilyModal';
@@ -71,8 +71,17 @@ export const HomePage = () => {
     setSelectedFamilyId(null);
   };
 
+  const handleGoToFeed = () => {
+    if (favoriteFamily?.id) {
+      navigate(`/families/${favoriteFamily.id}/feed`);
+    }
+  };
+
   const primaryBtnClass =
     "px-6 py-3 bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] hover:from-cyan-400 hover:to-purple-400 text-white font-medium rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2";
+
+    const iconBtnClass =
+    "flex items-center gap-2 px-4 py-2 rounded-xl text-white font-medium transition-all duration-300 hover:-translate-y-0.5 active:scale-95";
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -89,6 +98,15 @@ export const HomePage = () => {
                 <p className="text-xs text-slate-500 tracking-wider uppercase -mt-1">Архив семейных связей</p>
               </div>
             </div>
+            {favoriteFamily && (
+                <Button
+                  onClick={handleGoToFeed}
+                  className={`${iconBtnClass} bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(20,184,166,0.4)]`}
+                >
+                  <Newspaper className="w-5 h-5" />
+                  <span className="hidden lg:inline">Моя лента</span>
+                </Button>
+              )}
             <div className="flex items-center gap-3">
               <Button onClick={handleNewMemberClick} className={primaryBtnClass}>
                 <Plus className="w-5 h-5" />
