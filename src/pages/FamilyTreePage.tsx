@@ -2,7 +2,18 @@ import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, ChevronDown, ChevronUp, Info, Plus, Search, Users, Maximize2, Minimize2 } from 'lucide-react';
+import {
+    ArrowLeft,
+    ChevronDown,
+    ChevronUp,
+    Info,
+    Plus,
+    Search,
+    Users,
+    Maximize2,
+    Minimize2,
+    UserCircle
+} from 'lucide-react';
 import { useFamilyTreeData } from '@/hooks/useFamilyTreeData';
 import { useFamilies } from '@/hooks/useFamilies';
 import { useAuth } from '@/hooks/useAuth';
@@ -63,6 +74,10 @@ export const FamilyTreePage = () => {
       </div>
     );
   }
+
+    const handleViewProfile = (memberId: string) => {
+    navigate(`/families/${familyId}/members/${memberId}`);
+  };
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -135,11 +150,27 @@ export const FamilyTreePage = () => {
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20" title="Редактировать">✏️</Button>
                           <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/20" title="Удалить">🗑️</Button>
-                          <Button size="sm" variant="outline" className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300">Профиль</Button>
+                                                    <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300"
+                            onClick={() => handleViewProfile(member.id)}
+                          >
+                            <UserCircle className="w-4 h-4 mr-1" />
+                            Профиль
+                          </Button>
                         </div>
                       )}
-                      {!isAdmin && (
-                        <Button size="sm" variant="outline" className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300">Профиль</Button>
+                                            {!isAdmin && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300"
+                          onClick={() => handleViewProfile(member.id)}
+                        >
+                          <UserCircle className="w-4 h-4 mr-1" />
+                          Профиль
+                        </Button>
                       )}
                     </div>
                   ))
