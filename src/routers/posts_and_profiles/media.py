@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import FileResponse
 
+from ...core.manager import manager
 from ...core.models import Post, MediaFile
 from ...core.models.families import MembershipRole
 from ...core.models.members import FamilyMember
@@ -28,28 +29,56 @@ async def upload_media_to_post(
         )
     ),
 ):
-    stmt = select(Post).where(Post.id == post_id)
-    result = await db.execute(stmt)
-    post = result.scalar()
+    user_id = str(current_user.id)
+    file_id = str(post_id)
 
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
+    try:
+        await manager.send_progress(user_id, file_id, 5, "starting")
+        await manager.add_upload(user_id, file_id)
 
-    stmt = select(FamilyMember).where(
-        FamilyMember.linked_user_id == current_user.id,
-        FamilyMember.family_group_id.in_(
-            select(FamilyMember.family_group_id).where(
-                FamilyMember.linked_user_id == post.author_id
-            )
-        ),
-    )
-    result = await db.execute(stmt)
-    if not result.scalar():
-        raise HTTPException(
-            status_code=403, detail="You don't have access to this post"
+        stmt = select(Post).where(Post.id == post_id)
+        result = await db.execute(stmt)
+        post = result.scalar()
+
+        if not post:
+            await manager.send_error(user_id, file_id, "Post not found")
+            raise HTTPException(status_code=404, detail="Post not found")
+
+        await manager.send_progress(user_id, file_id, 15, "post_validated")
+
+        stmt = select(FamilyMember).where(
+            FamilyMember.linked_user_id == current_user.id,
+            FamilyMember.family_group_id.in_(
+                select(FamilyMember.family_group_id).where(
+                    FamilyMember.linked_user_id == post.author_id
+                )
+            ),
         )
+        result = await db.execute(stmt)
+        if not result.scalar():
+            await manager.send_error(user_id, file_id, "Access denied to this post")
+            raise HTTPException(
+                status_code=403, detail="You don't have access to this post"
+            )
 
-    return await media_service.upload_media(db, post_id, file, current_user.id)
+        await manager.send_progress(user_id, file_id, 25, "access_granted")
+
+        await manager.send_progress(user_id, file_id, 40, "saving_file")
+
+        result = await media_service.upload_media(db, post_id, file, current_user.id)
+
+        await manager.send_progress(user_id, file_id, 100, "completed")
+        await manager.remove_upload(user_id, file_id)
+
+        return result
+
+    except HTTPException:
+        await manager.remove_upload(user_id, file_id)
+        raise
+    except Exception as e:
+        await manager.send_error(user_id, file_id, str(e))
+        await manager.remove_upload(user_id, file_id)
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
 @router.get("/media/{media_id}/stream", status_code=200)
