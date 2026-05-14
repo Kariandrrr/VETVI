@@ -1,4 +1,4 @@
-import type { UUID } from './common';
+import type {UUID} from './common';
 
 export type MembershipRole = 'admin' | 'editor' | 'viewer';
 export type GenderEnum = 'male' | 'female' | 'other' | 'unknown';
@@ -42,6 +42,7 @@ export interface PostRead {
   media: MediaFileRead[];
   tags: TagRead[];
   reactions: ReactionSummary[];
+  author: AuthorUser | null;
 }
 
 export interface PostCreate {
@@ -88,7 +89,6 @@ export interface MemberProfileUpdate {
   patronymic?: string | null;
   maiden_name?: string | null;
   gender?: GenderEnum;
-  birth_date?: string | null;
   birth_place?: string | null;
   death_date?: string | null;
   death_place?: string | null;
@@ -106,4 +106,13 @@ export interface MyReactionResponse {
   post_id: UUID;
   member_id: UUID;
   reaction_type: ReactionType | null;
+}
+
+export interface AuthorUser {
+    id: UUID;
+    email: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    role: string;
+    created_at: string;
 }
