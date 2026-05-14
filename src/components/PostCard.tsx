@@ -89,33 +89,38 @@ export const PostCard: React.FC<PostCardProps> = ({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
-          <Avatar className="w-10 h-10">
-            <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] text-white">
-              {post.title?.[0]?.toUpperCase() || '📝'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-white">
-                {post.title || 'Новая публикация'}
-              </h3>
-              {post.tags.length > 0 && (
-                <div className="flex gap-1">
-                  {post.tags.slice(0, 3).map((tag) => (
-                    <Badge key={tag.id} variant="secondary" className="text-xs">
-                      #{tag.name}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-slate-500">
-              {formatDistanceToNow(new Date(post.created_at), {
-                addSuffix: true,
-                locale: ru,
-              })}
-            </p>
-          </div>
+                <Avatar className="w-10 h-10">
+                    <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] text-white">
+                        {post.author?.display_name?.[0]?.toUpperCase() ||
+                         post.author?.email?.[0]?.toUpperCase() ||
+                         '📝'}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-white">
+                            {post.author?.display_name ||
+                             post.author?.email?.split('@')[0] ||
+                             post.title ||
+                             'Новая публикация'}
+                        </h3>
+                        {post.tags.length > 0 && (
+                            <div className="flex gap-1">
+                                {post.tags.slice(0, 3).map((tag) => (
+                                    <Badge key={tag.id} variant="secondary" className="text-xs">
+                                        #{tag.name}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <p className="text-xs text-slate-500">
+                        {formatDistanceToNow(new Date(post.created_at), {
+                            addSuffix: true,
+                            locale: ru,
+                        })}
+                    </p>
+</div>
         </div>
 
         {isOwner && (
