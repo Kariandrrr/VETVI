@@ -22,21 +22,21 @@ export const useFamilyFeed = (familyGroupId: UUID, limit = 20) => {
   });
 };
 
-export const useUserPosts = (userId: UUID, limit = 20) => {
-  return useInfiniteQuery({
-    queryKey: ['user-posts', userId],
-    queryFn: async ({ pageParam = 0 }) => {
-      const response = await postsApi.getUserPosts(userId, pageParam, limit);
-      return {
-        posts: response.data,
-        nextOffset: pageParam + limit,
-        hasMore: response.data.length === limit,
-      };
-    },
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextOffset : undefined,
-    initialPageParam: 0,
-    enabled: !!userId,
-  });
+export const useUserPosts = (userId: UUID, options?: { enabled?: boolean }) => {
+    return useInfiniteQuery({
+        queryKey: ['user-posts', userId],
+        queryFn: async ({ pageParam = 0 }) => {
+            const response = await postsApi.getUserPosts(userId, pageParam, 20);
+            return {
+                posts: response.data,
+                nextOffset: pageParam + 20,
+                hasMore: response.data.length === 20,
+            };
+        },
+        getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextOffset : undefined,
+        initialPageParam: 0,
+        enabled: !!userId && options?.enabled !== false,
+    });
 };
 
 export const useCreatePost = (onSuccessCallback?: () => void) => {
