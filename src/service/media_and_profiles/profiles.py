@@ -71,6 +71,15 @@ async def get_member_profile(
         "bio": member.bio,
         "avatar_url": member.avatar_url,
         "date_of_birth": member.birth_date,
+        "first_name": member.first_name or "",
+        "last_name": member.last_name or "",
+        "patronymic": member.patronymic,
+        "maiden_name": member.maiden_name,
+        "gender": member.gender,
+        "birth_place": member.birth_place,
+        "death_date": member.death_date,
+        "death_place": member.death_place,
+        "is_alive": member.is_alive if member.is_alive is not None else True,
     }
 
 
@@ -98,6 +107,15 @@ async def get_all_family_members(
             "bio": m.bio,
             "avatar_url": m.avatar_url,
             "date_of_birth": m.birth_date,
+            "first_name": m.first_name or "",
+            "last_name": m.last_name or "",
+            "patronymic": m.patronymic,
+            "maiden_name": m.maiden_name,
+            "gender": m.gender or "unknown",
+            "birth_place": m.birth_place,
+            "death_date": m.death_date,
+            "death_place": m.death_place,
+            "is_alive": m.is_alive if m.is_alive is not None else True,
         }
         for m in members
     ]
