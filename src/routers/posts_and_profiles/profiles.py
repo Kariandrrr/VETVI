@@ -17,27 +17,36 @@ router = APIRouter()
 async def get_my_profile(
     current_member: FamilyMember = Depends(get_current_member_in_family),
 ):
-    member_data = {
-        "id": current_member.id,
-        "user_id": current_member.linked_user_id,
-        "family_group_id": current_member.family_group_id,
-        "role": current_member.role,
-        "joined_at": current_member.created_at,
-        "linked_user_id": current_member.linked_user_id,
-        "display_name": None,
-        "bio": current_member.bio,
-        "avatar_url": current_member.avatar_url,
-        "date_of_birth": current_member.birth_date,
-    }
-
-    return MemberProfileRead.model_validate(member_data)
+    return MemberProfileRead(
+        id=current_member.id,
+        user_id=current_member.linked_user_id,
+        family_group_id=current_member.family_group_id,
+        role=current_member.role,
+        joined_at=current_member.created_at,
+        linked_user_id=current_member.linked_user_id,
+        display_name=current_member.display_name,
+        bio=current_member.bio,
+        avatar_url=current_member.avatar_url,
+        date_of_birth=current_member.birth_date,
+        first_name=current_member.first_name,
+        last_name=current_member.last_name,
+        patronymic=current_member.patronymic,
+        maiden_name=current_member.maiden_name,
+        gender=current_member.gender,
+        birth_place=current_member.birth_place,
+        death_date=current_member.death_date,
+        death_place=current_member.death_place,
+        is_alive=(
+            current_member.is_alive if current_member.is_alive is not None else True
+        ),
+    )
 
 
 @router.get(
-    "/families/{family_group_id}/members/{member_id}", response_model=MemberProfileRead
+    "/families/{family_id}/members/{member_id}", response_model=MemberProfileRead
 )
 async def get_member_profile(
-    family_group_id: UUID,
+    family_id: UUID,
     member_id: UUID,
     db: AsyncSession = Depends(get_db),
     _=Depends(
@@ -46,14 +55,12 @@ async def get_member_profile(
         )
     ),
 ):
-    return await profile_service.get_member_profile(db, member_id, family_group_id)
+    return await profile_service.get_member_profile(db, member_id, family_id)
 
 
-@router.get(
-    "/families/{family_group_id}/members", response_model=list[MemberProfileRead]
-)
+@router.get("/families/{family_id}/members", response_model=list[MemberProfileRead])
 async def get_all_family_members(
-    family_group_id: UUID,
+    family_id: UUID,
     db: AsyncSession = Depends(get_db),
     _=Depends(
         RoleChecker(
@@ -61,7 +68,7 @@ async def get_all_family_members(
         )
     ),
 ):
-    members = await profile_service.get_all_family_members(db, family_group_id)
+    members = await profile_service.get_all_family_members(db, family_id)
     return members
 
 
