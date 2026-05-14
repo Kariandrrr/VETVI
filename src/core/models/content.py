@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, TYPE_CHECKING
 
 from sqlalchemy import (
     String,
@@ -19,8 +19,13 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+
 from .base import Base
 from .enums import PostType
+
+if TYPE_CHECKING:
+    from .users import User
+
 
 post_tags = Table(
     "post_tags",
@@ -52,6 +57,11 @@ class Post(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+    author: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[author_id],
+        back_populates="posts",
     )
 
     media: Mapped[List["MediaFile"]] = relationship(back_populates="post")
