@@ -22,13 +22,25 @@ const MemberNode = ({ data }: { data: { member: FamilyMember } }) => {
   if (!data || !data.member) {
     return (
       <div className="w-32 h-24 bg-red-500/20 border border-red-500 rounded-xl flex items-center justify-center text-xs text-red-200">
-        Ошибка данных
+        Нет данных
       </div>
     );
   }
 
   const m = data.member;
-  const initials = `${m.first_name[0]}${m.last_name[0]}`.toUpperCase();
+
+  const getInitials = () => {
+    const firstName = m.first_name || '';
+    const lastName = m.last_name || '';
+    const firstInitial = firstName[0] || '';
+    const lastInitial = lastName[0] || '';
+    const initials = `${firstInitial}${lastInitial}`.toUpperCase();
+    return initials || '?';
+  };
+
+  const fullName = m.first_name || m.last_name
+    ? getMemberFullName(m)
+    : 'Без имени';
 
   return (
     <div className="glass-card w-40 p-3 flex flex-col items-center gap-2 border-[var(--glass-border)] hover:border-[var(--primary)] transition-colors shadow-lg bg-[var(--glass-bg)] backdrop-blur-md cursor-pointer group">
@@ -36,12 +48,12 @@ const MemberNode = ({ data }: { data: { member: FamilyMember } }) => {
         {m.avatar_url ? (
           <img src={m.avatar_url} alt="" className="w-full h-full object-cover" />
         ) : (
-          initials
+          getInitials()
         )}
       </div>
       <div className="text-center w-full">
         <p className="text-white font-semibold text-sm leading-tight truncate w-full px-1 drop-shadow-md">
-          {getMemberFullName(m)}
+          {fullName}
         </p>
         <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-black/30 text-[10px] text-slate-300 uppercase tracking-wider border border-white/10">
           {m.gender === 'male' ? 'М' : m.gender === 'female' ? 'Ж' : '?'}
@@ -91,19 +103,39 @@ interface Props {
 }
 
 export const FamilyTree = ({ members, relationships, fullscreen = false }: Props) => {
+  // Фильтруем валидных членов семьи (защита от null/undefined)
+  const validMembers = useMemo(() =>
+    members?.filter(m => m && m.id) || [],
+    [members]
+  );
+
+  const validRelationships = useMemo(() =>
+    relationships?.filter(r => r && r.source_id && r.target_id) || [],
+    [relationships]
+  );
+
   const initialNodes = useMemo<Node[]>(() =>
-    members.map((m) => ({
+    validMembers.map((m) => ({
       id: m.id,
       type: 'member',
       data: { member: m },
       position: { x: 0, y: 0 },
     })),
-  [members]);
+    [validMembers]
+  );
 
-  const initialEdges = useMemo<Edge[]>(() =>
-    relationships.map((r) => {
-      const isSpouse = r.relationship_type.toLowerCase().includes('spouse');
-      return {
+  const initialEdges = useMemo<Edge[]>(() => {
+    const edges: Edge[] = [];
+
+    validRelationships.forEach((r) => {
+      const sourceExists = validMembers.some(m => m.id === r.source_id);
+      const targetExists = validMembers.some(m => m.id === r.target_id);
+
+      if (!sourceExists || !targetExists) return;
+
+      const isSpouse = r.relationship_type?.toLowerCase().includes('spouse') || false;
+
+      edges.push({
         id: `e-${r.source_id}-${r.target_id}`,
         source: r.source_id,
         target: r.target_id,
@@ -116,9 +148,11 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
         label: r.relationship_type === 'parent' ? 'родитель' : undefined,
         labelStyle: { fill: '#94a3b8', fontSize: 10, fontWeight: 600 },
         labelBgStyle: { fill: 'rgba(0,0,0,0.7)', rx: 4, ry: 4 },
-      };
-    }),
-  [relationships]);
+      } as Edge);
+    });
+
+    return edges;
+  }, [validRelationships, validMembers]);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
     () => getLayoutedElements(initialNodes, initialEdges, 'TB'),
@@ -129,8 +163,12 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
   const [edges, setEdges] = useEdgesState([]);
 
   useEffect(() => {
-    setNodes(layoutedNodes);
-    setEdges(layoutedEdges);
+    if (layoutedNodes.length > 0) {
+      setNodes(layoutedNodes);
+    }
+    if (layoutedEdges.length > 0) {
+      setEdges(layoutedEdges);
+    }
   }, [layoutedNodes, layoutedEdges, setNodes, setEdges]);
 
   const onConnect = useCallback(
@@ -138,8 +176,18 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
     [setEdges],
   );
 
-
   const containerHeight = fullscreen ? '100vh' : '600px';
+
+  if (validMembers.length === 0) {
+    return (
+      <div
+        className="rounded-2xl overflow-hidden border border-[var(--glass-border)] bg-black/20 flex items-center justify-center"
+        style={{ height: containerHeight, width: '100%' }}
+      >
+        <p className="text-slate-400">Нет данных для отображения</p>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useMemberProfile, useMyProfile, useUpdateMemberProfile} from '@/hooks/useMemberProfile';
 import {useUserPosts} from '@/hooks/usePosts';
@@ -19,11 +19,12 @@ import {ArrowLeftIcon, CalendarIcon, HeartIcon, MapPinIcon, PencilIcon, UserIcon
 import {format} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import type {UUID} from '@/types/common';
+import type {MemberProfileRead} from "@/types/profile_posts.ts";
 
 const profileUpdateSchema = z.object({
   display_name: z.string().optional().nullable(),
   bio: z.string().max(500, 'Не более 500 символов').optional().nullable(),
-  birth_date: z.string().optional().nullable(),
+  date_of_birth: z.string().optional().nullable(),
 });
 
 type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
@@ -55,18 +56,36 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
     defaultValues: {
       display_name: profile?.display_name || '',
       bio: profile?.bio || '',
-      birth_date: profile?.date_of_birth || '',
+      date_of_birth: profile?.date_of_birth || '',
     },
   });
+
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        display_name: profile.display_name || '',
+        bio: profile.bio || '',
+        date_of_birth: profile.date_of_birth || '',
+      });
+    }
+  }, [profile, form]);
 
   const onSubmit = async (data: ProfileUpdateFormData) => {
     await updateProfileMutation.mutateAsync({
       display_name: data.display_name,
       bio: data.bio,
-      birth_date: data.birth_date,
+      date_of_birth: data.date_of_birth,
     });
     setIsEditing(false);
   };
+
+  const getProfileTitle = (profile: MemberProfileRead): string => {
+      if (profile.display_name) {
+        return profile.display_name;
+      }
+  const parts = [profile.last_name, profile.first_name, profile.patronymic].filter(Boolean);
+  return parts.join(' ') || 'Новый участник';
+};
 
   if (isLoadingProfile || isLoadingMyProfile) {
     return (
@@ -138,7 +157,7 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
           <div className="flex-1 space-y-3">
             <div>
               <h1 className="text-3xl font-bold text-white">
-                {profile.display_name || fullName || 'Новый участник'}
+                     {getProfileTitle(profile)}
               </h1>
               <div className="flex flex-wrap gap-2 mt-2">
                 <Badge variant="outline" className="border-[var(--primary)] text-[var(--primary)]">
@@ -313,7 +332,7 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
 
               <FormField
                 control={form.control}
-                name="birth_date"
+                name="date_of_birth"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Дата рождения</FormLabel>

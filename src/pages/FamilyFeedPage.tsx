@@ -27,7 +27,7 @@ export const FamilyFeedPage = () => {
             variant="ghost"
             size="icon"
             className="rounded-full w-10 h-10 text-slate-400 hover:text-white"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </Button>

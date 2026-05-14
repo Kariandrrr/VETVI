@@ -8,6 +8,7 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/
 import {Skeleton} from '@/components/ui/skeleton';
 import {Loader2, PlusIcon} from 'lucide-react';
 import type {UUID} from '@/types/common';
+import { getDisplayName } from '@/utils/nameFormatter';
 
 interface PostFormFields {
   title: string;
@@ -62,10 +63,15 @@ export const FamilyFeed: React.FC<FamilyFeedProps> = ({ familyGroupId }) => {
       <div className="glass-card p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center">
-            <span className="text-white font-bold">
-              {myProfile?.display_name?.[0]?.toUpperCase() || '?'}
-            </span>
-          </div>
+              <span className="text-white font-bold">
+                {getDisplayName({
+                  firstName: myProfile?.first_name || '',
+                  lastName: myProfile?.last_name || '',
+                  patronymic: myProfile?.patronymic,
+                  displayName: myProfile?.display_name,
+                }).charAt(0).toUpperCase() || '?'}
+              </span>
+            </div>
           <button
             className="flex-1 text-left px-4 py-2 rounded-xl bg-black/20 border border-[var(--glass-border)] text-slate-400 hover:text-white hover:border-[var(--primary)]/50 transition-all"
             onClick={() => setIsCreateDialogOpen(true)}
