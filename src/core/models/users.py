@@ -15,6 +15,7 @@ from .enums import MembershipRole
 if TYPE_CHECKING:
     from .families import FamilyGroup, FamilyMembership
     from .members import FamilyMember
+    from .content import Post
 
 
 class User(Base):
@@ -45,4 +46,10 @@ class User(Base):
     family_links: Mapped[List["FamilyMember"]] = relationship(
         back_populates="linked_user",
         primaryjoin="User.id == FamilyMember.linked_user_id",
+    )
+    posts: Mapped[list["Post"]] = relationship(
+        "Post",
+        foreign_keys="[Post.author_id]",
+        back_populates="author",
+        cascade="all, delete-orphan",
     )
