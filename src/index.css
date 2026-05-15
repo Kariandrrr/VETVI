@@ -70,3 +70,31 @@
     @apply left-auto right-0 translate-x-0 w-72;
   }
 }
+
+
+/* Глобальные стили для тёмных форм */
+.dark-form input,
+.dark-form textarea,
+.dark-form select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark-form input::placeholder,
+.dark-form textarea::placeholder {
+  color: #64748b !important;
+}
+
+.dark-form input:focus,
+.dark-form textarea:focus,
+.dark-form select:focus {
+  border-color: #22d3ee !important;
+  outline: none !important;
+  ring: 2px solid #22d3ee !important;
+}
+
+/* Стили для Select в тёмной теме */
+.dark-form .dark\:bg-slate-800 {
+  background-color: #1e293b !important;
+}
