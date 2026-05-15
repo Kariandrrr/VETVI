@@ -56,6 +56,7 @@ export const authAPI = {
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
+    
 
     const response = await axiosInstance.post('/auth/login', formData);
     if (response.data.access_token) {
@@ -71,6 +72,11 @@ export const authAPI = {
 
   me: async (): Promise<UserRead> => {
     const response = await axiosInstance.get('/auth/me');
+    return response.data;
+  },
+
+  updateProfile: async (data: { display_name?: string; avatar_url?: string | null }): Promise<UserRead> => {
+    const response = await axiosInstance.patch('/auth/me', data);
     return response.data;
   },
 };
