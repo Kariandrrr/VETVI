@@ -198,3 +198,24 @@ async def delete_user(
     await db.commit()
 
     return {"message": "User deleted", "user_id": user_id}
+
+
+@router.patch("/me", response_model=UserRead)
+async def update_current_user(
+    data: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if data.display_name is not None:
+        current_user.display_name = data.display_name
+
+    if data.avatar_url is not None:
+        current_user.avatar_url = data.avatar_url
+
+    if data.email is not None:
+        current_user.email = data.email
+
+    await db.commit()
+    await db.refresh(current_user)
+
+    return current_user

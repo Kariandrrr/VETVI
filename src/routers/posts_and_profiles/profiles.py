@@ -1,13 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...core.models import FamilyMember
 from ...core.models.enums import MembershipRole
 from ...core.schemas.member_profile import MemberProfileRead, MemberProfileUpdate
 from ...deps.family import RoleChecker, get_current_member_in_family
-from ...deps.user import get_db
+from ...deps.user import get_db, get_current_user
 from ...service.media_and_profiles import profiles as profile_service
 
 router = APIRouter()
@@ -86,3 +86,32 @@ async def update_member_profile(
         db, member_id, data, current_member.id, family_group_id
     )
     return member
+
+
+@router.patch("/me/profile", response_model=MemberProfileRead)
+async def update_my_profile(
+    data: MemberProfileUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+
+    from sqlalchemy import select
+    from ...core.models.members import FamilyMember
+
+    stmt = select(FamilyMember).where(FamilyMember.linked_user_id == current_user.id)
+    result = await db.execute(stmt)
+    member = result.scalar()
+
+    if not member:
+        raise HTTPException(
+            status_code=404,
+            detail="You are not a member of any family. Please create or join a family first.",
+        )
+
+    return await profile_service.update_member_profile(
+        db=db,
+        member_id=member.id,
+        data=data,
+        requester_member_id=member.id,
+        family_group_id=member.family_group_id,
+    )
