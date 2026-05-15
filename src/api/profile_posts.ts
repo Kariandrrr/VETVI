@@ -40,7 +40,24 @@ export const profileApi = {
       `/profiles/families/${familyGroupId}/members/${memberId}`,
       data
     ),
+
+    updateMyProfile: async (data: {
+    first_name?: string;
+    last_name?: string;
+    patronymic?: string | null;
+    gender?: 'male' | 'female' | 'other' | 'unknown';
+    birth_place?: string | null;
+    date_of_birth?: string | null;
+    bio?: string | null;
+}) => {
+    console.log('Sending update to server:', data);
+    const response = await axiosInstance.patch<MemberProfileRead>(`/profiles/me/profile`, data);
+    console.log('Server response:', response.data);
+    return response.data;
+},
 };
+
+
 
 // ========== POSTS ==========
 
