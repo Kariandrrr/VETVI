@@ -1,25 +1,28 @@
-import {useEffect, useMemo, useState} from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
+import { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     ArrowLeft,
     ChevronDown,
     ChevronUp,
     Info,
-    Maximize2,
-    Minimize2,
     Plus,
     Search,
+    Users,
+    Maximize2,
+    Minimize2,
     UserCircle,
-    Users
+    Trash2
 } from 'lucide-react';
-import {useFamilyTreeData} from '@/hooks/useFamilyTreeData';
-import {useFamilies} from '@/hooks/useFamilies';
-import {useAuth} from '@/hooks/useAuth';
-import {FamilyTree} from '@/components/FamilyTree';
-import {AddMemberModal} from '@/components/AddMemberModal';
-import {type FamilyGroupRead, type FamilyMember, getMemberFullName} from '@/types/families';
+import { useFamilyTreeData } from '@/hooks/useFamilyTreeData';
+import { useFamilies } from '@/hooks/useFamilies';
+import { useAuth } from '@/hooks/useAuth';
+import { FamilyTree } from '@/components/FamilyTree';
+import { AddMemberModal } from '@/components/AddMemberModal';
+import { type FamilyGroupRead, type FamilyMember, getMemberFullName } from '@/types/families';
+import { familyApi } from '@/api/family';
+import { toast } from 'sonner';
 import logo from '@/assets/logo.png';
 
 const getFullNameFromMember = (member: FamilyMember): string => {
@@ -28,8 +31,7 @@ const getFullNameFromMember = (member: FamilyMember): string => {
 };
 
 const getTableNameFromMember = (member: FamilyMember): string => {
-    const fullName = getFullNameFromMember(member);
-    return fullName;
+    return getFullNameFromMember(member);
 };
 
 const getInitials = (member: FamilyMember): string => {
@@ -89,6 +91,43 @@ export const FamilyTreePage = () => {
         [validMembers, search]
     );
 
+    // Обработчик перехода на профиль для редактирования
+    const handleEditMember = (memberId: string) => {
+        navigate(`/families/${familyId}/members/${memberId}`);
+    };
+
+    const handleDeleteMember = async (member: FamilyMember) => {
+    const fullName = getFullNameFromMember(member);
+    if (!confirm(`Вы уверены, что хотите полностью удалить ${fullName}?`)) return;
+
+    try {
+        await familyApi.deleteMember(member.id);
+        toast.success('Участник удалён');
+        await refetch();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+        toast.error('Ошибка', { description: 'Не удалось удалить участника' });
+    }
+};
+
+//     const handleRemoveFromFamily = async (member: FamilyMember) => {
+//     const fullName = getFullNameFromMember(member);
+//     if (!confirm(`Вы уверены, что хотите исключить ${fullName} из семьи?`)) return;
+//
+//     try {
+//         await familyApi.removeUserFromFamily(familyId!, member.linked_user_id!);
+//         toast.success('Пользователь исключён из семьи');
+//         await refetch();
+//         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     } catch (error) {
+//         toast.error('Ошибка', { description: 'Не удалось исключить пользователя' });
+//     }
+// };
+
+    const handleViewProfile = (memberId: string) => {
+        navigate(`/families/${familyId}/members/${memberId}`);
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
@@ -97,13 +136,9 @@ export const FamilyTreePage = () => {
         );
     }
 
-    const handleViewProfile = (memberId: string) => {
-        navigate(`/families/${familyId}/members/${memberId}`);
-    };
-
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-            {/* Header */}
+            {/* Header - без изменений */}
             <header className="sticky top-0 z-50 backdrop-blur-2xl bg-black/30 border-b border-[var(--glass-border)]">
                 <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between h-16">
                     <div className="flex items-center gap-4">
@@ -154,8 +189,11 @@ export const FamilyTreePage = () => {
                                     <div className="text-center py-8 text-slate-500">Участников не найдено</div>
                                 ) : (
                                     filtered.map((member: FamilyMember) => {
-                                        // Определяем, жив ли участник
+                                        // Определяем статусы
                                         const isAlive = member.is_alive !== false;
+                                        const hasAccount = member.linked_user_id !== null && member.linked_user_id !== undefined;
+                                        // Редактировать можно только если НЕТ привязанного аккаунта
+                                        const canEdit = !hasAccount;
 
                                         return (
                                             <div
@@ -191,6 +229,11 @@ export const FamilyTreePage = () => {
                                                                 🕊️ Умер(ла)
                                                             </span>
                                                         )}
+                                                        {hasAccount && (
+                                                            <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
+                                                                🔗 с аккаунтом
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <p className={`text-xs ${isAlive ? 'text-slate-400' : 'text-slate-500'}`}>
                                                         {member.gender === 'male' ? 'Мужчина' : member.gender === 'female' ? 'Женщина' : 'Не указано'}
@@ -201,22 +244,44 @@ export const FamilyTreePage = () => {
                                                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     {isAdmin && (
                                                         <>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20"
-                                                                title="Редактировать"
-                                                            >
-                                                                ✏️
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/20"
-                                                                title="Удалить"
-                                                            >
-                                                                🗑️
-                                                            </Button>
+                                                            {/* Кнопка редактирования - только для пользователей БЕЗ аккаунта */}
+                                                            {canEdit && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20"
+                                                                    title="Редактировать"
+                                                                    onClick={() => handleEditMember(member.id)}
+                                                                >
+                                                                    ✏️
+                                                                </Button>
+                                                            )}
+
+                                                            {/* Кнопка исключения из семьи - для пользователей С аккаунтом */}
+                                                            {/*{hasAccount && (*/}
+                                                            {/*    <Button*/}
+                                                            {/*        size="sm"*/}
+                                                            {/*        variant="ghost"*/}
+                                                            {/*        className="h-8 w-8 p-0 text-slate-400 hover:text-orange-400 hover:bg-orange-500/20"*/}
+                                                            {/*        title="Исключить из семьи"*/}
+                                                            {/*        onClick={() => handleRemoveFromFamily(member)}*/}
+                                                            {/*    >*/}
+                                                            {/*        <DoorOpen className="w-4 h-4" />*/}
+                                                            {/*    </Button>*/}
+                                                            {/*)}*/}
+
+                                                            {/* Кнопка полного удаления - только для пользователей БЕЗ аккаунта */}
+                                                            {!hasAccount && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/20"
+                                                                    title="Полностью удалить"
+                                                                    onClick={() => handleDeleteMember(member)}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            )}
                                                         </>
                                                     )}
                                                     <Button
@@ -240,7 +305,7 @@ export const FamilyTreePage = () => {
                     )}
                 </div>
 
-                {/* Дерево */}
+                {/* Семейное древо - без изменений */}
                 <div className="glass-card overflow-hidden relative">
                     <div className="border-b border-[var(--glass-border)] p-5 flex items-center justify-between gap-4 flex-wrap">
                         <div>
@@ -282,7 +347,7 @@ export const FamilyTreePage = () => {
                 </div>
             </main>
 
-            {/* Модалки */}
+            {/* Модалка добавления */}
             {familyId && (
                 <AddMemberModal
                     key={`add-member-${familyId}`}
@@ -296,7 +361,7 @@ export const FamilyTreePage = () => {
                 />
             )}
 
-            {/* Полноэкранный режим */}
+            {/* Полноэкранный режим - без изменений */}
             {isTreeFullscreen && currentFamily && (
                 <div className="fixed inset-0 z-[100] bg-[var(--background)] flex flex-col">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/30 backdrop-blur-xl shrink-0">

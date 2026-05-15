@@ -28,6 +28,8 @@ export const familyApi = {
     axiosInstance.post<FamilyMember>(`${BASE_URL}/members`, data),
     deleteMember: (memberId: string) =>
     axiosInstance.delete(`${BASE_URL}/members/${memberId}`),
+    removeUserFromFamily: (familyId: string, userId: string) =>
+    axiosInstance.delete(`${BASE_URL}/${familyId}/members/${userId}`),
 
   // Связи
   getFamilyRelationships: (familyId: string) =>
