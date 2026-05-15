@@ -16,7 +16,7 @@ const postSchema = z.object({
   attributed_to_member_id: z.string(),
 });
 
-type PostFormData = z.infer<typeof postSchema>;
+export type PostFormData = z.infer<typeof postSchema>;
 
 interface PostFormProps {
   initialPost?: PostRead;
