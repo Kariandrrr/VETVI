@@ -9,6 +9,7 @@ import {JoinPage} from '@/pages/JoinPage';
 import { FamilyTreePage } from '@/pages/FamilyTreePage';
 import { MemberProfilePage } from '@/pages/MemberProfilePage';
 import { FamilyFeedPage } from '@/pages/FamilyFeedPage';
+import { UserProfilePage } from '@/pages/UserProfilePage';
 
 
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
@@ -65,6 +66,15 @@ function App() {
                   <MemberProfilePage />
                 </ProtectedRoute>
               }
+            />
+
+            <Route
+                path="/profile"
+                element={
+                    <ProtectedRoute>
+                        <UserProfilePage />
+                    </ProtectedRoute>
+                }
             />
               </Routes>
 
