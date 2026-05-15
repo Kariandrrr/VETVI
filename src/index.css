@@ -91,7 +91,6 @@
 .dark-form select:focus {
   border-color: #22d3ee !important;
   outline: none !important;
-  ring: 2px solid #22d3ee !important;
 }
 
 /* Стили для Select в тёмной теме */
