@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useFamilies } from '@/hooks/useFamilies';
-import { useFamilyTreeData } from '@/hooks/useFamilyTreeData';
-import { Button } from '@/components/ui/button';
-import {Heart, Link2, LogOut, Plus, Settings, Users, Zap, Maximize2, Minimize2, Newspaper} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { JoinByLinkModal } from '@/components/JoinByLinkModal';
-import { SelectFamilyModal } from '@/components/SelectFamilyModal';
-import { AddMemberModal } from '@/components/AddMemberModal';
-import { FamilyTree } from '@/components/FamilyTree';
+import {useEffect, useState} from 'react';
+import {useAuth} from '@/hooks/useAuth';
+import {useFamilies} from '@/hooks/useFamilies';
+import {useFamilyTreeData} from '@/hooks/useFamilyTreeData';
+import {Button} from '@/components/ui/button';
+import {Heart, Link2, LogOut, Maximize2, Minimize2, Newspaper, Plus, Settings, User, Users, Zap} from 'lucide-react';
+import {useNavigate} from 'react-router-dom';
+import {JoinByLinkModal} from '@/components/JoinByLinkModal';
+import {SelectFamilyModal} from '@/components/SelectFamilyModal';
+import {AddMemberModal} from '@/components/AddMemberModal';
+import {FamilyTree} from '@/components/FamilyTree';
 import logo from '@/assets/logo.png';
-import type { FamilyGroupRead, FamilyMembershipRead } from '@/types/families';
+import type {FamilyGroupRead, FamilyMembershipRead} from '@/types/families';
+
 
 export const HomePage = () => {
   const { logout } = useAuth();
@@ -98,6 +99,16 @@ export const HomePage = () => {
                 <p className="text-xs text-slate-500 tracking-wider uppercase -mt-1">Архив семейных связей</p>
               </div>
             </div>
+
+              {/* 🆕 Кнопка "Мой профиль" */}
+                <Button
+                    onClick={() => navigate('/profile')}
+                    className={`${iconBtnClass} bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]`}
+                >
+                    <User className="w-5 h-5" />
+                    <span className="hidden lg:inline">Мой профиль</span>
+                </Button>
+
             {favoriteFamily && (
                 <Button
                   onClick={handleGoToFeed}
