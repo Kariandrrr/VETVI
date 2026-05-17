@@ -64,9 +64,6 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                             {user?.display_name || fullName || user?.email?.split('@')[0] || 'Пользователь'}
                         </h2>
                         <div className="flex flex-wrap gap-2 mt-2">
-                            <Badge variant="outline" className="border-[var(--primary)] text-[var(--primary)]">
-                                {user?.role === 'admin' ? 'Администратор' : 'Пользователь'}
-                            </Badge>
                             {myProfile && (
                                 <Badge variant="outline" className="border-emerald-500 text-emerald-400">
                                     Член семьи

@@ -1,23 +1,23 @@
-import {useCallback, useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useAuth} from '@/hooks/useAuth';
-import {useCreatePost, useUserPosts} from '@/hooks/usePosts';
-import {useMyProfile} from '@/hooks/useMemberProfile';
-import {useFavoriteFamily} from '@/hooks/useFavFamily';
-import {useMutation} from '@tanstack/react-query';
-import {profileApi} from '@/api/profile_posts';
-import {Button} from '@/components/ui/button';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {PostForm, type PostFormData} from '@/components/PostForm';
-import {EditAccountForm} from '@/components/EditAccountForm';
-import {EditFamilyMemberDataForm} from '@/components/EditFamilyMemberDataForm';
-import {UserProfileCard} from '@/components/UserProfileCard';
-import {UserSettings} from '@/components/UserSettings';
-import {UserPosts} from '@/components/UserPosts';
-import {ArrowLeftIcon} from 'lucide-react';
-import {toast} from 'sonner';
-import {type ApiError, getErrorMessage} from '@/api/apiError';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { useCreatePost, useUserPosts } from '@/hooks/usePosts';
+import { useMyProfile } from '@/hooks/useMemberProfile';
+import { useFavoriteFamily } from '@/hooks/useFavFamily';
+import { useMutation } from '@tanstack/react-query';
+import { profileApi } from '@/api/profile_posts';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PostForm, type PostFormData } from '@/components/PostForm';
+import { EditAccountForm } from '@/components/EditAccountForm';
+import { EditFamilyMemberDataForm } from '@/components/EditFamilyMemberDataForm';
+import { UserProfileCard } from '@/components/UserProfileCard';
+import { UserSettings } from '@/components/UserSettings';
+import { UserPosts } from '@/components/UserPosts';
+import { ArrowLeftIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { type ApiError, getErrorMessage } from '@/api/apiError';
 
 export const UserProfilePage = () => {
     const navigate = useNavigate();
@@ -88,16 +88,16 @@ export const UserProfilePage = () => {
         date_of_birth?: string | null;
         bio?: string | null;
     }) => {
-            setIsUpdating(true);
-    try {
-        await updateMyProfileMutation.mutateAsync(data);
-        await refetchProfile();
-    } catch (error) {
-        console.error('Update error:', error);
-    } finally {
-        setIsUpdating(false);
-    }
-}, [updateMyProfileMutation, refetchProfile]);
+        setIsUpdating(true);
+        try {
+            await updateMyProfileMutation.mutateAsync(data);
+            await refetchProfile();
+        } catch (error) {
+            console.error('Update error:', error);
+        } finally {
+            setIsUpdating(false);
+        }
+    }, [updateMyProfileMutation, refetchProfile]);
 
     const handleCreatePost = useCallback(async (data: PostFormData) => {
         await createPostMutation.mutateAsync({

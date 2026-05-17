@@ -1,12 +1,11 @@
-import type {UserRead} from '@/types/auth';
-import type {MemberProfileRead} from '@/types/profile_posts';
-import {format} from 'date-fns';
-import {ru} from 'date-fns/locale';
+import type { UserRead } from '@/types/auth';
+import type { MemberProfileRead } from '@/types/profile_posts';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 interface UserSettingsProps {
     user: UserRead | null;
     myProfile: MemberProfileRead | null;
-
 }
 
 export const UserSettings: React.FC<UserSettingsProps> = ({ user, myProfile }) => {
@@ -19,10 +18,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ user, myProfile }) =
                         <p className="text-sm text-slate-400">Email</p>
                         <p className="text-white">{user?.email}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-white/5 border border-[var(--glass-border)]">
-                        <p className="text-sm text-slate-400">Роль</p>
-                        <p className="text-white">{user?.role === 'admin' ? 'Администратор' : 'Пользователь'}</p>
-                    </div>
+                    {/* Удалён блок с ролью */}
                     <div className="p-4 rounded-xl bg-white/5 border border-[var(--glass-border)]">
                         <p className="text-sm text-slate-400">ID пользователя</p>
                         <p className="text-white text-sm font-mono break-all">{user?.id}</p>
