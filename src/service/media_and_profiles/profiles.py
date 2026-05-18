@@ -5,6 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from ...core.models import FamilyMembership
+from ...core.models.enums import MembershipRole
 from ...core.models.members import FamilyMember
 from ...core.schemas.member_profile import MemberProfileUpdate
 
@@ -26,12 +28,16 @@ async def _get_member_with_user(
     return result.scalar()
 
 
-def _member_to_response(member: FamilyMember) -> dict:
+def _member_to_response(
+    member: FamilyMember, role: MembershipRole | None = None
+) -> dict:
+
+    final_role = role if role else MembershipRole.viewer
     return {
         "id": member.id,
         "user_id": member.linked_user_id,
         "family_group_id": member.family_group_id,
-        "role": member.role,
+        "role": final_role,
         "joined_at": member.created_at,
         "linked_user_id": member.linked_user_id,
         "display_name": member.display_name,
@@ -54,17 +60,20 @@ async def get_member_profile(
     db: AsyncSession,
     member_id: UUID,
     family_group_id: UUID,
+    role: MembershipRole | None = None,
 ) -> dict:
     member = await _get_member_with_user(db, member_id, family_group_id)
 
     if not member:
         raise HTTPException(status_code=404, detail="Profile not found")
 
+    final_role = role
+
     return {
         "id": member.id,
         "user_id": member.linked_user_id,
         "family_group_id": member.family_group_id,
-        "role": member.role,
+        "role": final_role,
         "joined_at": member.created_at,
         "linked_user_id": member.linked_user_id,
         "display_name": member.display_name,
@@ -144,8 +153,18 @@ async def update_member_profile(
     if not requester:
         raise HTTPException(status_code=403, detail="Not a member of this family")
 
+    stmt_membership = select(FamilyMembership).where(
+        FamilyMembership.user_id == requester.linked_user_id,
+        FamilyMembership.family_group_id == family_group_id,
+    )
+    result_membership = await db.execute(stmt_membership)
+    membership = result_membership.scalar()
+
+    if not membership:
+        raise HTTPException(status_code=403, detail="Membership not found")
+
     is_self = member_id == requester_member_id
-    is_admin = requester.role == "admin"
+    is_admin = membership.role == MembershipRole.admin
 
     if not (is_self or is_admin):
         raise HTTPException(
@@ -225,4 +244,15 @@ async def update_member_profile(
     await db.commit()
     await db.refresh(member)
 
-    return _member_to_response(member)
+    if member.linked_user_id:
+        stmt_membership = select(FamilyMembership).where(
+            FamilyMembership.user_id == member.linked_user_id,
+            FamilyMembership.family_group_id == family_group_id,
+        )
+        result_membership = await db.execute(stmt_membership)
+        membership = result_membership.scalar()
+        role_for_response = membership.role if membership else MembershipRole.viewer
+    else:
+        role_for_response = MembershipRole.viewer
+
+    return _member_to_response(member, role_for_response)

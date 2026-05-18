@@ -1,12 +1,16 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...core.models import FamilyMember
 from ...core.models.enums import MembershipRole
+from ...core.models.members import FamilyMember
 from ...core.schemas.member_profile import MemberProfileRead, MemberProfileUpdate
-from ...deps.family import RoleChecker, get_current_member_in_family
+from ...deps.family import (
+    RoleChecker,
+    get_user_role_in_family,
+)
 from ...deps.user import get_db, get_current_user
 from ...service.media_and_profiles import profiles as profile_service
 
@@ -15,30 +19,44 @@ router = APIRouter()
 
 @router.get("/families/{family_group_id}/members/me", response_model=MemberProfileRead)
 async def get_my_profile(
-    current_member: FamilyMember = Depends(get_current_member_in_family),
+    family_group_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
+    stmt = select(FamilyMember).where(
+        FamilyMember.linked_user_id == current_user.id,
+        FamilyMember.family_group_id == family_group_id,
+    )
+    result = await db.execute(stmt)
+    member = result.scalar()
+
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+    role = await get_user_role_in_family(db, current_user.id, family_group_id)
+    if role is None:
+        role = "editor"
+
     return MemberProfileRead(
-        id=current_member.id,
-        user_id=current_member.linked_user_id,
-        family_group_id=current_member.family_group_id,
-        role=current_member.role,
-        joined_at=current_member.created_at,
-        linked_user_id=current_member.linked_user_id,
-        display_name=current_member.display_name,
-        bio=current_member.bio,
-        avatar_url=current_member.avatar_url,
-        date_of_birth=current_member.birth_date,
-        first_name=current_member.first_name,
-        last_name=current_member.last_name,
-        patronymic=current_member.patronymic,
-        maiden_name=current_member.maiden_name,
-        gender=current_member.gender,
-        birth_place=current_member.birth_place,
-        death_date=current_member.death_date,
-        death_place=current_member.death_place,
-        is_alive=(
-            current_member.is_alive if current_member.is_alive is not None else True
-        ),
+        id=member.id,
+        user_id=member.linked_user_id,
+        family_group_id=member.family_group_id,
+        role=role,
+        joined_at=member.created_at,
+        linked_user_id=member.linked_user_id,
+        display_name=member.display_name,
+        bio=member.bio,
+        avatar_url=member.avatar_url,
+        date_of_birth=member.birth_date,
+        first_name=member.first_name,
+        last_name=member.last_name,
+        patronymic=member.patronymic,
+        maiden_name=member.maiden_name,
+        gender=member.gender,
+        birth_place=member.birth_place,
+        death_date=member.death_date,
+        death_place=member.death_place,
+        is_alive=member.is_alive if member.is_alive is not None else True,
     )
 
 
@@ -55,7 +73,26 @@ async def get_member_profile(
         )
     ),
 ):
-    return await profile_service.get_member_profile(db, member_id, family_id)
+    stmt = select(FamilyMember).where(
+        FamilyMember.id == member_id,
+        FamilyMember.family_group_id == family_id,
+    )
+    result = await db.execute(stmt)
+    target_member = result.scalar()
+    if not target_member:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+    if target_member.linked_user_id:
+        role_enum = await get_user_role_in_family(
+            db, target_member.linked_user_id, family_id
+        )
+        target_role = role_enum
+    else:
+        target_role = "viewer"
+
+    return await profile_service.get_member_profile(
+        db, member_id, family_id, role=target_role
+    )
 
 
 @router.get("/families/{family_id}/members", response_model=list[MemberProfileRead])
@@ -80,11 +117,30 @@ async def update_member_profile(
     member_id: UUID,
     data: MemberProfileUpdate,
     db: AsyncSession = Depends(get_db),
-    current_member=Depends(get_current_member_in_family),
+    current_user=Depends(get_current_user),
 ):
+    role = await get_user_role_in_family(db, current_user.id, family_group_id)
+
+    if role is None:
+        raise HTTPException(403, "You are not in this family group")
+
+    if role != MembershipRole.admin:
+        raise HTTPException(403, "Admin rights required")
+
+    stmt = select(FamilyMember).where(
+        FamilyMember.linked_user_id == current_user.id,
+        FamilyMember.family_group_id == family_group_id,
+    )
+    result = await db.execute(stmt)
+    current_member = result.scalar()
+
+    if not current_member:
+        raise HTTPException(404, "Your member profile not found")
+
     member = await profile_service.update_member_profile(
         db, member_id, data, current_member.id, family_group_id
     )
+
     return member
 
 
@@ -93,11 +149,8 @@ async def update_my_profile(
     data: MemberProfileUpdate,
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
+    _=Depends(RoleChecker([MembershipRole.admin])),
 ):
-
-    from sqlalchemy import select
-    from ...core.models.members import FamilyMember
-
     stmt = select(FamilyMember).where(FamilyMember.linked_user_id == current_user.id)
     result = await db.execute(stmt)
     member = result.scalar()
