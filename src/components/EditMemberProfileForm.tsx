@@ -302,3 +302,5 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
         </Form>
     );
 };
+
+export type ProfileUpdateFormData = z.infer<typeof editProfileSchema>;

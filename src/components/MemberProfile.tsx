@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useMemberProfile, useMyProfile, useUpdateMemberProfile} from '@/hooks/useMemberProfile';
 import {useUserPosts} from '@/hooks/usePosts';
@@ -9,31 +9,13 @@ import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/
 import {Badge} from '@/components/ui/badge';
 import {Skeleton} from '@/components/ui/skeleton';
 import {PostCard} from '@/components/PostCard';
-import {useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import {ArrowLeftIcon, CalendarIcon, HeartIcon, MapPinIcon, PencilIcon, UserIcon, UsersIcon,} from 'lucide-react';
+import type {ProfileUpdateFormData} from '@/components/EditMemberProfileForm';
+import {EditMemberProfileForm} from '@/components/EditMemberProfileForm';
+import {ArrowLeftIcon, CalendarIcon, HeartIcon, MapPinIcon, PencilIcon, UserIcon, UsersIcon} from 'lucide-react';
 import {format} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {toast} from 'sonner';
 import type {UUID} from '@/types/common';
-import {EditMemberProfileForm} from "@/components/EditMemberProfileForm.tsx";
-
-const profileUpdateSchema = z.object({
-    display_name: z.string().optional().nullable(),
-    bio: z.string().max(500, 'Не более 500 символов').optional().nullable(),
-    date_of_birth: z.string().optional().nullable(),
-    first_name: z.string().optional().nullable(),
-    last_name: z.string().optional().nullable(),
-    patronymic: z.string().optional().nullable(),
-    gender: z.enum(['male', 'female', 'other', 'unknown']).optional().nullable(),
-    birth_place: z.string().optional().nullable(),
-    death_date: z.string().optional().nullable(),
-    death_place: z.string().optional().nullable(),
-    is_alive: z.boolean().optional(),
-});
-
-type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
 
 interface MemberProfileProps {
     familyGroupId: UUID;
@@ -56,71 +38,90 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
     const [isEditing, setIsEditing] = useState(false);
 
     const isOwner = myProfile?.id === memberId;
-    const isAdmin = myProfile?.role === 'admin';
+    const isFamilyAdmin = myProfile?.role === 'admin';
     const hasAccount = profile?.user_id !== null && profile?.user_id !== undefined;
-    const canEdit = isOwner || (isAdmin && !hasAccount);
+    const isDeceased = profile?.is_alive === false;
+    const canEdit = isOwner || (isFamilyAdmin && (isDeceased || !hasAccount));
 
     const allPosts = userPostsData?.pages.flatMap((page) => page.posts) || [];
 
-    const form = useForm<ProfileUpdateFormData>({
-        resolver: zodResolver(profileUpdateSchema),
-        defaultValues: {
-            display_name: profile?.display_name || '',
-            bio: profile?.bio || '',
-            date_of_birth: profile?.date_of_birth || '',
-            first_name: profile?.first_name || '',
-            last_name: profile?.last_name || '',
-            patronymic: profile?.patronymic || '',
-            gender: profile?.gender || 'unknown',
-            birth_place: profile?.birth_place || '',
-            death_date: profile?.death_date || '',
-            death_place: profile?.death_place || '',
-            is_alive: profile?.is_alive !== false,
-        },
-    });
-
-    useEffect(() => {
-        if (profile) {
-            form.reset({
-                display_name: profile.display_name || '',
-                bio: profile.bio || '',
-                date_of_birth: profile.date_of_birth || '',
-                first_name: profile.first_name || '',
-                last_name: profile.last_name || '',
-                patronymic: profile.patronymic || '',
-                gender: profile.gender || 'unknown',
-                birth_place: profile.birth_place || '',
-                death_date: profile.death_date || '',
-                death_place: profile.death_place || '',
-                is_alive: profile.is_alive !== false,
-            });
-        }
-    }, [profile, form]);
-
     const onSubmit = async (data: ProfileUpdateFormData) => {
-        const updateData: Record<string, unknown> = {};
-        if (data.display_name !== undefined) updateData.display_name = data.display_name;
-        if (data.bio !== undefined) updateData.bio = data.bio;
-        if (data.date_of_birth !== undefined) updateData.date_of_birth = data.date_of_birth;
-        if (data.first_name !== undefined) updateData.first_name = data.first_name;
-        if (data.last_name !== undefined) updateData.last_name = data.last_name;
-        if (data.patronymic !== undefined) updateData.patronymic = data.patronymic;
-        if (data.gender !== undefined) updateData.gender = data.gender;
-        if (data.birth_place !== undefined) updateData.birth_place = data.birth_place;
-        if (data.death_date !== undefined) updateData.death_date = data.death_date;
-        if (data.death_place !== undefined) updateData.death_place = data.death_place;
-        if (data.is_alive !== undefined) updateData.is_alive = data.is_alive;
+    const updateData: Record<string, unknown> = {};
 
-        try {
-            await updateProfileMutation.mutateAsync(updateData);
-            toast.success('Профиль обновлён');
-            setIsEditing(false);
-            refetch();
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-            toast.error('Ошибка обновления');
+        updateData.family_id = familyGroupId;
+
+    if (data.display_name !== undefined) updateData.display_name = data.display_name;
+    if (data.bio !== undefined) updateData.bio = data.bio;
+    if (data.date_of_birth !== undefined) updateData.date_of_birth = data.date_of_birth;
+    if (data.first_name !== undefined) updateData.first_name = data.first_name;
+    if (data.last_name !== undefined) updateData.last_name = data.last_name;
+    if (data.patronymic !== undefined) updateData.patronymic = data.patronymic;
+    if (data.gender !== undefined) updateData.gender = data.gender;
+    if (data.birth_place !== undefined) updateData.birth_place = data.birth_place;
+    if (data.death_date !== undefined) updateData.death_date = data.death_date;
+    if (data.death_place !== undefined) updateData.death_place = data.death_place;
+    if (data.is_alive !== undefined) updateData.is_alive = data.is_alive;
+
+    console.log('📤 Sending update data:', updateData);
+
+    try {
+        await updateProfileMutation.mutateAsync(updateData);
+        toast.success('Профиль обновлён');
+        setIsEditing(false);
+        refetch();
+    } catch (error: unknown) {
+        console.error('❌ Update error:', error);
+
+        type AxiosErrorType = {
+            response?: {
+                status?: number;
+                data?: {
+                    detail?: string | Array<{
+                        type: string;
+                        loc: string[];
+                        msg: string;
+                        input?: unknown;
+                    }>;
+                };
+            };
+            request?: unknown;
+            message?: string;
+        };
+
+        const axiosError = error as AxiosErrorType;
+
+        if (axiosError.response) {
+            console.error('Response status:', axiosError.response.status);
+            console.error('Response data:', axiosError.response.data);
+
+            const detail = axiosError.response.data?.detail;
+
+            if (detail) {
+                if (Array.isArray(detail)) {
+                    detail.forEach((err) => {
+                        const field = err.loc?.slice(1).join('.') || 'unknown';
+                        const message = err.msg;
+                        console.error(`❌ Validation error - ${field}: ${message}`);
+                        toast.error(`${field}: ${message}`);
+                    });
+                } else if (typeof detail === 'string') {
+                    console.error(`❌ Error: ${detail}`);
+                    toast.error(detail);
+                } else {
+                    toast.error('Ошибка валидации данных');
+                }
+            } else {
+                toast.error(`Ошибка ${axiosError.response.status}`);
+            }
+        } else if (axiosError.request) {
+            console.error('No response received:', axiosError.request);
+            toast.error('Сервер не отвечает');
+        } else {
+            console.error('Error setting up request:', axiosError.message);
+            toast.error(`Ошибка: ${axiosError.message}`);
         }
-    };
+    }
+};
 
     if (isLoadingProfile || isLoadingMyProfile) {
         return (
@@ -150,7 +151,6 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
 
     return (
         <div className="space-y-6">
-            {/* Карточка профиля */}
             <div className="glass-card p-8 relative group">
                 <div className="absolute -top-12 -right-12 w-40 h-40 bg-[var(--primary)] rounded-full blur-[90px] opacity-20 pointer-events-none" />
                 <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[var(--secondary)] rounded-full blur-[90px] opacity-15 pointer-events-none" />
@@ -227,7 +227,6 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
                 </div>
             </div>
 
-            {/* Tabs */}
             <Tabs defaultValue={showPostsTab ? "posts" : "about"} className="glass-card overflow-hidden">
                 <TabsList className="w-full bg-transparent border-b border-[var(--glass-border)] p-0 h-auto">
                     {showPostsTab && (
@@ -317,35 +316,33 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
                 </TabsContent>
             </Tabs>
 
-            {/* Диалог редактирования */}
-            {/* Диалог редактирования */}
-                <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                    <DialogContent className="bg-slate-900 border border-slate-700 max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle className="text-white">Редактировать профиль</DialogTitle>
-                        </DialogHeader>
+            <Dialog open={isEditing} onOpenChange={setIsEditing}>
+                <DialogContent className="bg-slate-900 border border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-white">Редактировать профиль</DialogTitle>
+                    </DialogHeader>
 
-                        <EditMemberProfileForm
-                            initialData={{
-                                display_name: profile.display_name,
-                                bio: profile.bio,
-                                date_of_birth: profile.date_of_birth,
-                                first_name: profile.first_name,
-                                last_name: profile.last_name,
-                                patronymic: profile.patronymic,
-                                gender: profile.gender,
-                                birth_place: profile.birth_place,
-                                death_date: profile.death_date,
-                                death_place: profile.death_place,
-                                is_alive: profile.is_alive,
-                            }}
-                            onSubmit={onSubmit}
-                            isSubmitting={updateProfileMutation.isPending}
-                            isAdmin={isAdmin}
-                            isOwner={isOwner}
-                        />
-                    </DialogContent>
-                </Dialog>
+                    <EditMemberProfileForm
+                        initialData={{
+                            display_name: profile.display_name || '',
+                            bio: profile.bio || '',
+                            date_of_birth: profile.date_of_birth || '',  // <-- изменено
+                            first_name: profile.first_name || '',
+                            last_name: profile.last_name || '',
+                            patronymic: profile.patronymic || '',
+                            gender: profile.gender || 'unknown',
+                            birth_place: profile.birth_place || '',
+                            death_date: profile.death_date || '',
+                            death_place: profile.death_place || '',
+                            is_alive: profile.is_alive !== false,
+                        }}
+                        onSubmit={onSubmit}
+                        isSubmitting={updateProfileMutation.isPending}
+                        isAdmin={isFamilyAdmin}
+                        isOwner={isOwner}
+                    />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
