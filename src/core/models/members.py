@@ -19,7 +19,7 @@ from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
-from .enums import GenderEnum, RelationshipType, MembershipRole
+from .enums import GenderEnum, RelationshipType
 
 if TYPE_CHECKING:
     from .users import User
@@ -70,11 +70,6 @@ class FamilyMember(Base):
     linked_user: Mapped["User"] = relationship(
         back_populates="family_links",
         foreign_keys=[linked_user_id],
-    )
-    role: Mapped[MembershipRole] = mapped_column(
-        ENUM(MembershipRole, name="membership_role_enum", inherit_schema=True),
-        default=MembershipRole.editor,
-        server_default=MembershipRole.editor.value,
     )
 
     creator: Mapped["User"] = relationship(foreign_keys=[created_by])
