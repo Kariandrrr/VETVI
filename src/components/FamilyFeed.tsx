@@ -58,12 +58,12 @@ export const FamilyFeed: React.FC<FamilyFeedProps> = ({ familyGroupId }) => {
               }).charAt(0).toUpperCase() || '?'}
             </span>
           </div>
-          <button
+          <text
             className="flex-1 text-left px-4 py-2 rounded-xl bg-black/20 border border-[var(--glass-border)] text-slate-400 hover:text-white hover:border-[var(--primary)]/50 transition-all"
             onClick={() => setIsCreateDialogOpen(true)}
           >
             Что нового в семье?
-          </button>
+          </text>
         </div>
         <Button
           size="sm"
