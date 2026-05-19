@@ -146,3 +146,27 @@ export const tagsApi = {
       tagIds
     ),
 };
+
+// =================AVATAR==========
+export const AvatarApi = {
+    uploadAvatar: (familyGroupId: UUID, memberId: UUID, file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        return axiosInstance.post<{ avatar_url: string }>(
+            `/ws/families/${familyGroupId}/members/${memberId}/avatar`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
+    },
+
+    deleteAvatar: (familyGroupId: UUID, memberId: UUID) => {
+        return axiosInstance.delete<{ message: string }>(
+            `/ws/families/${familyGroupId}/members/${memberId}/avatar`
+        );
+    },
+};
