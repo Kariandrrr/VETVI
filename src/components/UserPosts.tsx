@@ -96,6 +96,7 @@ export const UserPosts: React.FC<UserPostsProps> = ({
                 onOpenChange={setIsCreateDialogOpen}
                 onPostCreated={onCreatePost}
                 currentMemberId={currentMemberId}
+                  familyGroupId={familyGroupId}
             />
         </div>
     );
