@@ -95,15 +95,19 @@ export const mediaApi = {
       `/media/posts/${postId}/media`,
       formData,
       {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       }
     );
   },
 
+  deleteMedia: (mediaId: UUID) =>
+    axiosInstance.delete(`/media/media/${mediaId}`),
+
   getMediaStreamUrl: (mediaId: UUID) =>
     `/media/media/${mediaId}/stream`,
 };
-
 // ========== REACTIONS ==========
 
 export const reactionsApi = {

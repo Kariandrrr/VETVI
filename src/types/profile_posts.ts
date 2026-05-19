@@ -46,10 +46,10 @@ export interface PostRead {
 }
 
 export interface PostCreate {
-  attributed_to_member_id?: UUID | null;
-  post_type?: PostType;
-  title?: string | null;
-  body?: string | null;
+  title: string;
+  body: string;
+  post_type: PostType;
+  attributed_to_member_id: string | null;
 }
 
 export interface PostUpdate {
