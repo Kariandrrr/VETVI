@@ -1,5 +1,5 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {profileApi} from '@/api/profile_posts';
+import {AvatarApi, profileApi} from '@/api/profile_posts';
 import {getErrorMessage} from '@/api/apiError';
 import {toast} from 'sonner';
 import type {UUID} from '@/types/common';
@@ -65,6 +65,42 @@ export const useUpdateMemberProfile = (familyGroupId: UUID, memberId: UUID) => {
     },
     onError: (error: unknown) => {
       toast.error(getErrorMessage(error, 'Ошибка при обновлении профиля'));
+    },
+  });
+};
+
+export const useUploadAvatar = (familyGroupId: UUID, memberId: UUID) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => {
+      return AvatarApi.uploadAvatar(familyGroupId, memberId, file);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['member-profile', familyGroupId, memberId] });
+      queryClient.invalidateQueries({ queryKey: ['my-profile', familyGroupId] });
+      toast.success('Аватар обновлён');
+    },
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, 'Ошибка при загрузке аватара'));
+    },
+  });
+};
+
+export const useDeleteAvatar = (familyGroupId: UUID, memberId: UUID) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => {
+      return AvatarApi.deleteAvatar(familyGroupId, memberId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['member-profile', familyGroupId, memberId] });
+      queryClient.invalidateQueries({ queryKey: ['my-profile', familyGroupId] });
+      toast.success('Аватар удалён');
+    },
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, 'Ошибка при удалении аватара'));
     },
   });
 };
