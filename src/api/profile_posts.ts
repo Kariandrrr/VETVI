@@ -170,3 +170,11 @@ export const AvatarApi = {
         );
     },
 };
+
+export const roleApi = {
+  updateMemberRole: (familyGroupId: UUID, memberId: UUID, role: string) =>
+    axiosInstance.patch<{ message: string; role: string }>(
+      `/profiles/families/${familyGroupId}/members/${memberId}/role`,
+      { role: role }
+    ),
+};

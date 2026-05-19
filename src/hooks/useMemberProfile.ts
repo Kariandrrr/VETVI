@@ -1,9 +1,10 @@
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {AvatarApi, profileApi} from '@/api/profile_posts';
-import {getErrorMessage} from '@/api/apiError';
+import {AvatarApi, profileApi, roleApi} from '@/api/profile_posts';
+import {type ApiError, getErrorMessage} from '@/api/apiError';
 import {toast} from 'sonner';
 import type {UUID} from '@/types/common';
 import type {MemberProfileUpdate} from '@/types/profile_posts';
+
 
 export const useMemberProfile = (familyGroupId: UUID, memberId: UUID) => {
   return useQuery({
@@ -101,6 +102,23 @@ export const useDeleteAvatar = (familyGroupId: UUID, memberId: UUID) => {
     },
     onError: (error: unknown) => {
       toast.error(getErrorMessage(error, 'Ошибка при удалении аватара'));
+    },
+  });
+};
+
+
+export const useUpdateMemberRole = (familyGroupId: UUID, memberId: UUID) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (role: string) => roleApi.updateMemberRole(familyGroupId, memberId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['family-tree-data', familyGroupId] });
+      queryClient.invalidateQueries({ queryKey: ['families'] });
+      toast.success('Роль обновлена');
+    },
+    onError: (error: ApiError) => {
+      toast.error('Ошибка', { description: getErrorMessage(error, 'Не удалось обновить роль') });
     },
   });
 };
