@@ -1,33 +1,44 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useCreatePost, useUserPosts } from '@/hooks/usePosts';
-import { useMyProfile } from '@/hooks/useMemberProfile';
-import { useFavoriteFamily } from '@/hooks/useFavFamily';
-import { useMutation } from '@tanstack/react-query';
-import { profileApi } from '@/api/profile_posts';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { PostForm, type PostFormData } from '@/components/PostForm';
-import { EditAccountForm } from '@/components/EditAccountForm';
-import { EditFamilyMemberDataForm } from '@/components/EditFamilyMemberDataForm';
-import { UserProfileCard } from '@/components/UserProfileCard';
-import { UserSettings } from '@/components/UserSettings';
-import { UserPosts } from '@/components/UserPosts';
-import { ArrowLeftIcon } from 'lucide-react';
-import { toast } from 'sonner';
-import { type ApiError, getErrorMessage } from '@/api/apiError';
+import {useCallback, useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {useAuth} from '@/hooks/useAuth';
+import {useUserPosts} from '@/hooks/usePosts';
+import {useMyProfile} from '@/hooks/useMemberProfile';
+import {Button} from '@/components/ui/button';
+import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {EditAccountForm} from '@/components/EditAccountForm';
+import {EditFamilyMemberDataForm} from '@/components/EditFamilyMemberDataForm';
+import {UserProfileCard} from '@/components/UserProfileCard';
+import {UserSettings} from '@/components/UserSettings';
+import {UserPosts} from '@/components/UserPosts';
+import {FamilySwitcher} from '@/components/FamilySwitcher';
+import {CreatePostWithMedia} from '@/components/CreatePostWithMedia';
+import {ArrowLeftIcon, Users} from 'lucide-react';
+import {toast} from 'sonner';
+import {type ApiError, getErrorMessage} from '@/api/apiError';
+import {useMutation} from '@tanstack/react-query';
+import {profileApi} from '@/api/profile_posts';
+import type {UUID} from '@/types/common';
 
 export const UserProfilePage = () => {
     const navigate = useNavigate();
     const { user, updateUser } = useAuth();
-    const { favoriteFamily } = useFavoriteFamily();
-    const familyId = favoriteFamily?.id;
 
-    const { data: myProfile, isLoading: isLoadingProfile, refetch: refetchProfile } = useMyProfile(familyId || '');
+    const [selectedFamilyId, setSelectedFamilyId] = useState<UUID | null>(() => {
+        const saved = localStorage.getItem('selectedFamilyForProfile');
+        return saved ? (saved as UUID) : null;
+    });
+
+    useEffect(() => {
+        if (selectedFamilyId) {
+            localStorage.setItem('selectedFamilyForProfile', selectedFamilyId);
+        }
+    }, [selectedFamilyId]);
+
+    const { data: myProfile, isLoading: isLoadingProfile, refetch: refetchProfile } = useMyProfile(selectedFamilyId || '');
     const { data: userPosts, fetchNextPage, hasNextPage, isLoading: isLoadingPosts, refetch: refetchPosts } = useUserPosts(
-        user?.id || ''
+        user?.id || '',
+        { enabled: !!user?.id && !!selectedFamilyId }
     );
 
     const [isEditingAccount, setIsEditingAccount] = useState(false);
@@ -35,12 +46,6 @@ export const UserProfilePage = () => {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const onPostCreated = useCallback(() => {
-        setIsCreateDialogOpen(false);
-        refetchPosts();
-    }, [refetchPosts]);
-
-    const createPostMutation = useCreatePost(onPostCreated);
     const allPosts = userPosts?.pages.flatMap((page) => page.posts) || [];
 
     const onAccountSubmit = useCallback(async (data: { display_name?: string; avatar_url?: string | null }) => {
@@ -72,7 +77,7 @@ export const UserProfilePage = () => {
         onSuccess: () => {
             toast.success('Данные профиля обновлены');
             setIsEditingMember(false);
-            refetchProfile();
+            void refetchProfile();
         },
         onError: (error: ApiError) => {
             toast.error('Ошибка', { description: getErrorMessage(error, 'Не удалось обновить данные профиля') });
@@ -99,30 +104,21 @@ export const UserProfilePage = () => {
         }
     }, [updateMyProfileMutation, refetchProfile]);
 
-    const handleCreatePost = useCallback(async (data: PostFormData) => {
-        await createPostMutation.mutateAsync({
-            title: data.title,
-            body: data.body,
-            post_type: data.post_type,
-            attributed_to_member_id: myProfile?.id || null,
-        });
-    }, [createPostMutation, myProfile?.id]);
+    const onPostCreated = useCallback(() => {
+        void refetchPosts();
+    }, [refetchPosts]);
 
     const handlePostDelete = useCallback(() => {
-        refetchPosts();
+        void refetchPosts();
     }, [refetchPosts]);
 
     const handleLoadMore = useCallback(async () => {
         await fetchNextPage();
     }, [fetchNextPage]);
 
-    useEffect(() => {
-        return () => {
-            setIsEditingAccount(false);
-            setIsEditingMember(false);
-            setIsCreateDialogOpen(false);
-        };
-    }, []);
+    const handleSelectFamily = (familyId: UUID) => {
+        setSelectedFamilyId(familyId);
+    };
 
     if (isLoadingProfile) {
         return (
@@ -135,68 +131,87 @@ export const UserProfilePage = () => {
     return (
         <div className="min-h-screen bg-[var(--background)]">
             <div className="max-w-[1200px] mx-auto px-6 py-8">
-                <div className="flex items-center gap-4 mb-8">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full w-10 h-10 text-slate-400 hover:text-white"
-                        onClick={() => navigate('/')}
-                    >
-                        <ArrowLeftIcon className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-extrabold text-white tracking-tighter">
-                            Мой профиль
-                        </h1>
-                        <p className="text-slate-400 mt-1">
-                            Управление аккаунтом и публикациями
-                        </p>
+                <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full w-10 h-10 text-slate-400 hover:text-white"
+                            onClick={() => navigate('/')}
+                        >
+                            <ArrowLeftIcon className="w-5 h-5" />
+                        </Button>
+                        <div>
+                            <h1 className="text-3xl font-extrabold text-white tracking-tighter">
+                                Мой профиль
+                            </h1>
+                            <p className="text-slate-400 mt-1">
+                                Управление аккаунтом и публикациями
+                            </p>
+                        </div>
                     </div>
+
+                    <FamilySwitcher
+                        selectedFamilyId={selectedFamilyId}
+                        onSelectFamily={handleSelectFamily}
+                          placeholder="Выберите семью для профиля"
+                    />
                 </div>
 
-                <UserProfileCard
-                    user={user}
-                    myProfile={myProfile || null}
-                    onEditAccount={() => setIsEditingAccount(true)}
-                    onEditMember={() => setIsEditingMember(true)}
-                />
-
-                <Tabs defaultValue="posts" className="glass-card overflow-hidden mt-6">
-                    <TabsList className="w-full bg-transparent border-b border-[var(--glass-border)] p-0 h-auto">
-                        <TabsTrigger
-                            value="posts"
-                            className="data-[state=active]:border-b-2 data-[state=active]:border-[var(--primary)] rounded-none py-3 px-6 text-slate-400 data-[state=active]:text-white"
-                        >
-                            Мои публикации
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="settings"
-                            className="data-[state=active]:border-b-2 data-[state=active]:border-[var(--primary)] rounded-none py-3 px-6 text-slate-400 data-[state=active]:text-white"
-                        >
-                            Настройки
-                        </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="posts" className="p-6">
-                        <UserPosts
-                            posts={allPosts}
-                            isLoading={isLoadingPosts}
-                            hasNextPage={hasNextPage || false}
-                            isFetchingNextPage={false}
-                            familyGroupId={familyId || ''}
-                            onCreatePost={() => setIsCreateDialogOpen(true)}
-                            onLoadMore={handleLoadMore}
-                            onPostDelete={handlePostDelete}
-                                currentMemberId={myProfile?.id}
+                {!selectedFamilyId ? (
+                    <div className="glass-card p-12 text-center">
+                        <Users className="w-16 h-16 mx-auto mb-4 text-slate-500" />
+                        <h3 className="text-xl font-bold text-white mb-2">Выберите семью</h3>
+                        <p className="text-slate-400 mb-6">
+                            Выберите семейную группу, чтобы просматривать и создавать публикации
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <UserProfileCard
+                            user={user}
+                            myProfile={myProfile || null}
+                            onEditAccount={() => setIsEditingAccount(true)}
+                            onEditMember={() => setIsEditingMember(true)}
                         />
-                    </TabsContent>
 
-                    <TabsContent value="settings" className="p-6">
-                        <UserSettings user={user} myProfile={myProfile || null} />
-                    </TabsContent>
-                </Tabs>
+                        <Tabs defaultValue="posts" className="glass-card overflow-hidden mt-6">
+                            <TabsList className="w-full bg-transparent border-b border-[var(--glass-border)] p-0 h-auto">
+                                <TabsTrigger
+                                    value="posts"
+                                    className="data-[state=active]:border-b-2 data-[state=active]:border-[var(--primary)] rounded-none py-3 px-6 text-slate-400 data-[state=active]:text-white"
+                                >
+                                    Мои публикации
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="settings"
+                                    className="data-[state=active]:border-b-2 data-[state=active]:border-[var(--primary)] rounded-none py-3 px-6 text-slate-400 data-[state=active]:text-white"
+                                >
+                                    Настройки
+                                </TabsTrigger>
+                            </TabsList>
 
-                {/* Диалог редактирования аккаунта */}
+                            <TabsContent value="posts" className="p-6">
+                                <UserPosts
+                                    posts={allPosts}
+                                    isLoading={isLoadingPosts}
+                                    hasNextPage={hasNextPage || false}
+                                    isFetchingNextPage={false}
+                                    familyGroupId={selectedFamilyId}
+                                    onCreatePost={() => setIsCreateDialogOpen(true)}
+                                    onLoadMore={handleLoadMore}
+                                    onPostDelete={handlePostDelete}
+                                    currentMemberId={myProfile?.id}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="settings" className="p-6">
+                                <UserSettings user={user} myProfile={myProfile || null} />
+                            </TabsContent>
+                        </Tabs>
+                    </>
+                )}
+
                 <Dialog open={isEditingAccount} onOpenChange={setIsEditingAccount}>
                     <DialogContent className="bg-slate-900 border border-slate-700 max-w-lg">
                         <DialogHeader>
@@ -213,7 +228,6 @@ export const UserProfilePage = () => {
                     </DialogContent>
                 </Dialog>
 
-                {/* Диалог редактирования профиля члена семьи */}
                 <Dialog open={isEditingMember} onOpenChange={setIsEditingMember}>
                     <DialogContent className="bg-slate-900 border border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
@@ -235,19 +249,13 @@ export const UserProfilePage = () => {
                     </DialogContent>
                 </Dialog>
 
-                {/* Диалог создания поста */}
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                    <DialogContent className="bg-slate-900 border border-slate-700 max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle className="text-white">Новая публикация</DialogTitle>
-                        </DialogHeader>
-                        <PostForm
-                            familyMembers={[]}
-                            onSubmit={handleCreatePost}
-                            isSubmitting={createPostMutation.isPending}
-                        />
-                    </DialogContent>
-                </Dialog>
+                <CreatePostWithMedia
+                    open={isCreateDialogOpen}
+                    onOpenChange={setIsCreateDialogOpen}
+                    onPostCreated={onPostCreated}
+                    currentMemberId={myProfile?.id}
+                    familyGroupId={selectedFamilyId || ''}
+                />
             </div>
         </div>
     );
