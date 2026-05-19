@@ -328,16 +328,17 @@ export const PostCard: React.FC<PostCardProps> = ({
             familyMembers={[]}
           />
 
-          {/* Tags section */}
-          <div className="mt-4 pt-4 border-t border-slate-700">
-            <h4 className="text-sm font-medium text-white mb-2">Теги</h4>
-            <TagSelector
-              familyGroupId={familyGroupId as UUID}
-              postId={post.id}
-              initialTags={post.tags}
-              onTagsChange={onUpdate}
-            />
-          </div>
+            {/* Tags section */}
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <h4 className="text-sm font-medium text-white mb-2">Теги</h4>
+              <TagSelector
+                familyGroupId={familyGroupId as UUID}
+                postId={post.id}
+                initialTags={post.tags}
+                onTagsChange={onUpdate}
+                isEditable={isOwner}
+              />
+            </div>
         </DialogContent>
       </Dialog>
 
