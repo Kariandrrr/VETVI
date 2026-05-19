@@ -70,7 +70,7 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
     setSelectedTagIds(tagIds);
   };
 
-  const handleSubmit = async (data: PostFormData) => {
+ const handleSubmit = async (data: PostFormData) => {
     setIsSubmitting(true);
 
     try {
@@ -85,6 +85,10 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
       postData.post_type = data.post_type;
       if (currentMemberId) {
         postData.attributed_to_member_id = currentMemberId;
+      }
+
+      if (familyGroupId) {
+        postData.family_group_id = familyGroupId;
       }
 
       const response = await axiosInstance.post('/posts/posts', postData);
