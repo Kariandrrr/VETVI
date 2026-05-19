@@ -17,6 +17,7 @@ class PostBase(BaseModel):
 
 class PostCreate(PostBase):
     attributed_to_member_id: UUID | None = None
+    family_group_id: UUID
 
 
 class PostUpdate(BaseModel):

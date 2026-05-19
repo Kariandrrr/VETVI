@@ -55,8 +55,13 @@ async def create_post(
     db: AsyncSession,
     post_in: PostCreate,
     author_id: UUID,
+    family_group_id: UUID,
 ) -> Post:
-    post = Post(author_id=author_id, **post_in.model_dump(exclude_unset=True))
+    post = Post(
+        author_id=author_id,
+        family_group_id=family_group_id,
+        **post_in.model_dump(exclude_unset=True)
+    )
     db.add(post)
     await db.commit()
     await db.refresh(post)
@@ -120,17 +125,7 @@ async def get_family_feed(
             status_code=403, detail="You are not a member of this family"
         )
 
-    stmt = select(FamilyMember.linked_user_id).where(
-        FamilyMember.family_group_id == family_group_id,
-        FamilyMember.linked_user_id.isnot(None),
-    )
-    result = await db.execute(stmt)
-    member_user_ids = [row[0] for row in result.all()]
-
-    if not member_user_ids:
-        return []
-
-    query = (
+    stmt = (
         select(Post)
         .options(
             selectinload(Post.media),
@@ -138,13 +133,12 @@ async def get_family_feed(
             selectinload(Post.reactions),
             selectinload(Post.author),
         )
-        .where(Post.author_id.in_(member_user_ids))
+        .where(Post.family_group_id == family_group_id)
         .order_by(Post.created_at.desc())
         .offset(skip)
         .limit(limit)
     )
-
-    result = await db.execute(query)
+    result = await db.execute(stmt)
     posts = result.scalars().all()
 
     return [_post_to_read(post) for post in posts]
