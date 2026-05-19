@@ -41,6 +41,9 @@ class Post(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
+    family_group_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("family_groups.id", ondelete="CASCADE"), index=True
+    )
     author_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
     attributed_to_member_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("family_members.id", ondelete="SET NULL"), index=True
