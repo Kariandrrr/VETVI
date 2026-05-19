@@ -1,8 +1,11 @@
+import {useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {Skeleton} from '@/components/ui/skeleton';
 import {PostCard} from '@/components/PostCard';
 import {HeartIcon, PlusIcon} from 'lucide-react';
+import {CreatePostWithMedia} from './CreatePostWithMedia';
 import type {PostRead} from '@/types/profile_posts';
+import type {UUID} from '@/types/common';
 
 interface UserPostsProps {
     posts: PostRead[];
@@ -13,6 +16,7 @@ interface UserPostsProps {
     onCreatePost: () => void;
     onLoadMore: () => void;
     onPostDelete: () => void;
+    currentMemberId?: UUID;
 }
 
 export const UserPosts: React.FC<UserPostsProps> = ({
@@ -24,7 +28,10 @@ export const UserPosts: React.FC<UserPostsProps> = ({
     onCreatePost,
     onLoadMore,
     onPostDelete,
+    currentMemberId,
 }) => {
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
     if (isLoading) {
         return (
             <div className="space-y-4">
@@ -42,7 +49,7 @@ export const UserPosts: React.FC<UserPostsProps> = ({
         <div className="space-y-4">
             <Button
                 className="w-full mb-4 bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500"
-                onClick={onCreatePost}
+                onClick={() => setIsCreateDialogOpen(true)}
             >
                 <PlusIcon className="w-4 h-4 mr-2" />
                 Создать публикацию
@@ -55,7 +62,7 @@ export const UserPosts: React.FC<UserPostsProps> = ({
                     <Button
                         variant="outline"
                         className="mt-4"
-                        onClick={onCreatePost}
+                        onClick={() => setIsCreateDialogOpen(true)}
                     >
                         Создать первую публикацию
                     </Button>
@@ -68,6 +75,7 @@ export const UserPosts: React.FC<UserPostsProps> = ({
                             post={post}
                             familyGroupId={familyGroupId}
                             onDelete={onPostDelete}
+                            onUpdate={onPostDelete}
                         />
                     ))}
                     {hasNextPage && (
@@ -82,6 +90,13 @@ export const UserPosts: React.FC<UserPostsProps> = ({
                     )}
                 </>
             )}
+
+            <CreatePostWithMedia
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                onPostCreated={onCreatePost}
+                currentMemberId={currentMemberId}
+            />
         </div>
     );
 };

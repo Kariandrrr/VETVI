@@ -3,7 +3,8 @@ import {mediaApi, postsApi, reactionsApi, tagsApi} from '@/api/profile_posts';
 import {getErrorMessage} from '@/api/apiError';
 import {toast} from 'sonner';
 import type {UUID} from '@/types/common';
-import type {PostCreate, PostUpdate, ReactionType} from '@/types/profile_posts';
+import type {MediaFileRead, PostCreate, PostRead, PostUpdate, ReactionType} from '@/types/profile_posts';
+import {axiosInstance} from "@/api/auth.ts";
 
 export const useFamilyFeed = (familyGroupId: UUID, limit = 20) => {
   return useInfiniteQuery({
@@ -42,15 +43,18 @@ export const useUserPosts = (userId: UUID, options?: { enabled?: boolean }) => {
 export const useCreatePost = (onSuccessCallback?: () => void) => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: PostCreate) => postsApi.createPost(data),
+  return useMutation<PostRead, Error, PostCreate>({
+    mutationFn: async (data: PostCreate) => {
+      const response = await postsApi.createPost(data);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['family-feed'] });
       queryClient.invalidateQueries({ queryKey: ['user-posts'] });
       toast.success('Пост опубликован');
       onSuccessCallback?.();
     },
-    onError: (error: unknown) => {
+    onError: (error: Error) => {
       toast.error(getErrorMessage(error, 'Ошибка при создании поста'));
     },
   });
@@ -89,18 +93,48 @@ export const useDeletePost = () => {
   });
 };
 
-export const useUploadMedia = (postId: UUID) => {
+
+export const useUploadMedia = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: File) => mediaApi.uploadMedia(postId, file),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['post', postId] });
+    mutationFn: ({ postId, file }: { postId: UUID; file: File }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return axiosInstance.post<MediaFileRead>(
+        `/media/posts/${postId}/media`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['post', variables.postId] });
       queryClient.invalidateQueries({ queryKey: ['family-feed'] });
       toast.success('Медиафайл загружен');
     },
     onError: (error: unknown) => {
+      console.error('Upload error:', error);
       toast.error(getErrorMessage(error, 'Ошибка при загрузке медиа'));
+    },
+  });
+};
+
+export const useDeleteMedia = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (mediaId: UUID) => mediaApi.deleteMedia(mediaId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['family-feed'] });
+      queryClient.invalidateQueries({ queryKey: ['post'] });
+      toast.success('Медиафайл удалён');
+    },
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error, 'Ошибка при удалении медиафайла'));
     },
   });
 };

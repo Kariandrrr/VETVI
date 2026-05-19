@@ -187,6 +187,7 @@ export const UserProfilePage = () => {
                             onCreatePost={() => setIsCreateDialogOpen(true)}
                             onLoadMore={handleLoadMore}
                             onPostDelete={handlePostDelete}
+                                currentMemberId={myProfile?.id}
                         />
                     </TabsContent>
 
