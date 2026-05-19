@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useCallback, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useMemberProfile, useMyProfile, useUpdateMemberProfile} from '@/hooks/useMemberProfile';
 import {useUserPosts} from '@/hooks/usePosts';
@@ -16,18 +16,25 @@ import {format} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {toast} from 'sonner';
 import type {UUID} from '@/types/common';
+import {AvatarApi} from '@/api/profile_posts';
+import {useQueryClient} from '@tanstack/react-query';
 
 interface MemberProfileProps {
     familyGroupId: UUID;
     memberId?: UUID;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, memberId: propMemberId }) => {
     const { memberId: paramMemberId } = useParams<{ memberId: string }>();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const memberId = (propMemberId || paramMemberId) as UUID;
 
-    const { data: myProfile, isLoading: isLoadingMyProfile } = useMyProfile(familyGroupId);
+    const [avatarVersion, setAvatarVersion] = useState(0);
+
+    const { data: myProfile, isLoading: isLoadingMyProfile, refetch: refetchMyProfile } = useMyProfile(familyGroupId);
     const { data: profile, isLoading: isLoadingProfile, refetch } = useMemberProfile(familyGroupId, memberId);
     const { data: userPostsData, fetchNextPage, hasNextPage, isLoading: isLoadingPosts } = useUserPosts(
         profile?.user_id || '' as UUID,
@@ -36,6 +43,20 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
 
     const updateProfileMutation = useUpdateMemberProfile(familyGroupId, memberId);
     const [isEditing, setIsEditing] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+    const getFullImageUrl = useCallback((path: string | null | undefined): string | undefined => {
+        if (!path) return undefined;
+
+        let cleanPath = path;
+        while (cleanPath.startsWith('/')) {
+            cleanPath = cleanPath.substring(1);
+        }
+
+        const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
+
+        return `${cleanBaseUrl}/${cleanPath}?t=${avatarVersion}`;
+    }, [avatarVersion]);
 
     const isOwner = myProfile?.id === memberId;
     const isFamilyAdmin = myProfile?.role === 'admin';
@@ -45,83 +66,87 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
 
     const allPosts = userPostsData?.pages.flatMap((page) => page.posts) || [];
 
-    const onSubmit = async (data: ProfileUpdateFormData) => {
-    const updateData: Record<string, unknown> = {};
+    const onSubmit = useCallback(async (data: ProfileUpdateFormData, avatarFile?: File) => {
+        const updateData: Record<string, unknown> = {};
 
         updateData.family_id = familyGroupId;
 
-    if (data.display_name !== undefined) updateData.display_name = data.display_name;
-    if (data.bio !== undefined) updateData.bio = data.bio;
-    if (data.date_of_birth !== undefined) updateData.date_of_birth = data.date_of_birth;
-    if (data.first_name !== undefined) updateData.first_name = data.first_name;
-    if (data.last_name !== undefined) updateData.last_name = data.last_name;
-    if (data.patronymic !== undefined) updateData.patronymic = data.patronymic;
-    if (data.gender !== undefined) updateData.gender = data.gender;
-    if (data.birth_place !== undefined) updateData.birth_place = data.birth_place;
-    if (data.death_date !== undefined) updateData.death_date = data.death_date;
-    if (data.death_place !== undefined) updateData.death_place = data.death_place;
-    if (data.is_alive !== undefined) updateData.is_alive = data.is_alive;
+        if (data.display_name !== undefined) updateData.display_name = data.display_name;
+        if (data.bio !== undefined) updateData.bio = data.bio;
+        if (data.date_of_birth !== undefined) updateData.date_of_birth = data.date_of_birth;
+        if (data.first_name !== undefined) updateData.first_name = data.first_name;
+        if (data.last_name !== undefined) updateData.last_name = data.last_name;
+        if (data.patronymic !== undefined) updateData.patronymic = data.patronymic;
+        if (data.gender !== undefined) updateData.gender = data.gender;
+        if (data.birth_place !== undefined) updateData.birth_place = data.birth_place;
+        if (data.death_date !== undefined) updateData.death_date = data.death_date;
+        if (data.death_place !== undefined) updateData.death_place = data.death_place;
+        if (data.is_alive !== undefined) updateData.is_alive = data.is_alive;
 
-    console.log('📤 Sending update data:', updateData);
+        console.log('📤 Sending update data:', updateData);
 
-    try {
-        await updateProfileMutation.mutateAsync(updateData);
-        toast.success('Профиль обновлён');
-        setIsEditing(false);
-        refetch();
-    } catch (error: unknown) {
-        console.error('❌ Update error:', error);
+        try {
+            await updateProfileMutation.mutateAsync(updateData);
 
-        type AxiosErrorType = {
-            response?: {
-                status?: number;
-                data?: {
-                    detail?: string | Array<{
-                        type: string;
-                        loc: string[];
-                        msg: string;
-                        input?: unknown;
-                    }>;
-                };
-            };
-            request?: unknown;
-            message?: string;
-        };
+            if (avatarFile) {
+                setIsUploadingAvatar(true);
+                const response = await AvatarApi.uploadAvatar(familyGroupId, memberId, avatarFile);
+                console.log('Avatar uploaded:', response.data.avatar_url);
 
-        const axiosError = error as AxiosErrorType;
+                setAvatarVersion(prev => prev + 1);
 
-        if (axiosError.response) {
-            console.error('Response status:', axiosError.response.status);
-            console.error('Response data:', axiosError.response.data);
+                await queryClient.invalidateQueries({
+                    queryKey: ['member-profile', familyGroupId, memberId]
+                });
+                await queryClient.invalidateQueries({
+                    queryKey: ['my-profile', familyGroupId]
+                });
 
-            const detail = axiosError.response.data?.detail;
-
-            if (detail) {
-                if (Array.isArray(detail)) {
-                    detail.forEach((err) => {
-                        const field = err.loc?.slice(1).join('.') || 'unknown';
-                        const message = err.msg;
-                        console.error(`❌ Validation error - ${field}: ${message}`);
-                        toast.error(`${field}: ${message}`);
-                    });
-                } else if (typeof detail === 'string') {
-                    console.error(`❌ Error: ${detail}`);
-                    toast.error(detail);
-                } else {
-                    toast.error('Ошибка валидации данных');
-                }
-            } else {
-                toast.error(`Ошибка ${axiosError.response.status}`);
+                await refetch();
+                await refetchMyProfile();
             }
-        } else if (axiosError.request) {
-            console.error('No response received:', axiosError.request);
-            toast.error('Сервер не отвечает');
-        } else {
-            console.error('Error setting up request:', axiosError.message);
-            toast.error(`Ошибка: ${axiosError.message}`);
+
+            toast.success('Профиль обновлён');
+            setIsEditing(false);
+        } catch (error) {
+            console.error('❌ Update error:', error);
+            toast.error('Ошибка обновления');
+        } finally {
+            setIsUploadingAvatar(false);
         }
-    }
-};
+    }, [familyGroupId, memberId, updateProfileMutation, queryClient, refetch, refetchMyProfile]);
+
+    const onAvatarRemove = useCallback(async () => {
+        try {
+            await AvatarApi.deleteAvatar(familyGroupId, memberId);
+
+            setAvatarVersion(prev => prev + 1);
+
+            await queryClient.invalidateQueries({
+                queryKey: ['member-profile', familyGroupId, memberId]
+            });
+            await queryClient.invalidateQueries({
+                queryKey: ['my-profile', familyGroupId]
+            });
+
+            await refetch();
+            await refetchMyProfile();
+
+            toast.success('Аватар удалён');
+        } catch (error) {
+            console.error('❌ Remove avatar error:', error);
+            toast.error('Ошибка при удалении аватара');
+        }
+    }, [familyGroupId, memberId, queryClient, refetch, refetchMyProfile]);
+
+    const handleAvatarError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        console.error('Avatar failed to load:', profile?.avatar_url);
+        const target = e.currentTarget;
+        const urlWithoutVersion = getFullImageUrl(profile?.avatar_url)?.split('?')[0];
+        if (urlWithoutVersion && target.src !== urlWithoutVersion) {
+            target.src = urlWithoutVersion;
+        }
+    }, [profile?.avatar_url, getFullImageUrl]);
 
     if (isLoadingProfile || isLoadingMyProfile) {
         return (
@@ -169,7 +194,10 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
 
                 <div className="flex flex-col md:flex-row gap-8 relative z-10">
                     <Avatar className="w-32 h-32 border-4 border-[var(--primary)]/30 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                        <AvatarImage src={profile.avatar_url || undefined} />
+                        <AvatarImage
+                            src={getFullImageUrl(profile.avatar_url)}
+                            onError={handleAvatarError}
+                        />
                         <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] text-3xl text-white">
                             {initials || <UserIcon className="w-12 h-12" />}
                         </AvatarFallback>
@@ -326,7 +354,7 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
                         initialData={{
                             display_name: profile.display_name || '',
                             bio: profile.bio || '',
-                            date_of_birth: profile.date_of_birth || '',  // <-- изменено
+                            date_of_birth: profile.date_of_birth || '',
                             first_name: profile.first_name || '',
                             last_name: profile.last_name || '',
                             patronymic: profile.patronymic || '',
@@ -336,8 +364,10 @@ export const MemberProfile: React.FC<MemberProfileProps> = ({ familyGroupId, mem
                             death_place: profile.death_place || '',
                             is_alive: profile.is_alive !== false,
                         }}
+                        initialAvatarUrl={getFullImageUrl(profile.avatar_url)}
                         onSubmit={onSubmit}
-                        isSubmitting={updateProfileMutation.isPending}
+                        onAvatarRemove={onAvatarRemove}
+                        isSubmitting={updateProfileMutation.isPending || isUploadingAvatar}
                         isAdmin={isFamilyAdmin}
                         isOwner={isOwner}
                     />

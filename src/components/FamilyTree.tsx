@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import {useCallback, useEffect, useMemo} from 'react';
 import ReactFlow, {
     addEdge,
     applyEdgeChanges,
@@ -15,8 +15,23 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import dagre from 'dagre';
-import type { FamilyMember, Relationship } from '@/types/families';
-import { getMemberFullName } from '@/types/families';
+import type {FamilyMember, Relationship} from '@/types/families';
+import {getMemberFullName} from '@/types/families';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const getAvatarUrl = (avatarUrl: string | null | undefined, version: number = 0): string | undefined => {
+    if (!avatarUrl) return undefined;
+
+    let cleanPath = avatarUrl;
+    while (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+    }
+
+    const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
+
+    return `${cleanBaseUrl}/${cleanPath}?t=${version}`;
+};
 
 const MemberNode = ({ data }: { data: { member: FamilyMember } }) => {
   if (!data || !data.member) {
@@ -42,11 +57,27 @@ const MemberNode = ({ data }: { data: { member: FamilyMember } }) => {
     ? getMemberFullName(m)
     : 'Без имени';
 
+  const avatarUrl = getAvatarUrl(m.avatar_url);
+
   return (
     <div className="glass-card w-40 p-3 flex flex-col items-center gap-2 border-[var(--glass-border)] hover:border-[var(--primary)] transition-colors shadow-lg bg-[var(--glass-bg)] backdrop-blur-md cursor-pointer group">
       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center text-white font-bold text-lg overflow-hidden shadow-inner transition-transform group-hover:scale-110">
-        {m.avatar_url ? (
-          <img src={m.avatar_url} alt="" className="w-full h-full object-cover" />
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt=""
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // При ошибке показываем инициалы
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                parent.className = 'w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center text-white font-bold text-lg overflow-hidden shadow-inner transition-transform group-hover:scale-110';
+                parent.textContent = getInitials();
+              }
+            }}
+          />
         ) : (
           getInitials()
         )}

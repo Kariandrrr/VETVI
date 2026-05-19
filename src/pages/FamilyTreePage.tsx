@@ -1,29 +1,31 @@
-import { useMemo, useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import {useEffect, useMemo, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
 import {
     ArrowLeft,
     ChevronDown,
     ChevronUp,
     Info,
-    Plus,
-    Search,
-    Users,
     Maximize2,
     Minimize2,
+    Plus,
+    Search,
+    Trash2,
     UserCircle,
-    Trash2
+    Users
 } from 'lucide-react';
-import { useFamilyTreeData } from '@/hooks/useFamilyTreeData';
-import { useFamilies } from '@/hooks/useFamilies';
-import { useAuth } from '@/hooks/useAuth';
-import { FamilyTree } from '@/components/FamilyTree';
-import { AddMemberModal } from '@/components/AddMemberModal';
-import { type FamilyGroupRead, type FamilyMember, getMemberFullName } from '@/types/families';
-import { familyApi } from '@/api/family';
-import { toast } from 'sonner';
+import {useFamilyTreeData} from '@/hooks/useFamilyTreeData';
+import {useFamilies} from '@/hooks/useFamilies';
+import {useAuth} from '@/hooks/useAuth';
+import {FamilyTree} from '@/components/FamilyTree';
+import {AddMemberModal} from '@/components/AddMemberModal';
+import {type FamilyGroupRead, type FamilyMember, getMemberFullName} from '@/types/families';
+import {familyApi} from '@/api/family';
+import {toast} from 'sonner';
 import logo from '@/assets/logo.png';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const getFullNameFromMember = (member: FamilyMember): string => {
     const parts = [member.last_name, member.first_name, member.patronymic].filter(Boolean);
@@ -41,6 +43,19 @@ const getInitials = (member: FamilyMember): string => {
     const lastInitial = lastName[0] || '';
     const initials = `${firstInitial}${lastInitial}`.toUpperCase();
     return initials || '?';
+};
+
+const getAvatarUrl = (avatarUrl: string | null | undefined, version: number = 0): string | undefined => {
+    if (!avatarUrl) return undefined;
+
+    let cleanPath = avatarUrl;
+    while (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+    }
+
+    const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
+
+    return `${cleanBaseUrl}/${cleanPath}?t=${version}`;
 };
 
 export const FamilyTreePage = () => {
@@ -63,6 +78,14 @@ export const FamilyTreePage = () => {
     const [showAddMember, setShowAddMember] = useState(false);
     const [search, setSearch] = useState('');
     const [isTreeFullscreen, setIsTreeFullscreen] = useState(false);
+    const [avatarVersion, setAvatarVersion] = useState(0);
+
+    useEffect(() => {
+        if (members && members.length > 0) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
+            setAvatarVersion(prev => prev + 1);
+        }
+    }, [members]);
 
     const validMembers = useMemo(() =>
         members?.filter(m => m && m.id) || [],
@@ -91,41 +114,33 @@ export const FamilyTreePage = () => {
         [validMembers, search]
     );
 
-    // Обработчик перехода на профиль для редактирования
     const handleEditMember = (memberId: string) => {
         navigate(`/families/${familyId}/members/${memberId}`);
     };
 
     const handleDeleteMember = async (member: FamilyMember) => {
-    const fullName = getFullNameFromMember(member);
-    if (!confirm(`Вы уверены, что хотите полностью удалить ${fullName}?`)) return;
+        const fullName = getFullNameFromMember(member);
+        if (!confirm(`Вы уверены, что хотите полностью удалить ${fullName}?`)) return;
 
-    try {
-        await familyApi.deleteMember(member.id);
-        toast.success('Участник удалён');
-        await refetch();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-        toast.error('Ошибка', { description: 'Не удалось удалить участника' });
-    }
-};
-
-//     const handleRemoveFromFamily = async (member: FamilyMember) => {
-//     const fullName = getFullNameFromMember(member);
-//     if (!confirm(`Вы уверены, что хотите исключить ${fullName} из семьи?`)) return;
-//
-//     try {
-//         await familyApi.removeUserFromFamily(familyId!, member.linked_user_id!);
-//         toast.success('Пользователь исключён из семьи');
-//         await refetch();
-//         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     } catch (error) {
-//         toast.error('Ошибка', { description: 'Не удалось исключить пользователя' });
-//     }
-// };
+        try {
+            await familyApi.deleteMember(member.id);
+            toast.success('Участник удалён');
+            await refetch();
+            setAvatarVersion(prev => prev + 1);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+            toast.error('Ошибка', { description: 'Не удалось удалить участника' });
+        }
+    };
 
     const handleViewProfile = (memberId: string) => {
         navigate(`/families/${familyId}/members/${memberId}`);
+    };
+
+    const handleAddSuccess = async () => {
+        await refetch();
+        setAvatarVersion(prev => prev + 1);
+        setShowAddMember(false);
     };
 
     if (isLoading) {
@@ -136,9 +151,129 @@ export const FamilyTreePage = () => {
         );
     }
 
+    const renderMemberRow = (member: FamilyMember) => {
+        const isAlive = member.is_alive !== false;
+        const hasAccount = member.linked_user_id !== null && member.linked_user_id !== undefined;
+        const canEdit = !hasAccount;
+        const avatarUrl = getAvatarUrl(member.avatar_url, avatarVersion);
+
+        return (
+            <div
+                key={member.id}
+                className={`group flex items-center gap-4 p-3 rounded-xl transition-colors ${
+                    isAlive 
+                        ? 'bg-emerald-900/10 hover:bg-emerald-900/20 border-l-2 border-l-emerald-500/30' 
+                        : 'bg-slate-800/20 hover:bg-slate-800/30 border-l-2 border-l-slate-500/20'
+                }`}
+            >
+                {/* Аватар */}
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 overflow-hidden">
+                    {avatarUrl ? (
+                        <img
+                            src={avatarUrl}
+                            className="w-full h-full rounded-full object-cover"
+                            alt=""
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const fallbackUrl = getAvatarUrl(member.avatar_url, 0);
+                                if (fallbackUrl && target.src !== fallbackUrl) {
+                                    target.src = fallbackUrl;
+                                } else {
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                        parent.className = `w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 ${
+                                            isAlive 
+                                                ? 'bg-gradient-to-br from-emerald-500 to-teal-400' 
+                                                : 'bg-gradient-to-br from-slate-500 to-gray-400'
+                                        }`;
+                                        parent.textContent = getInitials(member);
+                                    }
+                                }
+                            }}
+                        />
+                    ) : (
+                        <div className={`w-full h-full rounded-full flex items-center justify-center ${
+                            isAlive 
+                                ? 'bg-gradient-to-br from-emerald-500 to-teal-400' 
+                                : 'bg-gradient-to-br from-slate-500 to-gray-400'
+                        }`}>
+                            {getInitials(member)}
+                        </div>
+                    )}
+                </div>
+
+                {/* Информация об участнике */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <p className={`font-medium truncate ${isAlive ? 'text-white' : 'text-slate-300'}`}
+                           title={getFullNameFromMember(member)}>
+                            {getTableNameFromMember(member)}
+                        </p>
+                        {!isAlive && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-slate-700/50 text-slate-300">
+                                🕊️ Умер(ла)
+                            </span>
+                        )}
+                        {hasAccount && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
+                                🔗 с аккаунтом
+                            </span>
+                        )}
+                    </div>
+                    <p className={`text-xs ${isAlive ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {member.gender === 'male' ? 'Мужчина' : member.gender === 'female' ? 'Женщина' : 'Не указано'}
+                    </p>
+                </div>
+
+                {/* Кнопки действий */}
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {isAdmin && (
+                        <>
+                            {canEdit && (
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20"
+                                    title="Редактировать"
+                                    onClick={() => handleEditMember(member.id)}
+                                >
+                                    ✏️
+                                </Button>
+                            )}
+
+                            {!hasAccount && (
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/20"
+                                    title="Полностью удалить"
+                                    onClick={() => handleDeleteMember(member)}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            )}
+                        </>
+                    )}
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className={`border-[var(--glass-border)] hover:bg-[var(--glass-bg)] ${
+                            isAlive ? 'text-slate-300' : 'text-slate-400'
+                        }`}
+                        onClick={() => handleViewProfile(member.id)}
+                    >
+                        <UserCircle className="w-4 h-4 mr-1" />
+                        Профиль
+                    </Button>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-            {/* Header - без изменений */}
+            {/* Header */}
             <header className="sticky top-0 z-50 backdrop-blur-2xl bg-black/30 border-b border-[var(--glass-border)]">
                 <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between h-16">
                     <div className="flex items-center gap-4">
@@ -188,124 +323,14 @@ export const FamilyTreePage = () => {
                                 {filtered.length === 0 ? (
                                     <div className="text-center py-8 text-slate-500">Участников не найдено</div>
                                 ) : (
-                                    filtered.map((member: FamilyMember) => {
-                                        // Определяем статусы
-                                        const isAlive = member.is_alive !== false;
-                                        const hasAccount = member.linked_user_id !== null && member.linked_user_id !== undefined;
-                                        // Редактировать можно только если НЕТ привязанного аккаунта
-                                        const canEdit = !hasAccount;
-
-                                        return (
-                                            <div
-                                                key={member.id}
-                                                className={`group flex items-center gap-4 p-3 rounded-xl transition-colors ${
-                                                    isAlive 
-                                                        ? 'bg-emerald-900/10 hover:bg-emerald-900/20 border-l-2 border-l-emerald-500/30' 
-                                                        : 'bg-slate-800/20 hover:bg-slate-800/30 border-l-2 border-l-slate-500/20'
-                                                }`}
-                                            >
-                                                {/* Аватар */}
-                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 ${
-                                                    isAlive 
-                                                        ? 'bg-gradient-to-br from-emerald-500 to-teal-400' 
-                                                        : 'bg-gradient-to-br from-slate-500 to-gray-400'
-                                                }`}>
-                                                    {member.avatar_url ? (
-                                                        <img src={member.avatar_url} className="w-full h-full rounded-full object-cover" alt="" />
-                                                    ) : (
-                                                        getInitials(member)
-                                                    )}
-                                                </div>
-
-                                                {/* Информация об участнике */}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <p className={`font-medium truncate ${isAlive ? 'text-white' : 'text-slate-300'}`}
-                                                           title={getFullNameFromMember(member)}>
-                                                            {getTableNameFromMember(member)}
-                                                        </p>
-                                                        {!isAlive && (
-                                                            <span className="text-xs px-1.5 py-0.5 rounded bg-slate-700/50 text-slate-300">
-                                                                🕊️ Умер(ла)
-                                                            </span>
-                                                        )}
-                                                        {hasAccount && (
-                                                            <span className="text-xs px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">
-                                                                🔗 с аккаунтом
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className={`text-xs ${isAlive ? 'text-slate-400' : 'text-slate-500'}`}>
-                                                        {member.gender === 'male' ? 'Мужчина' : member.gender === 'female' ? 'Женщина' : 'Не указано'}
-                                                    </p>
-                                                </div>
-
-                                                {/* Кнопки действий */}
-                                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    {isAdmin && (
-                                                        <>
-                                                            {/* Кнопка редактирования - только для пользователей БЕЗ аккаунта */}
-                                                            {canEdit && (
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20"
-                                                                    title="Редактировать"
-                                                                    onClick={() => handleEditMember(member.id)}
-                                                                >
-                                                                    ✏️
-                                                                </Button>
-                                                            )}
-
-                                                            {/* Кнопка исключения из семьи - для пользователей С аккаунтом */}
-                                                            {/*{hasAccount && (*/}
-                                                            {/*    <Button*/}
-                                                            {/*        size="sm"*/}
-                                                            {/*        variant="ghost"*/}
-                                                            {/*        className="h-8 w-8 p-0 text-slate-400 hover:text-orange-400 hover:bg-orange-500/20"*/}
-                                                            {/*        title="Исключить из семьи"*/}
-                                                            {/*        onClick={() => handleRemoveFromFamily(member)}*/}
-                                                            {/*    >*/}
-                                                            {/*        <DoorOpen className="w-4 h-4" />*/}
-                                                            {/*    </Button>*/}
-                                                            {/*)}*/}
-
-                                                            {/* Кнопка полного удаления - только для пользователей БЕЗ аккаунта */}
-                                                            {!hasAccount && (
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/20"
-                                                                    title="Полностью удалить"
-                                                                    onClick={() => handleDeleteMember(member)}
-                                                                >
-                                                                    <Trash2 className="w-4 h-4" />
-                                                                </Button>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className={`border-[var(--glass-border)] hover:bg-[var(--glass-bg)] ${
-                                                            isAlive ? 'text-slate-300' : 'text-slate-400'
-                                                        }`}
-                                                        onClick={() => handleViewProfile(member.id)}
-                                                    >
-                                                        <UserCircle className="w-4 h-4 mr-1" />
-                                                        Профиль
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
+                                    filtered.map(renderMemberRow)
                                 )}
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Семейное древо - без изменений */}
+                {/* Семейное древо */}
                 <div className="glass-card overflow-hidden relative">
                     <div className="border-b border-[var(--glass-border)] p-5 flex items-center justify-between gap-4 flex-wrap">
                         <div>
@@ -342,7 +367,11 @@ export const FamilyTreePage = () => {
                     </div>
 
                     <div className="p-4 bg-black/10">
-                        <FamilyTree members={validMembers} relationships={relationships || []} fullscreen={false} />
+                        <FamilyTree
+                            members={validMembers}
+                            relationships={relationships || []}
+                            fullscreen={false}
+                        />
                     </div>
                 </div>
             </main>
@@ -354,14 +383,11 @@ export const FamilyTreePage = () => {
                     familyId={familyId}
                     open={showAddMember}
                     onOpenChange={setShowAddMember}
-                    onAddSuccess={async () => {
-                        await refetch();
-                        setShowAddMember(false);
-                    }}
+                    onAddSuccess={handleAddSuccess}
                 />
             )}
 
-            {/* Полноэкранный режим - без изменений */}
+            {/* Полноэкранный режим */}
             {isTreeFullscreen && currentFamily && (
                 <div className="fixed inset-0 z-[100] bg-[var(--background)] flex flex-col">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/30 backdrop-blur-xl shrink-0">
@@ -388,7 +414,11 @@ export const FamilyTreePage = () => {
                     </div>
 
                     <div className="flex-1 w-full" onClick={(e) => e.stopPropagation()}>
-                        <FamilyTree members={validMembers} relationships={relationships || []} fullscreen={true} />
+                        <FamilyTree
+                            members={validMembers}
+                            relationships={relationships || []}
+                            fullscreen={true}
+                        />
                     </div>
 
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-400 pointer-events-none z-[101]">

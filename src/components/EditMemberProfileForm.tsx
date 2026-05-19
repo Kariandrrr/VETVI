@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,6 +7,8 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
+import {CameraIcon, Loader2, XIcon} from 'lucide-react';
 import {toast} from 'sonner';
 
 const editProfileSchema = z.object({
@@ -27,7 +29,9 @@ type EditProfileFormData = z.infer<typeof editProfileSchema>;
 
 interface EditMemberProfileFormProps {
     initialData: EditProfileFormData;
-    onSubmit: (data: EditProfileFormData) => Promise<void>;
+    initialAvatarUrl?: string | null;
+    onSubmit: (data: EditProfileFormData, avatarFile?: File) => Promise<void>;
+    onAvatarRemove?: () => Promise<void>;
     isSubmitting?: boolean;
     isAdmin?: boolean;
     isOwner?: boolean;
@@ -35,11 +39,18 @@ interface EditMemberProfileFormProps {
 
 export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
     initialData,
+    initialAvatarUrl,
     onSubmit,
+    onAvatarRemove,
     isSubmitting = false,
     isAdmin = false,
     isOwner = false,
 }) => {
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(initialAvatarUrl || null);
+    const [isRemovingAvatar, setIsRemovingAvatar] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const form = useForm<EditProfileFormData>({
         resolver: zodResolver(editProfileSchema),
         defaultValues: initialData,
@@ -49,18 +60,107 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
         form.reset(initialData);
     }, [initialData, form]);
 
+    const updateAvatarPreview = useCallback(() => {
+        setAvatarPreview(initialAvatarUrl || null);
+    }, [initialAvatarUrl]);
+
+    useEffect(() => {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+        updateAvatarPreview();
+    }, [updateAvatarPreview]);
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Пожалуйста, выберите изображение');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Размер изображения не должен превышать 5MB');
+            return;
+        }
+
+        setAvatarFile(file);
+        const preview = URL.createObjectURL(file);
+        setAvatarPreview(preview);
+    };
+
+    const handleRemoveAvatar = async () => {
+        if (onAvatarRemove) {
+            setIsRemovingAvatar(true);
+            try {
+                await onAvatarRemove();
+                setAvatarFile(null);
+                setAvatarPreview(null);
+                toast.success('Аватар удалён');
+            } catch (err) {
+                // Исправлено: используем err вместо error
+                console.error('Error removing avatar:', err);
+                toast.error('Ошибка при удалении аватара');
+            } finally {
+                setIsRemovingAvatar(false);
+            }
+        }
+    };
+
     const handleSubmit = async (data: EditProfileFormData) => {
         try {
-            await onSubmit(data);
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
+            await onSubmit(data, avatarFile || undefined);
+        } catch (err) {
+            console.error('Submit error:', err);
             toast.error('Ошибка при сохранении');
         }
     };
 
+    const hasAvatar = avatarPreview && !avatarFile;
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                {/* Avatar Upload */}
+                <div className="flex flex-col items-center gap-4 pb-4 border-b border-slate-700">
+                    <div className="relative">
+                        <Avatar className="w-24 h-24 border-2 border-[var(--primary)]">
+                            <AvatarImage src={avatarPreview || undefined} />
+                            <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] text-white text-2xl">
+                                {initialData.first_name?.[0] || initialData.last_name?.[0] || '👤'}
+                            </AvatarFallback>
+                        </Avatar>
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="absolute bottom-0 right-0 p-1.5 rounded-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/80 transition-colors"
+                        >
+                            <CameraIcon className="w-4 h-4" />
+                        </button>
+                        {hasAvatar && onAvatarRemove && (
+                            <button
+                                type="button"
+                                onClick={handleRemoveAvatar}
+                                disabled={isRemovingAvatar}
+                                className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                            >
+                                {isRemovingAvatar ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                    <XIcon className="w-3 h-3" />
+                                )}
+                            </button>
+                        )}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                        />
+                    </div>
+                    <p className="text-xs text-slate-400">Нажмите на камеру, чтобы загрузить аватар</p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                         control={form.control}
@@ -221,7 +321,6 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                     )}
                 />
 
-                {/* Только для админов при редактировании чужого профиля */}
                 {isAdmin && !isOwner && (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -292,7 +391,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                     </Button>
                     <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isRemovingAvatar}
                         className="bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500"
                     >
                         {isSubmitting ? 'Сохранение...' : 'Сохранить'}
@@ -303,4 +402,4 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
     );
 };
 
-export type ProfileUpdateFormData = z.infer<typeof editProfileSchema>;
+export type ProfileUpdateFormData = EditProfileFormData;
