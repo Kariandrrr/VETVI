@@ -12,7 +12,7 @@ interface UserPostsProps {
     isLoading: boolean;
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
-    familyGroupId: string;
+    familyGroupId: UUID;
     onCreatePost: () => void;
     onLoadMore: () => void;
     onPostDelete: () => void;

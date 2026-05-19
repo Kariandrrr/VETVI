@@ -1,21 +1,13 @@
 import {useState} from 'react';
-import {useCreatePost, useFamilyFeed} from '@/hooks/usePosts';
-import {useAllFamilyMembers, useMyProfile} from '@/hooks/useMemberProfile';
+import {useFamilyFeed} from '@/hooks/usePosts';
+import {useMyProfile} from '@/hooks/useMemberProfile';
 import {Button} from '@/components/ui/button';
 import {PostCard} from '@/components/PostCard';
-import {PostForm} from '@/components/PostForm';
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {CreatePostWithMedia} from '@/components/CreatePostWithMedia';
 import {Skeleton} from '@/components/ui/skeleton';
 import {Loader2, PlusIcon} from 'lucide-react';
 import type {UUID} from '@/types/common';
-import { getDisplayName } from '@/utils/nameFormatter';
-
-interface PostFormFields {
-  title: string;
-  body: string;
-  post_type: 'text' | 'photo' | 'audio' | 'video' | 'document';
-  attributed_to_member_id: string;
-}
+import {getDisplayName} from '@/utils/nameFormatter';
 
 interface FamilyFeedProps {
   familyGroupId: UUID;
@@ -24,18 +16,12 @@ interface FamilyFeedProps {
 export const FamilyFeed: React.FC<FamilyFeedProps> = ({ familyGroupId }) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { data: myProfile } = useMyProfile(familyGroupId);
-  const { data: familyMembers } = useAllFamilyMembers(familyGroupId);
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } = useFamilyFeed(familyGroupId);
-  const createPostMutation = useCreatePost(() => setIsCreateDialogOpen(false));
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, refetch } = useFamilyFeed(familyGroupId);
 
   const allPosts = data?.pages.flatMap((page) => page.posts) || [];
 
-  const handleCreatePost = async (data: PostFormFields) => {
-    const postData = {
-      ...data,
-      attributed_to_member_id: data.attributed_to_member_id || null,
-    };
-    await createPostMutation.mutateAsync(postData);
+  const handlePostCreated = () => {
+    void refetch();
   };
 
   if (isLoading) {
@@ -63,15 +49,15 @@ export const FamilyFeed: React.FC<FamilyFeedProps> = ({ familyGroupId }) => {
       <div className="glass-card p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center">
-              <span className="text-white font-bold">
-                {getDisplayName({
-                  firstName: myProfile?.first_name || '',
-                  lastName: myProfile?.last_name || '',
-                  patronymic: myProfile?.patronymic,
-                  displayName: myProfile?.display_name,
-                }).charAt(0).toUpperCase() || '?'}
-              </span>
-            </div>
+            <span className="text-white font-bold">
+              {getDisplayName({
+                firstName: myProfile?.first_name || '',
+                lastName: myProfile?.last_name || '',
+                patronymic: myProfile?.patronymic,
+                displayName: myProfile?.display_name,
+              }).charAt(0).toUpperCase() || '?'}
+            </span>
+          </div>
           <button
             className="flex-1 text-left px-4 py-2 rounded-xl bg-black/20 border border-[var(--glass-border)] text-slate-400 hover:text-white hover:border-[var(--primary)]/50 transition-all"
             onClick={() => setIsCreateDialogOpen(true)}
@@ -93,7 +79,10 @@ export const FamilyFeed: React.FC<FamilyFeedProps> = ({ familyGroupId }) => {
       {allPosts.length === 0 ? (
         <div className="glass-card p-12 text-center">
           <p className="text-slate-400 mb-4">В семье пока нет публикаций</p>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Button
+            onClick={() => setIsCreateDialogOpen(true)}
+            className="bg-gradient-to-r from-emerald-400 to-cyan-400"
+          >
             Создать первую публикацию
           </Button>
         </div>
@@ -104,6 +93,7 @@ export const FamilyFeed: React.FC<FamilyFeedProps> = ({ familyGroupId }) => {
               key={post.id}
               post={post}
               familyGroupId={familyGroupId}
+              onUpdate={handlePostCreated}
             />
           ))}
 
@@ -129,26 +119,13 @@ export const FamilyFeed: React.FC<FamilyFeedProps> = ({ familyGroupId }) => {
       )}
 
       {/* Create Post Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900 max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-emerald-600 dark:text-emerald-400">
-              Новая публикация
-            </DialogTitle>
-          </DialogHeader>
-
-          <PostForm
-            familyMembers={familyMembers?.map((m) => ({
-              id: m.id,
-              display_name: m.display_name,
-              first_name: m.first_name,
-              last_name: m.last_name,
-            }))}
-            onSubmit={handleCreatePost}
-            isSubmitting={createPostMutation.isPending}
-          />
-        </DialogContent>
-      </Dialog>
+      <CreatePostWithMedia
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onPostCreated={handlePostCreated}
+        currentMemberId={myProfile?.id}
+        familyGroupId={familyGroupId}
+      />
     </div>
   );
 };

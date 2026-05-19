@@ -28,7 +28,7 @@ import type {UUID} from '@/types/common';
 
 interface PostCardProps {
   post: PostRead;
-  familyGroupId: string;
+  familyGroupId: UUID;
   onDelete?: () => void;
   isCompact?: boolean;
   onUpdate?: () => void;

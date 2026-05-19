@@ -14,6 +14,7 @@ import {TagSelector} from './TagSelector';
 import type {UUID} from '@/types/common';
 import type {AxiosError} from 'axios';
 import {useState} from "react";
+import {postsApi} from "@/api/profile_posts.ts";
 
 const postSchema = z.object({
   title: z.string().max(100, 'Заголовок не должен превышать 100 символов').optional(),
@@ -28,7 +29,7 @@ interface CreatePostWithMediaProps {
   onOpenChange: (open: boolean) => void;
   onPostCreated: () => void;
   currentMemberId?: UUID | null;
-  familyGroupId: string;
+  familyGroupId: UUID;
 }
 
 const postTypeIcons: Record<string, React.ReactNode> = {
@@ -74,25 +75,18 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
     setIsSubmitting(true);
 
     try {
-      const postData: Record<string, unknown> = {};
+      const postData = {
+        title: data.title || '',
+        body: data.body || '',
+        post_type: data.post_type || 'text',
+        attributed_to_member_id: currentMemberId || null,
+        family_group_id: familyGroupId,
+      };
 
-      if (data.title && data.title.trim()) {
-        postData.title = data.title.trim();
-      }
-      if (data.body && data.body.trim()) {
-        postData.body = data.body.trim();
-      }
-      postData.post_type = data.post_type;
-      if (currentMemberId) {
-        postData.attributed_to_member_id = currentMemberId;
-      }
+      console.log('📤 Sending post data:', JSON.stringify(postData, null, 2));
 
-      if (familyGroupId) {
-        postData.family_group_id = familyGroupId;
-      }
-
-      const response = await axiosInstance.post('/posts/posts', postData);
-      const newPost = response.data;
+      const response = await postsApi.createPost(postData, familyGroupId);
+      const newPost = response.data
 
       if (selectedTagIds.size > 0 && familyGroupId) {
         try {
@@ -111,14 +105,23 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
       onPostCreated();
       onOpenChange(false);
       toast.success('Пост опубликован!');
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error('Create post error:', axiosError.response?.data);
-      toast.error('Ошибка при создании поста');
-    } finally {
-      setIsSubmitting(false);
+    }  catch (error) {
+  const axiosError = error as AxiosError;
+  console.error('Create post error:', axiosError.response?.data);
+  const errorData = axiosError.response?.data as { detail: Array<{ msg: string }> | string };
+  if (errorData?.detail) {
+    if (Array.isArray(errorData.detail)) {
+      console.error('Validation errors:', errorData.detail.map(d => d.msg));
+      toast.error(errorData.detail.map(d => d.msg).join(', '));
+    } else {
+      console.error('Error detail:', errorData.detail);
+      toast.error(errorData.detail);
     }
-  };
+  } else {
+    toast.error('Ошибка при создании поста');
+  }
+}
+};
 
   const handleClose = () => {
     form.reset();
