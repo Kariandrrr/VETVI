@@ -180,7 +180,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
           placeholder="Новый тег..."
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyUp={handleKeyPress}
           maxLength={50}
           className="flex-1 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 text-sm"
           disabled={createTagMutation.isPending}
