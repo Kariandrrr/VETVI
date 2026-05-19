@@ -2,7 +2,7 @@ import {useFamilies} from '@/hooks/useFamilies';
 import {useAuth} from '@/hooks/useAuth';
 import {Button} from '@/components/ui/button';
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu';
-import {ChevronDown, Heart, Users} from 'lucide-react';
+import {ChevronDown, Heart, Home, Users} from 'lucide-react';
 import type {UUID} from '@/types/common';
 import type {FamilyGroupRead, FamilyMembershipRead} from '@/types/families';
 
@@ -10,12 +10,14 @@ interface FamilySwitcherProps {
   selectedFamilyId: UUID | null;
   onSelectFamily: (familyId: UUID) => void;
   showOnlyWithAccess?: boolean;
+  placeholder?: string;
 }
 
 export const FamilySwitcher: React.FC<FamilySwitcherProps> = ({
   selectedFamilyId,
   onSelectFamily,
   showOnlyWithAccess = true,
+  placeholder = 'Выберите семью',
 }) => {
   const { data: familiesRaw, isLoading } = useFamilies();
   const { user } = useAuth();
@@ -52,12 +54,20 @@ export const FamilySwitcher: React.FC<FamilySwitcherProps> = ({
     );
   }
 
+  const buttonIcon = selectedFamily ? <Home className="w-4 h-4" /> : <Users className="w-4 h-4" />;
+  const buttonText = selectedFamily ? selectedFamily.name : placeholder;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2 bg-slate-800 border-slate-700 hover:bg-slate-700">
-          <Users className="w-4 h-4" />
-          {selectedFamily ? selectedFamily.name : 'Выберите семью'}
+        <Button
+          variant="outline"
+          className={`gap-2 bg-slate-800 border-slate-700 hover:bg-slate-700 ${
+            !selectedFamily ? 'text-amber-400 border-amber-500/50' : ''
+          }`}
+        >
+          {buttonIcon}
+          {buttonText}
           <ChevronDown className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -77,6 +87,9 @@ export const FamilySwitcher: React.FC<FamilySwitcherProps> = ({
               <div className="flex items-center gap-2">
                 {isFavorite && <Heart className="w-4 h-4 text-[var(--primary)]" />}
                 <span>{family.name}</span>
+                {selectedFamilyId === family.id && (
+                  <span className="ml-auto text-xs text-emerald-400">✓</span>
+                )}
               </div>
             </DropdownMenuItem>
           );
