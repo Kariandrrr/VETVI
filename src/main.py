@@ -1,9 +1,11 @@
 import asyncio
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from .core.config import settings
 from .core.models import db_helper
@@ -32,10 +34,13 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.run.cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Content-Type", "Set-Cookie", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+uploads_path = Path("uploads")
+if uploads_path.exists():
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(router)
 
