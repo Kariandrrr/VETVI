@@ -13,7 +13,7 @@ from ...service.media_and_profiles import posts as post_service
 router = APIRouter()
 
 
-@router.post("/posts", response_model=PostRead, status_code=201)
+@router.post("/{family_group_id}/posts", response_model=PostRead, status_code=201)
 async def create_post(
     post_in: PostCreate,
     db: AsyncSession = Depends(get_db),
