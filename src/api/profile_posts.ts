@@ -62,8 +62,8 @@ export const profileApi = {
 // ========== POSTS ==========
 
 export const postsApi = {
-  createPost: (data: PostCreate) =>
-    axiosInstance.post<PostRead>('/posts/posts', data),
+    createPost: (data: PostCreate, familyGroupId: UUID) =>
+    axiosInstance.post<PostRead>(`/posts/${familyGroupId}/posts`, data),
 
   getUserPosts: (userId: UUID, skip = 0, limit = 20) =>
     axiosInstance.get<PostRead[]>(`/posts/users/${userId}/posts`, {

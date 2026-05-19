@@ -3,7 +3,7 @@ import {mediaApi, postsApi, reactionsApi, tagsApi} from '@/api/profile_posts';
 import {getErrorMessage} from '@/api/apiError';
 import {toast} from 'sonner';
 import type {UUID} from '@/types/common';
-import type {MediaFileRead, PostCreate, PostRead, PostUpdate, ReactionType} from '@/types/profile_posts';
+import type {MediaFileRead, PostCreate, PostUpdate, ReactionType} from '@/types/profile_posts';
 import {axiosInstance} from "@/api/auth.ts";
 
 export const useFamilyFeed = (familyGroupId: UUID, limit = 20) => {
@@ -43,9 +43,9 @@ export const useUserPosts = (userId: UUID, options?: { enabled?: boolean }) => {
 export const useCreatePost = (onSuccessCallback?: () => void) => {
   const queryClient = useQueryClient();
 
-  return useMutation<PostRead, Error, PostCreate>({
-    mutationFn: async (data: PostCreate) => {
-      const response = await postsApi.createPost(data);
+  return useMutation({
+    mutationFn: async ({ data, familyGroupId }: { data: PostCreate; familyGroupId: UUID }) => {
+      const response = await postsApi.createPost(data, familyGroupId);
       return response.data;
     },
     onSuccess: () => {
@@ -54,7 +54,7 @@ export const useCreatePost = (onSuccessCallback?: () => void) => {
       toast.success('Пост опубликован');
       onSuccessCallback?.();
     },
-    onError: (error: Error) => {
+    onError: (error: unknown) => {
       toast.error(getErrorMessage(error, 'Ошибка при создании поста'));
     },
   });
