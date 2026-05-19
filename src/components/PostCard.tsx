@@ -11,7 +11,6 @@ import {
     HeartIcon,
     ImageIcon,
     LaughIcon,
-    MessageCircleIcon,
     PartyPopperIcon,
     PencilIcon,
     ThumbsUpIcon,
@@ -225,10 +224,6 @@ export const PostCard: React.FC<PostCardProps> = ({
           )}
         </div>
 
-        <Button variant="ghost" size="sm" className="gap-2 text-slate-400 hover:text-white">
-          <MessageCircleIcon className="w-4 h-4" />
-          <span>Комментарии</span>
-        </Button>
       </div>
 
       {/* Reactions summary */}
