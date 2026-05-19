@@ -1,9 +1,10 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...core.models import FamilyMembership
 from ...core.models.enums import MembershipRole
 from ...core.models.members import FamilyMember
 from ...core.schemas.member_profile import MemberProfileRead, MemberProfileUpdate
@@ -168,3 +169,63 @@ async def update_my_profile(
         requester_member_id=member.id,
         family_group_id=member.family_group_id,
     )
+
+
+@router.patch("/families/{family_group_id}/members/{member_id}/role")
+async def update_member_role(
+    family_group_id: UUID,
+    member_id: UUID,
+    role_data: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    admin_role = await get_user_role_in_family(db, current_user.id, family_group_id)
+    if admin_role != MembershipRole.admin:
+        raise HTTPException(403, "Only admin can change roles")
+
+    stmt = select(FamilyMember).where(
+        FamilyMember.id == member_id,
+        FamilyMember.family_group_id == family_group_id,
+    )
+    result = await db.execute(stmt)
+    member = result.scalar()
+
+    if not member:
+        raise HTTPException(404, "Member not found")
+
+    if not member.linked_user_id:
+        raise HTTPException(400, "Cannot change role for member without account")
+
+    stmt = select(FamilyMembership).where(
+        FamilyMembership.user_id == member.linked_user_id,
+        FamilyMembership.family_group_id == family_group_id,
+    )
+    result = await db.execute(stmt)
+    membership = result.scalar()
+
+    if not membership:
+        raise HTTPException(404, "Membership not found")
+
+    new_role = role_data.get("role")
+    if new_role not in ["admin", "editor", "viewer"]:
+        raise HTTPException(400, "Invalid role")
+
+    if membership.role == MembershipRole.admin and new_role != "admin":
+        admin_count_stmt = (
+            select(func.count())
+            .select_from(FamilyMembership)
+            .where(
+                FamilyMembership.family_group_id == family_group_id,
+                FamilyMembership.role == MembershipRole.admin,
+            )
+        )
+        admin_count = await db.scalar(admin_count_stmt)
+
+        if admin_count <= 1:
+            raise HTTPException(400, "Cannot remove the last admin of the family")
+
+    membership.role = MembershipRole(new_role)
+    await db.commit()
+    await db.refresh(membership)
+
+    return {"message": "Role updated successfully", "role": new_role}
