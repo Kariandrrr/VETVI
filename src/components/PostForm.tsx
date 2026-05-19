@@ -77,19 +77,16 @@ export const PostForm: React.FC<PostFormProps> = ({
           name="post_type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Тип публикации</FormLabel>
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-              >
+              <FormLabel className="text-slate-300">Тип публикации</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger className="border-emerald-200 focus:border-emerald-400">
-                    <SelectValue />
+                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                    <SelectValue placeholder="Выберите тип" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-slate-800 border-slate-700">
                   {Object.entries(postTypeLabels).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
+                    <SelectItem key={value} value={value} className="text-slate-300">
                       <span className="flex items-center gap-2">
                         {postTypeIcons[value as PostType]}
                         {label}
@@ -108,12 +105,12 @@ export const PostForm: React.FC<PostFormProps> = ({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Заголовок</FormLabel>
+              <FormLabel className="text-slate-300">Заголовок</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Заголовок публикации"
                   {...field}
-                  className="border-emerald-200 focus:border-emerald-400"
+                  className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                 />
               </FormControl>
               <FormMessage />
@@ -126,11 +123,11 @@ export const PostForm: React.FC<PostFormProps> = ({
           name="body"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Текст</FormLabel>
+              <FormLabel className="text-slate-300">Текст</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Поделитесь историей..."
-                  className="resize-none min-h-[150px] border-emerald-200 focus:border-emerald-400"
+                  className="resize-none min-h-[150px] bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                   {...field}
                 />
               </FormControl>
@@ -145,20 +142,17 @@ export const PostForm: React.FC<PostFormProps> = ({
             name="attributed_to_member_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>От имени участника</FormLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
+                <FormLabel className="text-slate-300">От имени участника</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="border-emerald-200 focus:border-emerald-400">
+                    <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                       <SelectValue placeholder="От вашего имени" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="">От вашего имени</SelectItem>
+                  <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectItem value="" className="text-slate-300">От вашего имени</SelectItem>
                     {familyMembers.map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
+                      <SelectItem key={member.id} value={member.id} className="text-slate-300">
                         {member.display_name || `${member.first_name} ${member.last_name}`}
                       </SelectItem>
                     ))}
@@ -174,7 +168,7 @@ export const PostForm: React.FC<PostFormProps> = ({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500"
+            className="bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500 text-white"
           >
             {isSubmitting
               ? initialPost ? 'Сохранение...' : 'Публикация...'
