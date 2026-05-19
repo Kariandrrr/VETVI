@@ -88,7 +88,7 @@ async def get_member_profile(
         )
         target_role = role_enum
     else:
-        target_role = "viewer"
+        target_role = MembershipRole.viewer
 
     return await profile_service.get_member_profile(
         db, member_id, family_id, role=target_role
