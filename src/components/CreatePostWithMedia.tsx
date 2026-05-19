@@ -5,9 +5,12 @@ import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {FileTextIcon, ImageIcon, MusicIcon, VideoIcon} from 'lucide-react';
 import {axiosInstance} from '@/api/auth';
 import {toast} from 'sonner';
+import {TagSelector} from './TagSelector';
 import type {UUID} from '@/types/common';
 import type {AxiosError} from 'axios';
 import {useState} from "react";
@@ -25,15 +28,34 @@ interface CreatePostWithMediaProps {
   onOpenChange: (open: boolean) => void;
   onPostCreated: () => void;
   currentMemberId?: UUID | null;
+  familyGroupId: string;
 }
+
+const postTypeIcons: Record<string, React.ReactNode> = {
+  text: <FileTextIcon className="w-4 h-4" />,
+  photo: <ImageIcon className="w-4 h-4" />,
+  video: <VideoIcon className="w-4 h-4" />,
+  audio: <MusicIcon className="w-4 h-4" />,
+  document: <FileTextIcon className="w-4 h-4" />,
+};
+
+const postTypeLabels: Record<string, string> = {
+  text: 'Текст',
+  photo: 'Фото',
+  video: 'Видео',
+  audio: 'Аудио',
+  document: 'Документ',
+};
 
 export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
   open,
   onOpenChange,
   onPostCreated,
   currentMemberId,
+  familyGroupId,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<Set<UUID>>(new Set());
 
   const form = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
@@ -43,6 +65,10 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
       post_type: 'text',
     },
   });
+
+  const handleTagsChange = (tagIds: Set<UUID>) => {
+    setSelectedTagIds(tagIds);
+  };
 
   const handleSubmit = async (data: PostFormData) => {
     setIsSubmitting(true);
@@ -61,14 +87,25 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
         postData.attributed_to_member_id = currentMemberId;
       }
 
-      await axiosInstance.post('/posts/posts', postData);
+      const response = await axiosInstance.post('/posts/posts', postData);
+      const newPost = response.data;
+
+      if (selectedTagIds.size > 0 && familyGroupId) {
+        try {
+          await axiosInstance.post(
+            `/tags/families/${familyGroupId}/posts/${newPost.id}/tags`,
+            Array.from(selectedTagIds)
+          );
+        } catch (tagError) {
+          console.error('Error attaching tags:', tagError);
+          toast.warning('Пост создан, но теги не прикрепились');
+        }
+      }
 
       form.reset();
-
-      onOpenChange(false);
-
+      setSelectedTagIds(new Set());
       onPostCreated();
-
+      onOpenChange(false);
       toast.success('Пост опубликован!');
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -81,6 +118,7 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
 
   const handleClose = () => {
     form.reset();
+    setSelectedTagIds(new Set());
     onOpenChange(false);
   };
 
@@ -93,7 +131,34 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-
+            {/* Тип публикации */}
+            <FormField
+              control={form.control}
+              name="post_type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-slate-300">Тип публикации</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-slate-800 border-slate-700">
+                      {Object.entries(postTypeLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value} className="text-slate-300">
+                          <span className="flex items-center gap-2">
+                            {postTypeIcons[value]}
+                            {label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Заголовок */}
             <FormField
@@ -132,6 +197,19 @@ export const CreatePostWithMedia: React.FC<CreatePostWithMediaProps> = ({
                 </FormItem>
               )}
             />
+
+            {/* Теги - показываем только если есть familyGroupId */}
+            {familyGroupId && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300">Теги</label>
+                <TagSelector
+                  familyGroupId={familyGroupId as UUID}
+                  initialTags={[]}
+                  onTagsChange={handleTagsChange}
+                  isEditable={true}
+                />
+              </div>
+            )}
 
             {/* Кнопки */}
             <div className="flex gap-2 justify-end pt-4">
