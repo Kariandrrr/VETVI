@@ -57,11 +57,9 @@ async def create_post(
     author_id: UUID,
     family_group_id: UUID,
 ) -> Post:
-    post = Post(
-        author_id=author_id,
-        family_group_id=family_group_id,
-        **post_in.model_dump(exclude_unset=True)
-    )
+    post_data = post_in.model_dump(exclude_unset=True, exclude={"family_group_id"})
+
+    post = Post(author_id=author_id, family_group_id=family_group_id, **post_data)
     db.add(post)
     await db.commit()
     await db.refresh(post)
