@@ -150,7 +150,6 @@ async def update_my_profile(
     data: MemberProfileUpdate,
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
-    _=Depends(RoleChecker([MembershipRole.admin])),
 ):
     stmt = select(FamilyMember).where(FamilyMember.linked_user_id == current_user.id)
     result = await db.execute(stmt)
