@@ -13,22 +13,40 @@ import {toast} from 'sonner';
 
 const editMyProfileSchema = z.object({
     display_name: z.string().min(2, 'Имя должно содержать минимум 2 символа').optional(),
-
-    first_name: z.string().optional().nullable(),
-    last_name: z.string().optional().nullable(),
-    patronymic: z.string().optional().nullable(),
-    gender: z.enum(['male', 'female', 'other', 'unknown']).optional().nullable(),
-    birth_place: z.string().optional().nullable(),
-    date_of_birth: z.string().optional().nullable(),
-    bio: z.string().max(500, 'Не более 500 символов').optional().nullable(),
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
+    patronymic: z.string().nullable().optional(),
+    gender: z.enum(['male', 'female', 'other', 'unknown']).optional(),
+    birth_place: z.string().nullable().optional(),
+    date_of_birth: z.string().nullable().optional(),
+    bio: z.string().max(500, 'Не более 500 символов').nullable().optional(),
 });
 
 type EditMyProfileFormData = z.infer<typeof editMyProfileSchema>;
 
 interface EditMyProfileFormProps {
-    initialData: EditMyProfileFormData;
+    initialData: {
+        display_name?: string;
+        first_name?: string;
+        last_name?: string;
+        patronymic?: string | null;
+        gender?: 'male' | 'female' | 'other' | 'unknown';
+        birth_place?: string | null;
+        date_of_birth?: string | null;
+        bio?: string | null;
+    };
     initialAvatarUrl?: string | null;
-    onSubmit: (data: EditMyProfileFormData, avatarFile?: File) => Promise<void>;
+    onUpdateAccount: (data: { display_name?: string }) => Promise<void>;
+    onUpdateMember: (data: {
+        first_name?: string;
+        last_name?: string;
+        patronymic?: string | null;
+        gender?: 'male' | 'female' | 'other' | 'unknown';
+        birth_place?: string | null;
+        date_of_birth?: string | null;
+        bio?: string | null;
+    }) => Promise<void>;
+    onAvatarUpload?: (file: File) => Promise<void>;
     onAvatarRemove?: () => Promise<void>;
     isSubmitting?: boolean;
 }
@@ -36,22 +54,43 @@ interface EditMyProfileFormProps {
 export const EditMyProfileForm: React.FC<EditMyProfileFormProps> = ({
     initialData,
     initialAvatarUrl,
-    onSubmit,
+    onUpdateAccount,
+    onUpdateMember,
+    onAvatarUpload,
     onAvatarRemove,
     isSubmitting = false,
 }) => {
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(initialAvatarUrl || null);
     const [isRemovingAvatar, setIsRemovingAvatar] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const form = useForm<EditMyProfileFormData>({
         resolver: zodResolver(editMyProfileSchema),
-        defaultValues: initialData,
+        defaultValues: {
+            display_name: initialData.display_name || '',
+            first_name: initialData.first_name || '',
+            last_name: initialData.last_name || '',
+            patronymic: initialData.patronymic || '',
+            gender: initialData.gender || 'unknown',
+            birth_place: initialData.birth_place || '',
+            date_of_birth: initialData.date_of_birth || '',
+            bio: initialData.bio || '',
+        },
     });
 
     useEffect(() => {
-        form.reset(initialData);
+        form.reset({
+            display_name: initialData.display_name || '',
+            first_name: initialData.first_name || '',
+            last_name: initialData.last_name || '',
+            patronymic: initialData.patronymic || '',
+            gender: initialData.gender || 'unknown',
+            birth_place: initialData.birth_place || '',
+            date_of_birth: initialData.date_of_birth || '',
+            bio: initialData.bio || '',
+        });
     }, [initialData, form]);
 
     const updateAvatarPreview = useCallback(() => {
@@ -80,6 +119,20 @@ export const EditMyProfileForm: React.FC<EditMyProfileFormProps> = ({
         setAvatarFile(file);
         const preview = URL.createObjectURL(file);
         setAvatarPreview(preview);
+
+        if (onAvatarUpload) {
+            setIsUploadingAvatar(true);
+            try {
+                await onAvatarUpload(file);
+                toast.success('Аватар обновлён');
+                setAvatarFile(null);
+            } catch {
+                toast.error('Ошибка при загрузке аватара');
+                setAvatarPreview(initialAvatarUrl || null);
+            } finally {
+                setIsUploadingAvatar(false);
+            }
+        }
     };
 
     const handleRemoveAvatar = async () => {
@@ -99,14 +152,45 @@ export const EditMyProfileForm: React.FC<EditMyProfileFormProps> = ({
     };
 
     const handleSubmit = async (data: EditMyProfileFormData) => {
+        const accountData: { display_name?: string } = {};
+        if (data.display_name !== undefined) {
+            accountData.display_name = data.display_name;
+        }
+
+        const memberData: {
+            first_name?: string;
+            last_name?: string;
+            patronymic?: string | null;
+            gender?: 'male' | 'female' | 'other' | 'unknown';
+            birth_place?: string | null;
+            date_of_birth?: string | null;
+            bio?: string | null;
+        } = {};
+
+        if (data.first_name !== undefined) memberData.first_name = data.first_name;
+        if (data.last_name !== undefined) memberData.last_name = data.last_name;
+        if (data.patronymic !== undefined) memberData.patronymic = data.patronymic;
+        if (data.gender !== undefined) memberData.gender = data.gender;
+        if (data.birth_place !== undefined) memberData.birth_place = data.birth_place;
+        if (data.date_of_birth !== undefined) memberData.date_of_birth = data.date_of_birth;
+        if (data.bio !== undefined) memberData.bio = data.bio;
+
         try {
-            await onSubmit(data, avatarFile || undefined);
-        } catch {
-            toast.error('Ошибка при сохранении');
+            if (Object.keys(accountData).length > 0) {
+                await onUpdateAccount(accountData);
+            }
+            if (Object.keys(memberData).length > 0) {
+                await onUpdateMember(memberData);
+            }
+            toast.success('Профиль обновлён');
+        } catch (error) {
+            console.error('Update error:', error);
+            toast.error('Ошибка при обновлении профиля');
+            throw error;
         }
     };
 
-    const hasAvatar = avatarPreview && !avatarFile;
+    const hasAvatar = avatarPreview && !avatarFile && !isUploadingAvatar;
 
     return (
         <Form {...form}>
@@ -115,17 +199,22 @@ export const EditMyProfileForm: React.FC<EditMyProfileFormProps> = ({
                 <div className="flex flex-col items-center gap-4 pb-4 border-b border-slate-700">
                     <div className="relative">
                         <Avatar className="w-24 h-24 border-2 border-[var(--primary)]">
-                            <AvatarImage src={avatarPreview || undefined} />
-                            <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] text-white text-2xl">
-                                {initialData.first_name?.[0] || initialData.display_name?.[0] || '👤'}
-                            </AvatarFallback>
-                        </Avatar>
+                        <AvatarImage src={avatarPreview || undefined} />
+                        <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] text-white text-2xl">
+                            {initialData.first_name?.[0] || initialData.display_name?.[0] || '👤'}
+                        </AvatarFallback>
+                    </Avatar>
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploadingAvatar}
                             className="absolute bottom-0 right-0 p-1.5 rounded-full bg-[var(--primary)] text-white hover:bg-[var(--primary)]/80 transition-colors"
                         >
-                            <CameraIcon className="w-4 h-4" />
+                            {isUploadingAvatar ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <CameraIcon className="w-4 h-4" />
+                            )}
                         </button>
                         {hasAvatar && onAvatarRemove && (
                             <button
@@ -279,26 +368,24 @@ export const EditMyProfileForm: React.FC<EditMyProfileFormProps> = ({
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="birth_place"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-slate-300">Место рождения</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            value={field.value || ''}
-                                            className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                                            placeholder="Город, страна"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+                    <FormField
+                        control={form.control}
+                        name="birth_place"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-slate-300">Место рождения</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        value={field.value || ''}
+                                        className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                                        placeholder="Город, страна"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     <FormField
                         control={form.control}
@@ -327,7 +414,7 @@ export const EditMyProfileForm: React.FC<EditMyProfileFormProps> = ({
                     </Button>
                     <Button
                         type="submit"
-                        disabled={isSubmitting || isRemovingAvatar}
+                        disabled={isSubmitting || isRemovingAvatar || isUploadingAvatar}
                         className="bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500"
                     >
                         {isSubmitting ? 'Сохранение...' : 'Сохранить'}
