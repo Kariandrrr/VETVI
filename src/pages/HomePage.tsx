@@ -3,7 +3,7 @@ import {useAuth} from '@/hooks/useAuth';
 import {useFamilies} from '@/hooks/useFamilies';
 import {useFamilyTreeData} from '@/hooks/useFamilyTreeData';
 import {Button} from '@/components/ui/button';
-import {Heart, Link2, LogOut, Maximize2, Minimize2, Newspaper, Plus, Settings, User, Users, Zap} from 'lucide-react';
+import {Heart, Link2, LogOut, Maximize2, Minimize2, Newspaper, Plus, User, Users, Zap} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import {JoinByLinkModal} from '@/components/JoinByLinkModal';
 import {SelectFamilyModal} from '@/components/SelectFamilyModal';
@@ -130,9 +130,6 @@ export const HomePage = () => {
               <Button onClick={() => setShowJoinModal(true)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
                 <Link2 className="w-5 h-5" />
                 <span className="hidden md:inline">Вступить по ссылке</span>
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full w-11 h-11 text-slate-400 hover:text-white hover:bg-[var(--glass-bg)] border border-transparent hover:border-[var(--glass-border)] transition-all">
-                <Settings className="w-5 h-5" />
               </Button>
               <Button onClick={handleLogout} variant="ghost" size="icon" className="rounded-full w-11 h-11 text-slate-500 hover:text-red-400 hover:bg-red-950/40 transition-all">
                 <LogOut className="w-5 h-5" />
