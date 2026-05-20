@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {useDeleteMedia, useDeletePost, useMyReaction, useToggleReaction, useUpdatePost} from '@/hooks/usePosts';
 import {useMyProfile} from '@/hooks/useMemberProfile';
 import {Button} from '@/components/ui/button';
-import {Avatar, AvatarFallback} from '@/components/ui/avatar';
+import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {Badge} from '@/components/ui/badge';
 import {
     AngryIcon,
@@ -25,6 +25,19 @@ import {TagSelector} from './TagSelector';
 import {toast} from 'sonner';
 import type {PostRead, PostUpdate, ReactionType} from '@/types/profile_posts';
 import type {UUID} from '@/types/common';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const getFullImageUrl = (url: string | null | undefined): string | undefined => {
+    if (!url) return undefined;
+    if (url.startsWith('http')) return url;
+    let cleanUrl = url;
+    while (cleanUrl.startsWith('/')) {
+        cleanUrl = cleanUrl.substring(1);
+    }
+    const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
+    return `${cleanBaseUrl}/${cleanUrl}`;
+};
 
 interface PostCardProps {
   post: PostRead;
@@ -75,8 +88,9 @@ export const PostCard: React.FC<PostCardProps> = ({
 
   const isOwner = myProfile?.id === post.attributed_to_member_id || myProfile?.user_id === post.author_id;
   const currentReaction = myReaction?.reaction_type;
-
   const canReact = !isOwner;
+
+  const authorAvatarUrl = getFullImageUrl(post.author?.avatar_url);
 
   useEffect(() => {
     return () => {
@@ -143,17 +157,20 @@ export const PostCard: React.FC<PostCardProps> = ({
   const totalReactions = post.reactions.reduce((sum, r) => sum + r.count, 0);
   const reactionButtons: ReactionType[] = ['like', 'love', 'haha', 'wow', 'sad', 'angry', 'laugh'];
 
+  const authorInitials = post.author?.display_name?.[0]?.toUpperCase() ||
+                         post.author?.email?.[0]?.toUpperCase() || '?';
+
   return (
     <>
       <div className="glass-card p-6 hover:border-[var(--primary)]/30 transition-all duration-300">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3 flex-1">
+            {/* Аватар автора */}
             <Avatar className="w-10 h-10">
+              <AvatarImage src={authorAvatarUrl} />
               <AvatarFallback className="bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] text-white">
-                {post.author?.display_name?.[0]?.toUpperCase() ||
-                 post.author?.email?.[0]?.toUpperCase() ||
-                 '📝'}
+                {authorInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
@@ -260,7 +277,6 @@ export const PostCard: React.FC<PostCardProps> = ({
 
         {/* Actions */}
         <div className="mt-4 pt-4 border-t border-[var(--glass-border)] flex items-center gap-4">
-          {/* Reactions button - отключаем для своих постов */}
           <div
             className="relative"
             onMouseEnter={handleMouseEnter}
@@ -278,7 +294,6 @@ export const PostCard: React.FC<PostCardProps> = ({
               <span>{totalReactions > 0 ? totalReactions : 'Нравится'}</span>
             </Button>
 
-            {/* Reactions popup - показываем только если можно реагировать */}
             {showReactions && canReact && (
               <div
                 className="absolute bottom-full left-0 mb-2 p-2 bg-slate-800 rounded-xl shadow-xl border border-[var(--glass-border)] flex gap-1 z-10"
@@ -328,17 +343,16 @@ export const PostCard: React.FC<PostCardProps> = ({
             familyMembers={[]}
           />
 
-            {/* Tags section */}
-            <div className="mt-4 pt-4 border-t border-slate-700">
-              <h4 className="text-sm font-medium text-white mb-2">Теги</h4>
-              <TagSelector
-                familyGroupId={familyGroupId as UUID}
-                postId={post.id}
-                initialTags={post.tags}
-                onTagsChange={onUpdate}
-                isEditable={isOwner}
-              />
-            </div>
+          <div className="mt-4 pt-4 border-t border-slate-700">
+            <h4 className="text-sm font-medium text-white mb-2">Теги</h4>
+            <TagSelector
+              familyGroupId={familyGroupId}
+              postId={post.id}
+              initialTags={post.tags}
+              onTagsChange={onUpdate}
+              isEditable={isOwner}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
