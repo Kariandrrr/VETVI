@@ -24,9 +24,6 @@ export const useMyProfile = (familyGroupId: UUID) => {
   return useQuery({
     queryKey: ['my-profile', familyGroupId],
     queryFn: async () => {
-      if (!familyGroupId) {
-        throw new Error('Missing familyGroupId');
-      }
       const response = await profileApi.getMyProfile(familyGroupId);
       return response.data;
     },
