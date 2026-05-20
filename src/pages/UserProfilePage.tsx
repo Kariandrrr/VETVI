@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {useAuth} from '@/hooks/useAuth';
 import {useUserPosts} from '@/hooks/usePosts';
@@ -6,18 +6,15 @@ import {useMyProfile} from '@/hooks/useMemberProfile';
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {EditAccountForm} from '@/components/EditAccountForm';
-import {EditFamilyMemberDataForm} from '@/components/EditFamilyMemberDataForm';
 import {UserProfileCard} from '@/components/UserProfileCard';
 import {UserSettings} from '@/components/UserSettings';
 import {UserPosts} from '@/components/UserPosts';
 import {FamilySwitcher} from '@/components/FamilySwitcher';
 import {CreatePostWithMedia} from '@/components/CreatePostWithMedia';
+import {EditMyProfileForm} from '@/components/EditMyProfileForm';
 import {ArrowLeftIcon, Users} from 'lucide-react';
 import {toast} from 'sonner';
-import {type ApiError, getErrorMessage} from '@/api/apiError';
-import {useMutation} from '@tanstack/react-query';
-import {profileApi} from '@/api/profile_posts';
+import {AvatarApi, profileApi} from '@/api/profile_posts';
 import type {UUID} from '@/types/common';
 
 export const UserProfilePage = () => {
@@ -41,50 +38,27 @@ export const UserProfilePage = () => {
         { enabled: !!user?.id && !!selectedFamilyId }
     );
 
-    const [isEditingAccount, setIsEditingAccount] = useState(false);
-    const [isEditingMember, setIsEditingMember] = useState(false);
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
     const allPosts = userPosts?.pages.flatMap((page) => page.posts) || [];
 
-    const onAccountSubmit = useCallback(async (data: { display_name?: string; avatar_url?: string | null }) => {
+    const handleUpdateAccount = async (data: { display_name?: string }) => {
         setIsUpdating(true);
         try {
-            await updateUser({
-                display_name: data.display_name,
-                avatar_url: data.avatar_url,
-            });
+            await updateUser(data);
             toast.success('Данные аккаунта обновлены');
-            setIsEditingAccount(false);
         } catch (error) {
-            toast.error('Ошибка', { description: getErrorMessage(error, 'Не удалось обновить данные аккаунта') });
+            console.error('Update account error:', error);
+            toast.error('Ошибка при обновлении аккаунта');
+            throw error;
         } finally {
             setIsUpdating(false);
         }
-    }, [updateUser]);
+    };
 
-    const updateMyProfileMutation = useMutation({
-        mutationFn: (data: {
-            first_name?: string;
-            last_name?: string;
-            patronymic?: string | null;
-            gender?: 'male' | 'female' | 'other' | 'unknown';
-            birth_place?: string | null;
-            date_of_birth?: string | null;
-            bio?: string | null;
-        }) => profileApi.updateMyProfile(data),
-        onSuccess: () => {
-            toast.success('Данные профиля обновлены');
-            setIsEditingMember(false);
-            void refetchProfile();
-        },
-        onError: (error: ApiError) => {
-            toast.error('Ошибка', { description: getErrorMessage(error, 'Не удалось обновить данные профиля') });
-        },
-    });
-
-    const onMemberSubmit = useCallback(async (data: {
+    const handleUpdateMember = async (data: {
         first_name?: string;
         last_name?: string;
         patronymic?: string | null;
@@ -95,26 +69,64 @@ export const UserProfilePage = () => {
     }) => {
         setIsUpdating(true);
         try {
-            await updateMyProfileMutation.mutateAsync(data);
-            await refetchProfile();
+            if (selectedFamilyId && myProfile?.id) {
+                await profileApi.updateMemberProfile(selectedFamilyId, myProfile.id, data);
+                await refetchProfile();
+                toast.success('Данные профиля обновлены');
+            }
         } catch (error) {
-            console.error('Update error:', error);
+            console.error('Update member error:', error);
+            toast.error('Ошибка при обновлении данных профиля');
+            throw error;
         } finally {
             setIsUpdating(false);
         }
-    }, [updateMyProfileMutation, refetchProfile]);
+    };
 
-    const onPostCreated = useCallback(() => {
+   const handleAvatarUpload = async (file: File) => {
+    if (!selectedFamilyId || !myProfile?.id) {
+        toast.error('Сначала выберите семью');
+        return;
+    }
+    setIsUpdating(true);
+    try {
+        await AvatarApi.uploadAvatar(selectedFamilyId, myProfile.id, file);
+        await refetchProfile();
+        await updateUser({});
+        toast.success('Аватар обновлён');
+    } catch (error) {
+        console.error('Avatar upload error:', error);
+        toast.error('Ошибка при загрузке аватара');
+    } finally {
+        setIsUpdating(false);
+    }
+};
+    const handleAvatarRemove = async () => {
+        if (!selectedFamilyId || !myProfile?.id) return;
+        setIsUpdating(true);
+        try {
+            await AvatarApi.deleteAvatar(selectedFamilyId, myProfile.id);
+            await refetchProfile();
+            toast.success('Аватар удалён');
+        } catch (error) {
+            console.error('Remove avatar error:', error);
+            toast.error('Ошибка при удалении аватара');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const onPostCreated = () => {
         void refetchPosts();
-    }, [refetchPosts]);
+    };
 
-    const handlePostDelete = useCallback(() => {
+    const handlePostDelete = () => {
         void refetchPosts();
-    }, [refetchPosts]);
+    };
 
-    const handleLoadMore = useCallback(async () => {
+    const handleLoadMore = async () => {
         await fetchNextPage();
-    }, [fetchNextPage]);
+    };
 
     const handleSelectFamily = (familyId: UUID) => {
         setSelectedFamilyId(familyId);
@@ -154,7 +166,7 @@ export const UserProfilePage = () => {
                     <FamilySwitcher
                         selectedFamilyId={selectedFamilyId}
                         onSelectFamily={handleSelectFamily}
-                          placeholder="Выберите семью для профиля"
+                        placeholder="Выберите семью для профиля"
                     />
                 </div>
 
@@ -171,8 +183,8 @@ export const UserProfilePage = () => {
                         <UserProfileCard
                             user={user}
                             myProfile={myProfile || null}
-                            onEditAccount={() => setIsEditingAccount(true)}
-                            onEditMember={() => setIsEditingMember(true)}
+                            onEditAccount={() => setIsEditingProfile(true)}
+                            onEditMember={() => setIsEditingProfile(true)}
                         />
 
                         <Tabs defaultValue="posts" className="glass-card overflow-hidden mt-6">
@@ -212,38 +224,28 @@ export const UserProfilePage = () => {
                     </>
                 )}
 
-                <Dialog open={isEditingAccount} onOpenChange={setIsEditingAccount}>
-                    <DialogContent className="bg-slate-900 border border-slate-700 max-w-lg">
-                        <DialogHeader>
-                            <DialogTitle className="text-white">Редактировать аккаунт</DialogTitle>
-                        </DialogHeader>
-                        <EditAccountForm
-                            initialData={{
-                                display_name: user?.display_name || '',
-                                avatar_url: user?.avatar_url || '',
-                            }}
-                            onSubmit={onAccountSubmit}
-                            isSubmitting={isUpdating}
-                        />
-                    </DialogContent>
-                </Dialog>
-
-                <Dialog open={isEditingMember} onOpenChange={setIsEditingMember}>
+                {/* Единая форма редактирования */}
+                <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
                     <DialogContent className="bg-slate-900 border border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <DialogTitle className="text-white">Редактировать данные в семейном древе</DialogTitle>
+                            <DialogTitle className="text-white">Редактировать профиль</DialogTitle>
                         </DialogHeader>
-                        <EditFamilyMemberDataForm
+                        <EditMyProfileForm
                             initialData={{
+                                display_name: user?.display_name || '',
                                 first_name: myProfile?.first_name || '',
                                 last_name: myProfile?.last_name || '',
-                                patronymic: myProfile?.patronymic || '',
+                                patronymic: myProfile?.patronymic || null,
                                 gender: (myProfile?.gender as 'male' | 'female' | 'other' | 'unknown') || 'unknown',
-                                birth_place: myProfile?.birth_place || '',
-                                date_of_birth: myProfile?.date_of_birth || '',
-                                bio: myProfile?.bio || '',
+                                birth_place: myProfile?.birth_place || null,
+                                date_of_birth: myProfile?.date_of_birth || null,
+                                bio: myProfile?.bio || null,
                             }}
-                            onSubmit={onMemberSubmit}
+                            initialAvatarUrl={myProfile?.avatar_url || user?.avatar_url}
+                            onUpdateAccount={handleUpdateAccount}
+                            onUpdateMember={handleUpdateMember}
+                            onAvatarUpload={handleAvatarUpload}
+                            onAvatarRemove={handleAvatarRemove}
                             isSubmitting={isUpdating}
                         />
                     </DialogContent>
