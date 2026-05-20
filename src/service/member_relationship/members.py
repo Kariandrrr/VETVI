@@ -100,7 +100,6 @@ async def create_family_member(
         is_alive=member_in.is_alive,
         bio=member_in.bio,
         avatar_url=member_in.avatar_url,
-        role=member_in.role,
         created_by=created_by,
     )
 
