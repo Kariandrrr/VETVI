@@ -282,10 +282,9 @@ export const FamilyTreePage = () => {
     const { data: familiesRaw } = useFamilies();
 
     const families = useMemo(() => {
-        const raw = Array.isArray(familiesRaw)
+        return Array.isArray(familiesRaw)
             ? familiesRaw
             : (familiesRaw as { data?: FamilyGroupRead[] })?.data ?? [];
-        return raw;
     }, [familiesRaw]);
 
     const currentFamily = families.find((f: FamilyGroupRead) => f.id === familyId);
