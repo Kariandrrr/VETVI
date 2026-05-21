@@ -1,10 +1,6 @@
-import {useCallback, useEffect, useMemo} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import ReactFlow, {
-    addEdge,
-    applyEdgeChanges,
-    applyNodeChanges,
     Background,
-    type Connection,
     Controls,
     type Edge,
     MarkerType,
@@ -20,112 +16,134 @@ import {getMemberFullName} from '@/types/families';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-const getAvatarUrl = (avatarUrl: string | null | undefined, version: number = 0): string | undefined => {
-    if (!avatarUrl) return undefined;
+const NODE_WIDTH = 180;
+const NODE_HEIGHT = 100;
+const GENERATION_GAP_Y = 220;
+const NODE_GAP_X = 120;
 
-    let cleanPath = avatarUrl;
-    while (cleanPath.startsWith('/')) {
-        cleanPath = cleanPath.substring(1);
-    }
-
-    const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
-
-    return `${cleanBaseUrl}/${cleanPath}?t=${version}`;
+const getAvatarUrl = (avatarUrl: string | null | undefined): string | undefined => {
+  if (!avatarUrl) return undefined;
+  const cleanPath = avatarUrl.replace(/^\//, '');
+  const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
+  return `${cleanBaseUrl}/${cleanPath}`;
 };
 
-const MemberNode = ({ data }: { data: { member: FamilyMember } }) => {
-  if (!data || !data.member) {
-    return (
-      <div className="w-32 h-24 bg-red-500/20 border border-red-500 rounded-xl flex items-center justify-center text-xs text-red-200">
-        Нет данных
-      </div>
-    );
-  }
+const detectCycles = (members: FamilyMember[], relationships: Relationship[]): boolean => {
+  const graph = new Map<string, string[]>();
 
-  const m = data.member;
+  relationships.forEach(rel => {
+    if (rel.relationship_type === 'parent_child' && rel.source_id && rel.target_id) {
+      if (!graph.has(rel.source_id)) graph.set(rel.source_id, []);
+      graph.get(rel.source_id)!.push(rel.target_id);
+    }
+  });
 
-  const getInitials = () => {
-    const firstName = m.first_name || '';
-    const lastName = m.last_name || '';
-    const firstInitial = firstName[0] || '';
-    const lastInitial = lastName[0] || '';
-    const initials = `${firstInitial}${lastInitial}`.toUpperCase();
-    return initials || '?';
+  const visited = new Set<string>();
+  const recursionStack = new Set<string>();
+
+  const hasCycle = (nodeId: string): boolean => {
+    visited.add(nodeId);
+    recursionStack.add(nodeId);
+
+    const children = graph.get(nodeId) || [];
+    for (const child of children) {
+      if (!visited.has(child)) {
+        if (hasCycle(child)) return true;
+      } else if (recursionStack.has(child)) {
+        return true;
+      }
+    }
+
+    recursionStack.delete(nodeId);
+    return false;
   };
 
-  const fullName = m.first_name || m.last_name
-    ? getMemberFullName(m)
-    : 'Без имени';
+  for (const member of members) {
+    if (!visited.has(member.id)) {
+      if (hasCycle(member.id)) return true;
+    }
+  }
 
+  return false;
+};
+
+interface EdgeStyle {
+  stroke: string;
+  strokeWidth: number;
+  strokeDasharray?: string;
+  markerEnd: { type: MarkerType; color: string };
+}
+
+const getEdgeStyle = (type: string): EdgeStyle => {
+  switch (type) {
+    case 'parent_child':
+      return {
+        stroke: '#10b981',
+        strokeWidth: 2.5,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#10b981' }
+      };
+    case 'spouse':
+      return {
+        stroke: '#ec4899',
+        strokeWidth: 2,
+        strokeDasharray: '5,5',
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ec4899' }
+      };
+    case 'sibling':
+      return {
+        stroke: '#6366f1',
+        strokeWidth: 2,
+        strokeDasharray: '3,3',
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#6366f1' }
+      };
+    default:
+      return {
+        stroke: '#94a3b8',
+        strokeWidth: 1,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8' }
+      };
+  }
+};
+
+
+const MemberNode = ({ data }: { data: { member: FamilyMember } }) => {
+  if (!data?.member) return null;
+  const m = data.member;
+  const fullName = getMemberFullName(m);
   const avatarUrl = getAvatarUrl(m.avatar_url);
+  const isAlive = m.is_alive !== false;
+
+  const getInitials = () => {
+    const first = m.first_name?.[0] || '';
+    const last = m.last_name?.[0] || '';
+    return `${first}${last}`.toUpperCase() || '?';
+  };
 
   return (
-    <div className="glass-card w-40 p-3 flex flex-col items-center gap-2 border-[var(--glass-border)] hover:border-[var(--primary)] transition-colors shadow-lg bg-[var(--glass-bg)] backdrop-blur-md cursor-pointer group">
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center text-white font-bold text-lg overflow-hidden shadow-inner transition-transform group-hover:scale-110">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt=""
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              // При ошибке показываем инициалы
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                parent.className = 'w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center text-white font-bold text-lg overflow-hidden shadow-inner transition-transform group-hover:scale-110';
-                parent.textContent = getInitials();
-              }
-            }}
-          />
-        ) : (
-          getInitials()
-        )}
-      </div>
-      <div className="text-center w-full">
-        <p className="text-white font-semibold text-sm leading-tight truncate w-full px-1 drop-shadow-md">
-          {fullName}
-        </p>
-        <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-black/30 text-[10px] text-slate-300 uppercase tracking-wider border border-white/10">
-          {m.gender === 'male' ? 'М' : m.gender === 'female' ? 'Ж' : '?'}
-        </span>
+    <div className="bg-slate-800 rounded-xl p-3 border border-slate-700 min-w-[160px] shadow-lg relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
+      <div className={`absolute top-0 right-0 w-2 h-2 rounded-bl-lg ${isAlive ? 'bg-emerald-500' : 'bg-slate-500'}`}></div>
+
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white font-bold shrink-0 overflow-hidden border border-slate-600">
+          {avatarUrl ? (
+            <img src={avatarUrl} className="w-full h-full rounded-full object-cover" alt="" />
+          ) : (
+            <span className="text-sm">{getInitials()}</span>
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-white font-medium text-sm truncate" title={fullName}>{fullName}</p>
+          <p className="text-slate-400 text-xs truncate">
+            {m.gender === 'male' ? 'Мужчина' : m.gender === 'female' ? 'Женщина' : 'Не указано'}
+            {!isAlive && ' 🕊️'}
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
 const nodeTypes = { member: MemberNode };
-
-const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({
-    rankdir: direction,
-    nodesep: 80,
-    ranksep: 100,
-    marginx: 50,
-    marginy: 50,
-  });
-
-  nodes.forEach((node) => g.setNode(node.id, { width: 160, height: 120 }));
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-
-  dagre.layout(g);
-
-  return {
-    nodes: nodes.map((node) => {
-      const nodeWithPosition = g.node(node.id);
-      return {
-        ...node,
-        position: {
-          x: nodeWithPosition.x - 80,
-          y: nodeWithPosition.y - 60,
-        },
-      };
-    }),
-    edges,
-  };
-};
 
 interface Props {
   members: FamilyMember[];
@@ -134,112 +152,146 @@ interface Props {
 }
 
 export const FamilyTree = ({ members, relationships, fullscreen = false }: Props) => {
-  // Фильтруем валидных членов семьи (защита от null/undefined)
-  const validMembers = useMemo(() =>
-    members?.filter(m => m && m.id) || [],
-    [members]
-  );
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const flowRef = useRef<HTMLDivElement>(null);
 
-  const validRelationships = useMemo(() =>
-    relationships?.filter(r => r && r.source_id && r.target_id) || [],
-    [relationships]
-  );
+  const validMembers = useMemo(() => members?.filter(m => m && m.id) || [], [members]);
+  const validRelationships = useMemo(() => relationships?.filter(r => r && r.source_id && r.target_id) || [], [relationships]);
 
-  const initialNodes = useMemo<Node[]>(() =>
-    validMembers.map((m) => ({
-      id: m.id,
-      type: 'member',
-      data: { member: m },
-      position: { x: 0, y: 0 },
-    })),
-    [validMembers]
-  );
+  useEffect(() => {
+    if (validMembers.length === 0) return;
 
-  const initialEdges = useMemo<Edge[]>(() => {
-    const edges: Edge[] = [];
+    if (detectCycles(validMembers, validRelationships)) {
+      console.warn("⚠️ Обнаружены циклы в родословной! Раскладка может быть некорректной.");
+    }
+
+    const graph = new dagre.graphlib.Graph();
+    graph.setDefaultEdgeLabel(() => ({}));
+
+    graph.setGraph({
+      rankdir: 'TB',
+      nodesep: NODE_GAP_X,
+      ranksep: GENERATION_GAP_Y,
+      align: 'UL',
+    });
+
+    validMembers.forEach((m) => {
+      graph.setNode(m.id, {
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT
+      });
+    });
 
     validRelationships.forEach((r) => {
-      const sourceExists = validMembers.some(m => m.id === r.source_id);
-      const targetExists = validMembers.some(m => m.id === r.target_id);
+      if (r.relationship_type === 'parent_child') {
+        graph.setEdge(r.source_id, r.target_id);
+      }
+    });
 
-      if (!sourceExists || !targetExists) return;
+    dagre.layout(graph);
 
-      const isSpouse = r.relationship_type?.toLowerCase().includes('spouse') || false;
+    const newNodes: Node[] = [];
+    const newEdges: Edge[] = [];
 
-      edges.push({
-        id: `e-${r.source_id}-${r.target_id}`,
+    graph.nodes().forEach((nodeId) => {
+      const node = graph.node(nodeId);
+      const member = validMembers.find(m => m.id === nodeId);
+      if (!member) return;
+
+      newNodes.push({
+        id: nodeId,
+        type: 'member',
+        data: { member },
+        position: { x: node.x - NODE_WIDTH / 2, y: node.y - NODE_HEIGHT / 2 },
+      });
+    });
+
+    validRelationships.forEach((r) => {
+      const edgeStyle = getEdgeStyle(r.relationship_type);
+      newEdges.push({
+        id: `${r.source_id}-${r.target_id}-${r.relationship_type}`,
         source: r.source_id,
         target: r.target_id,
-        type: isSpouse ? 'smoothstep' : 'default',
-        animated: isSpouse,
-        style: isSpouse
-          ? { stroke: '#a855f7', strokeWidth: 2, strokeDasharray: '5 5' }
-          : { stroke: '#22d3ee', strokeWidth: 1.5 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#22d3ee', width: 15, height: 15 },
-        label: r.relationship_type === 'parent' ? 'родитель' : undefined,
-        labelStyle: { fill: '#94a3b8', fontSize: 10, fontWeight: 600 },
-        labelBgStyle: { fill: 'rgba(0,0,0,0.7)', rx: 4, ry: 4 },
+        type: 'smoothstep',
+        animated: r.relationship_type === 'parent_child',
+        style: {
+          stroke: edgeStyle.stroke,
+          strokeWidth: edgeStyle.strokeWidth,
+          ...(edgeStyle.strokeDasharray && { strokeDasharray: edgeStyle.strokeDasharray })
+        },
+        markerEnd: edgeStyle.markerEnd,
+        label: r.relationship_type === 'spouse' ? '💑' : undefined,
+        labelStyle: { fill: '#fff', fontSize: 14, fontWeight: 'bold' },
+        labelBgPadding: [4, 2],
+        labelBgBorderRadius: 4,
+        labelBgStyle: { fill: '#1e293b', fillOpacity: 0.8 },
       } as Edge);
     });
 
-    return edges;
-  }, [validRelationships, validMembers]);
-
-  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
-    () => getLayoutedElements(initialNodes, initialEdges, 'TB'),
-    [initialNodes, initialEdges],
-  );
-
-  const [nodes, setNodes] = useNodesState([]);
-  const [edges, setEdges] = useEdgesState([]);
-
-  useEffect(() => {
-    if (layoutedNodes.length > 0) {
-      setNodes(layoutedNodes);
-    }
-    if (layoutedEdges.length > 0) {
-      setEdges(layoutedEdges);
-    }
-  }, [layoutedNodes, layoutedEdges, setNodes, setEdges]);
-
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, type: 'default' }, eds)),
-    [setEdges],
-  );
+    setNodes(newNodes);
+    setEdges(newEdges);
+  }, [validMembers, validRelationships, setNodes, setEdges]);
 
   const containerHeight = fullscreen ? '100vh' : '600px';
 
   if (validMembers.length === 0) {
     return (
-      <div
-        className="rounded-2xl overflow-hidden border border-[var(--glass-border)] bg-black/20 flex items-center justify-center"
-        style={{ height: containerHeight, width: '100%' }}
-      >
-        <p className="text-slate-400">Нет данных для отображения</p>
+      <div className="rounded-2xl border border-slate-700 bg-black/20 flex items-center justify-center" style={{ height: containerHeight }}>
+        <p className="text-slate-400 flex flex-col items-center gap-2">
+          <span className="text-2xl">🌳</span>
+          Нет участников для отображения
+        </p>
       </div>
     );
   }
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden border border-[var(--glass-border)] bg-black/20"
-      style={{ height: containerHeight, width: '100%' }}
-    >
+    <div ref={flowRef} className="rounded-2xl border border-slate-700 bg-slate-900/50 relative overflow-hidden" style={{ height: containerHeight, width: '100%' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={(changes) => setNodes((nds) => applyNodeChanges(changes, nds))}
-        onEdgesChange={(changes) => setEdges((eds) => applyEdgeChanges(changes, eds))}
-        onConnect={onConnect}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
-        attributionPosition="bottom-right"
-        className="bg-transparent"
+        fitViewOptions={{ padding: 0.2 }}
+        minZoom={0.1}
+        maxZoom={2}
+        snapToGrid={true}
+        snapGrid={[15, 15]}
+        style={{ background: 'transparent' }}
+        proOptions={{ hideAttribution: true }}
       >
-        <Background color="#475569" gap={20} size={1} />
-        <Controls className="glass-card border-[var(--glass-border)] !bg-transparent" />
-        <MiniMap className="glass-card border-[var(--glass-border)]" />
+        <Background color="#334155" gap={20} size={0.5} />
+        <Controls />
+        <MiniMap
+          nodeStrokeColor={() => '#10b981'}
+          nodeColor={() => '#1e293b'}
+          maskColor="rgba(0,0,0,0.6)"
+          pannable
+          zoomable
+        />
       </ReactFlow>
+
+      {/* Легенда */}
+      <div className="absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-700 text-xs text-slate-300 shadow-xl pointer-events-none z-10">
+        <div className="font-bold mb-2 text-white">Легенда связей:</div>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-0.5 bg-emerald-500"></div>
+            <span>Родитель → Ребенок</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-0.5 bg-pink-500" style={{ borderStyle: 'dashed', borderWidth: '1px', borderColor: '#ec4899' }}></div>
+            <span>Супруги</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-0.5 bg-indigo-500" style={{ borderStyle: 'dotted', borderWidth: '1px', borderColor: '#6366f1' }}></div>
+            <span>Братья/Сестры</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

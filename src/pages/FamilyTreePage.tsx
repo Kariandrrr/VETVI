@@ -2,13 +2,14 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '@/components/ui/select';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {
     ArrowLeft,
     ChevronDown,
     ChevronUp,
     Eye,
     Info,
+    Link2,
     Maximize2,
     Minimize2,
     Plus,
@@ -24,6 +25,7 @@ import {useFamilies} from '@/hooks/useFamilies';
 import {useAuth} from '@/hooks/useAuth';
 import {FamilyTree} from '@/components/FamilyTree';
 import {AddMemberModal} from '@/components/AddMemberModal';
+import {RelationshipModal} from '@/components/RelationshipModal';
 import {type FamilyGroupRead, type FamilyMember, getMemberFullName} from '@/types/families';
 import {familyApi} from '@/api/family';
 import {axiosInstance} from '@/api/auth';
@@ -299,6 +301,7 @@ export const FamilyTreePage = () => {
 
     const [isTableExpanded, setIsTableExpanded] = useState(true);
     const [showAddMember, setShowAddMember] = useState(false);
+    const [showRelationshipModal, setShowRelationshipModal] = useState(false);
     const [search, setSearch] = useState('');
     const [isTreeFullscreen, setIsTreeFullscreen] = useState(false);
     const [avatarVersion, setAvatarVersion] = useState(0);
@@ -384,6 +387,12 @@ export const FamilyTreePage = () => {
         await refetch();
         setAvatarVersion(prev => prev + 1);
         setShowAddMember(false);
+    }, [refetch]);
+
+    const handleRelationshipSuccess = useCallback(async () => {
+        await refetch();
+        setAvatarVersion(prev => prev + 1);
+        setShowRelationshipModal(false);
     }, [refetch]);
 
     const handleRoleChange = useCallback(async (memberId: string, newRole: string) => {
@@ -511,15 +520,26 @@ export const FamilyTreePage = () => {
 
                         <div className="flex items-center gap-3">
                             {validMembers.length > 0 && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setIsTreeFullscreen(true)}
-                                    className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-slate-400 hover:text-white hover:bg-[var(--primary)]/20 transition-all"
-                                    title="Развернуть на весь экран"
-                                >
-                                    <Maximize2 className="w-5 h-5" />
-                                </Button>
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setIsTreeFullscreen(true)}
+                                        className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-slate-400 hover:text-white hover:bg-[var(--primary)]/20 transition-all"
+                                        title="Развернуть на весь экран"
+                                    >
+                                        <Maximize2 className="w-5 h-5" />
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowRelationshipModal(true)}
+                                        className="border-[var(--glass-border)] hover:bg-[var(--glass-bg)] text-slate-300"
+                                    >
+                                        <Link2 className="w-4 h-4 mr-2" />
+                                        Управление связями
+                                    </Button>
+                                </>
                             )}
 
                             <Button
@@ -542,7 +562,7 @@ export const FamilyTreePage = () => {
                 </div>
             </main>
 
-            {/* Модальное окно добавления */}
+            {/* Модальное окно добавления участника */}
             {familyId && (
                 <AddMemberModal
                     key={`add-member-${familyId}`}
@@ -550,6 +570,19 @@ export const FamilyTreePage = () => {
                     open={showAddMember}
                     onOpenChange={setShowAddMember}
                     onAddSuccess={handleAddSuccess}
+                />
+            )}
+
+            {/* Модальное окно управления связями */}
+            {familyId && (
+                <RelationshipModal
+                    key={`relationship-modal-${familyId}`}
+                    familyGroupId={familyId}
+                    open={showRelationshipModal}
+                    onOpenChange={setShowRelationshipModal}
+                    members={validMembers}
+                    existingRelationships={relationships || []}
+                    onSuccess={handleRelationshipSuccess}
                 />
             )}
 
