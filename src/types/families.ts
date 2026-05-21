@@ -1,6 +1,6 @@
 export type MembershipRole = 'viewer' | 'editor' | 'admin';
 export type Gender = 'male' | 'female' | 'unknown';
-export type RelationshipType = 'parent' | 'child' | 'spouse' | 'sibling' | 'other';
+export type RelationshipType = 'parent_child' | 'spouse' | 'sibling' ;
 
 export interface FamilyMember {
     id: string;
