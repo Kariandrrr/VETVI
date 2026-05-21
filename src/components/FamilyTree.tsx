@@ -157,7 +157,37 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
   const flowRef = useRef<HTMLDivElement>(null);
 
   const validMembers = useMemo(() => members?.filter(m => m && m.id) || [], [members]);
-  const validRelationships = useMemo(() => relationships?.filter(r => r && r.source_id && r.target_id) || [], [relationships]);
+
+    interface RawRelationship {
+      source_id?: string;
+      target_id?: string;
+      from_member_id?: string;
+      to_member_id?: string;
+      relationship_type: string;
+    }
+    const validRelationships = useMemo(() => {
+      if (!relationships) return [];
+
+      return relationships
+        .filter(r => r)
+        .map(r => {
+          const raw = r as unknown as RawRelationship;
+          const sourceId = raw.source_id || raw.from_member_id;
+          const targetId = raw.target_id || raw.to_member_id;
+
+          if (!sourceId || !targetId) {
+            console.warn('Relationship missing IDs:', r);
+            return null;
+          }
+
+          return {
+            ...r,
+            source_id: sourceId,
+            target_id: targetId,
+          };
+        })
+        .filter((r): r is Relationship => r !== null);
+    }, [relationships]);
 
   useEffect(() => {
     if (validMembers.length === 0) return;

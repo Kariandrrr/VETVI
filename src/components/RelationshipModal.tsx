@@ -21,11 +21,32 @@ interface RelationshipModalProps {
   onSuccess: () => void;
 }
 
+interface RawRelationship {
+  id: string;
+  source_id?: string;
+  target_id?: string;
+  from_member_id?: string;
+  to_member_id?: string;
+  relationship_type: string;
+  family_group_id?: string;
+}
+
 const relationshipTypes: { value: RelationshipTypeValue; label: string; description: string; icon: string }[] = [
   { value: 'parent_child', label: 'Родитель-Ребёнок', description: 'Установить родственную связь', icon: '👨‍👧' },
   { value: 'spouse', label: 'Супруг(а)', description: 'Установить брачную связь', icon: '💑' },
   { value: 'sibling', label: 'Брат/Сестра', description: 'Установить связь брата/сестры', icon: '👥' },
 ];
+
+const normalizeRelationship = (rel: RawRelationship): Relationship => {
+  return {
+    id: rel.id,
+    source_id: rel.source_id || rel.from_member_id || '',
+    target_id: rel.target_id || rel.to_member_id || '',
+    relationship_type: rel.relationship_type,
+    family_group_id: rel.family_group_id || '',
+    created_at: '',
+  };
+};
 
 const QuickFamilyCreator = ({
   members,
@@ -57,7 +78,7 @@ const QuickFamilyCreator = ({
     }
 
     setIsSubmitting(true);
-    const relationshipsToCreate = [];
+    const relationshipsToCreate: { from_member_id: string; to_member_id: string; rel_type: string }[] = [];
 
     if (fatherId) {
       relationshipsToCreate.push({
@@ -225,12 +246,13 @@ export const RelationshipModal: React.FC<RelationshipModalProps> = ({
 
   const memberOptions = members.filter(m => m && m.id).map(m => ({
     id: m.id,
-    name: `${m.last_name} ${m.first_name} ${m.patronymic || ''}`.trim() || 'Без имени',
+    name: `${m.first_name} ${m.last_name}`.trim() || 'Без имени',
   }));
 
   const getMemberName = (memberId: string): string => {
     const member = memberMap.get(memberId);
     if (!member) {
+      console.warn(`Member not found for ID: ${memberId}`);
       return 'Неизвестный';
     }
     return `${member.first_name} ${member.last_name}`.trim() || 'Без имени';
@@ -294,6 +316,10 @@ export const RelationshipModal: React.FC<RelationshipModalProps> = ({
       setDeletingId(null);
     }
   };
+
+  const normalizedRelationships = existingRelationships
+    .filter(rel => rel && (rel.source_id || (rel as unknown as RawRelationship).from_member_id))
+    .map(rel => normalizeRelationship(rel as unknown as RawRelationship));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -389,11 +415,11 @@ export const RelationshipModal: React.FC<RelationshipModalProps> = ({
           </TabsContent>
         </Tabs>
 
-        {existingRelationships.length > 0 && (
+        {normalizedRelationships.length > 0 && (
           <div className="mt-4 pt-4 border-t border-slate-700">
             <Label className="text-slate-300 mb-2 block">Существующие связи</Label>
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {existingRelationships.map((rel) => {
+              {normalizedRelationships.map((rel) => {
                 const fromName = getMemberName(rel.source_id);
                 const toName = getMemberName(rel.target_id);
                 return (
