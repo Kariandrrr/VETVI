@@ -41,54 +41,39 @@
   }
 }
 
-/* Стили для ребер дерева (XYFlow префиксы) */
-.edge-parent-child .xyflow__edge-path {
+/* --- Стили для связей React Flow v12 --- */
+
+/* Используем именно react-flow__edge (стандарт библиотеки) */
+.react-flow__edge.edge-parent-child .react-flow__edge-path {
   stroke: #10b981 !important;
   stroke-width: 3px !important;
-}
-.edge-parent-child .xyflow__edge-arrow path {
-  fill: #10b981 !important;
-  stroke: #10b981 !important;
+  fill: none !important; /* ВАЖНО: fill: none убирает заливку */
 }
 
-.edge-spouse .xyflow__edge-path {
+.react-flow__edge.edge-spouse .react-flow__edge-path {
   stroke: #ec4899 !important;
   stroke-width: 3px !important;
   stroke-dasharray: 6, 6 !important;
-}
-.edge-spouse .xyflow__edge-arrow path {
-  fill: #ec4899 !important;
-  stroke: #ec4899 !important;
+  fill: none !important;
 }
 
-.edge-sibling .xyflow__edge-path {
+.react-flow__edge.edge-sibling .react-flow__edge-path {
   stroke: #6366f1 !important;
   stroke-width: 2.5px !important;
   stroke-dasharray: 4, 4 !important;
+  fill: none !important;
 }
-.edge-sibling .xyflow__edge-arrow path {
+
+/* Красим стрелочки */
+.react-flow__edge.edge-parent-child .react-flow__edge-arrowhead {
+  fill: #10b981 !important;
+  stroke: #10b981 !important;
+}
+.react-flow__edge.edge-spouse .react-flow__edge-arrowhead {
+  fill: #ec4899 !important;
+  stroke: #ec4899 !important;
+}
+.react-flow__edge.edge-sibling .react-flow__edge-arrowhead {
   fill: #6366f1 !important;
   stroke: #6366f1 !important;
-}
-
-/* СТИЛИЗАЦИЯ МИНИКАРТЫ ПОД V12 */
-.xyflow__minimap {
-  background-color: #0b0f19 !important;
-  border: 1px solid #1e293b !important;
-  border-radius: 12px !important;
-}
-
-/* Яркие узелки людей на миникарте */
-.xyflow__minimap-node:not([class*="generationGroup"]) {
-  fill: #22d3ee !important;
-  stroke: #0891b2 !important;
-  stroke-width: 2px !important;
-  opacity: 1 !important;
-}
-
-/* Скрываем подложки поколений на миникарте */
-.xyflow__minimap-node[class*="generationGroup"] {
-  fill: transparent !important;
-  stroke: transparent !important;
-  opacity: 0 !important;
 }

@@ -14,19 +14,19 @@ import {
     type NodeProps
 } from '@xyflow/react';
 
+// Подключаем стили v12, которые прописаны у тебя в index.css
 import '@xyflow/react/dist/style.css';
 
 import dagre from 'dagre';
 import type { FamilyMember, Relationship } from '@/types/families';
 import { getMemberFullName } from '@/types/families';
-import { calculateGenerations } from '@/utils/generationCalculator';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const NODE_WIDTH = 220;
 const NODE_HEIGHT = 80;
-const GENERATION_GAP_Y = 240;
-const NODE_GAP_X = 140;
+const GENERATION_GAP_Y = 220; // Шаг между поколениями
+const NODE_GAP_X = 160;       // Расстояние по горизонтали, чтобы карточки не слипались
 
 const getAvatarUrl = (avatarUrl: string | null | undefined): string | undefined => {
     if (!avatarUrl) return undefined;
@@ -36,6 +36,7 @@ const getAvatarUrl = (avatarUrl: string | null | undefined): string | undefined 
 };
 
 interface IncomingRelationship {
+    id?: string;
     source_id?: string;
     target_id?: string;
     from_member_id?: string;
@@ -43,9 +44,8 @@ interface IncomingRelationship {
     relationship_type: 'parent_child' | 'spouse' | 'sibling';
 }
 
+// Типизируем кастомную ноду для XYFlow v12
 type MemberNode = Node<{ member: FamilyMember }, 'member'>;
-type GenerationGroupNode = Node<{ label: string }, 'generationGroup'>;
-type AppNode = MemberNode | GenerationGroupNode;
 
 const MemberNodeComponent = ({ data }: NodeProps<MemberNode>) => {
     if (!data?.member) return null;
@@ -62,7 +62,8 @@ const MemberNodeComponent = ({ data }: NodeProps<MemberNode>) => {
 
     return (
         <div className="bg-slate-950 rounded-xl p-3 border border-slate-700 min-w-[220px] shadow-2xl relative overflow-visible group hover:border-cyan-500/50 transition-colors">
-            <Handle type="target" position={Position.Top} className="!bg-slate-400 !w-2.5 !h-2.5" />
+            <Handle type="target" position={Position.Top} className="!bg-slate-500 !w-2 !h-2" />
+
             <div className={`absolute top-0 right-4 w-3 h-1 rounded-b-full ${isAlive ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-slate-500'}`}></div>
 
             <div className="flex items-center gap-3">
@@ -81,17 +82,8 @@ const MemberNodeComponent = ({ data }: NodeProps<MemberNode>) => {
                     </p>
                 </div>
             </div>
-            <Handle type="source" position={Position.Bottom} className="!bg-slate-400 !w-2.5 !h-2.5" />
-        </div>
-    );
-};
 
-const GenerationGroupNodeComponent = ({ data }: NodeProps<GenerationGroupNode>) => {
-    return (
-        <div className="w-full h-full border border-dashed border-slate-700/30 bg-slate-900/10 rounded-2xl flex items-start p-4 pointer-events-none box-border">
-            <span className="text-xs font-bold tracking-widest text-slate-500 uppercase select-none">
-                {data.label}
-            </span>
+            <Handle type="source" position={Position.Bottom} className="!bg-slate-500 !w-2 !h-2" />
         </div>
     );
 };
@@ -103,13 +95,13 @@ interface Props {
 }
 
 export const FamilyTree = ({ members, relationships, fullscreen = false }: Props) => {
-    const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
+    // Явно указываем типы генериков, чтобы убрать ошибку TS2345 (never[])
+    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
     const flowRef = useRef<HTMLDivElement>(null);
 
     const nodeTypes = useMemo(() => ({
-        member: MemberNodeComponent,
-        generationGroup: GenerationGroupNodeComponent
+        member: MemberNodeComponent
     }), []);
 
     const validMembers = useMemo(() => members?.filter(m => m && m.id) || [], [members]);
@@ -132,16 +124,21 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
         if (validMembers.length === 0) return;
 
         try {
-            const genMap = calculateGenerations(validMembers, validRelationships);
-
+            // Инициализируем Dagre
             const g = new dagre.graphlib.Graph();
             g.setDefaultEdgeLabel(() => ({}));
-            g.setGraph({ rankdir: 'TB', nodesep: NODE_GAP_X, ranksep: GENERATION_GAP_Y });
+            g.setGraph({
+                rankdir: 'TB',
+                nodesep: NODE_GAP_X,
+                ranksep: GENERATION_GAP_Y
+            });
 
+            // Передаем узлы
             validMembers.forEach((m) => {
                 g.setNode(m.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
             });
 
+            // Строим связи только для иерархии (родитель-ребенок) внутри Dagre
             validRelationships.forEach((r) => {
                 if (r.relationship_type === 'parent_child') {
                     g.setEdge(r.source_id, r.target_id);
@@ -150,70 +147,55 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
 
             dagre.layout(g);
 
-            const computedNodes: AppNode[] = [];
-            const generationRows: Record<number, { minX: number; maxX: number }> = {};
+            // Вычисляем уровни (Y координаты) динамически, чтобы избежать каши
+            const levels = new Map<string, number>();
+            validMembers.forEach(m => levels.set(m.id, 0));
 
-            g.nodes().forEach((nodeId) => {
-                const dagreNode = g.node(nodeId);
-                const member = validMembers.find(m => m.id === nodeId);
-                if (!member || !dagreNode) return;
+            // Проход по связям для выстраивания точных этажей поколений
+            for (let i = 0; i < 4; i++) {
+                validRelationships.forEach(r => {
+                    if (r.relationship_type === 'parent_child') {
+                        const parentLvl = levels.get(r.source_id) ?? 0;
+                        const childLvl = levels.get(r.target_id) ?? 0;
+                        if (childLvl <= parentLvl) {
+                            levels.set(r.target_id, parentLvl + 1);
+                        }
+                    }
+                    if (r.relationship_type === 'spouse' || r.relationship_type === 'sibling') {
+                        const lvl1 = levels.get(r.source_id) ?? 0;
+                        const lvl2 = levels.get(r.target_id) ?? 0;
+                        if (lvl1 !== lvl2) {
+                            const maxLvl = Math.max(lvl1, lvl2);
+                            levels.set(r.source_id, maxLvl);
+                            levels.set(r.target_id, maxLvl);
+                        }
+                    }
+                });
+            }
 
-                let genIdx = genMap.get(nodeId) ?? 0;
-                if (genMap.size === 0 || Array.from(genMap.values()).every(v => v === 0)) {
-                    genIdx = Math.round(dagreNode.y / GENERATION_GAP_Y);
-                }
+            // Рендерим ноды родственников
+            const computedNodes: Node[] = validMembers.map((m) => {
+                const dagreNode = g.node(m.id);
+                const genLevel = levels.get(m.id) ?? 0;
 
-                const posX = dagreNode.x - NODE_WIDTH / 2;
-                const posY = genIdx * GENERATION_GAP_Y + 100;
-
-                if (!generationRows[genIdx]) {
-                    generationRows[genIdx] = { minX: posX, maxX: posX + NODE_WIDTH };
-                } else {
-                    generationRows[genIdx].minX = Math.min(generationRows[genIdx].minX, posX);
-                    generationRows[genIdx].maxX = Math.max(generationRows[genIdx].maxX, posX + NODE_WIDTH);
-                }
-
-                computedNodes.push({
-                    id: nodeId,
+                return {
+                    id: m.id,
                     type: 'member',
-                    data: { member },
-                    position: { x: posX, y: posY },
-                    style: { zIndex: 100 },
-                });
+                    data: { member: m },
+                    // X берем у Dagre, Y — жестко по вычисленному уровню поколения
+                    position: {
+                        x: dagreNode ? (dagreNode.x - NODE_WIDTH / 2) : 0,
+                        y: genLevel * GENERATION_GAP_Y + 60
+                    },
+                };
             });
 
-            const backgroundGroups: AppNode[] = [];
-            Object.keys(generationRows).forEach((genStr) => {
-                const genIdx = parseInt(genStr, 10);
-                const row = generationRows[genIdx];
-
-                const paddingX = 160;
-                const width = Math.max((row.maxX - row.minX) + paddingX * 2, 1000);
-                const startX = row.minX - paddingX;
-
-                let label = `Поколение ${genIdx + 1}`;
-                if (genIdx === 0) label = "👴👵 Прародители";
-                else if (genIdx === 1) label = "👨👩 Родители";
-                else if (genIdx === 2) label = "👶🧒 Дети";
-
-                backgroundGroups.push({
-                    id: `gen-group-${genIdx}`,
-                    type: 'generationGroup',
-                    data: { label },
-                    position: { x: startX, y: genIdx * GENERATION_GAP_Y + 30 },
-                    width: width,
-                    height: NODE_HEIGHT + 130,
-                    style: { zIndex: 1 },
-                    selectable: false,
-                    draggable: false,
-                });
-            });
-
+            // Отрисовываем линии связей в соответствии с классами из твоего index.css
             const computedEdges: Edge[] = validRelationships.map((r) => {
                 const isSpouse = r.relationship_type === 'spouse';
-
                 let edgeClassName = 'edge-parent-child';
-                if (r.relationship_type === 'spouse') edgeClassName = 'edge-spouse';
+
+                if (isSpouse) edgeClassName = 'edge-spouse';
                 else if (r.relationship_type === 'sibling') edgeClassName = 'edge-sibling';
 
                 return {
@@ -222,7 +204,7 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
                     target: r.target_id,
                     type: isSpouse ? 'straight' : 'smoothstep',
                     animated: r.relationship_type === 'parent_child',
-                    className: edgeClassName,
+                    className: edgeClassName, // Подхватывает стили цвета линий из глобального CSS
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
                         width: 16,
@@ -236,12 +218,12 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
                 };
             });
 
-            setNodes([...backgroundGroups, ...computedNodes]);
+            setNodes(computedNodes);
             setEdges(computedEdges);
         } catch (error) {
-            console.error("Ошибка построения дерева:", error);
+            console.error("Ошибка обновления дерева:", error);
         }
-    }, [validMembers, validRelationships, memberIdsSet, setNodes, setEdges]);
+    }, [validMembers, validRelationships, setNodes, setEdges]);
 
     const containerStyle = fullscreen
         ? { width: '100vw', height: '100vh' }
@@ -278,7 +260,6 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
                 snapGrid={[20, 20]}
                 proOptions={{ hideAttribution: true }}
             >
-                {/* Фикс сетки: убираем конфликтующий gap */}
                 <Background color="#334155" size={1} />
                 <Controls />
                 <MiniMap
