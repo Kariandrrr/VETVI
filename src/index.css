@@ -3,37 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* Базовый фон - глубокий космос */
-  --background: rgba(46, 46, 95, 0.88); /* Slate 955 */
-  --foreground: #f8fafc; /* Slate 50 */
+  --background: rgba(46, 46, 95, 0.88);
+  --foreground: #f8fafc;
 
-  /* Неоновые акценты */
-  --primary: #a855f7; /* Violet 500 */
+  /* НЕОНОВЫЕ АКЦЕНТЫ */
+  --primary: #a855f7;
   --primary-foreground: #ffffff;
-
-  --secondary: #22d3ee; /* Cyan 400 */
+  --secondary: #22d3ee;
   --secondary-foreground: #0f172a;
 
-  /* Элементы стекла */
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-blur: blur(12px);
 
-  /* Тени и свечения */
   --neon-glow-primary: 0 0 15px rgba(168, 85, 247, 0.4);
   --neon-glow-secondary: 0 0 15px rgba(34, 211, 238, 0.4);
-
-  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-}
-
-/* На всякий случай для светлой темы, но фокус на темной */
-.light {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --glass-bg: rgba(15, 23, 42, 0.03);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --primary: #9333ea;
-  --secondary: #0891b2;
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
 }
 
 @layer base {
@@ -43,12 +28,10 @@
   }
 }
 
-/* Полезный класс для эффекта стекла */
 @layer components {
   .glass-card {
     @apply bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-[var(--glass-blur)] rounded-3xl shadow-[var(--shadow-card)];
   }
-
   .neon-input {
     @apply transition-all duration-300;
   }
@@ -58,42 +41,54 @@
   }
 }
 
-/* Плавное появление тултипа */
-.group\/tooltip:hover [role="tooltip"],
-.group\/tooltip:focus-within [role="tooltip"] {
-  @apply opacity-100 visible;
+/* Стили для ребер дерева (XYFlow префиксы) */
+.edge-parent-child .xyflow__edge-path {
+  stroke: #10b981 !important;
+  stroke-width: 3px !important;
+}
+.edge-parent-child .xyflow__edge-arrow path {
+  fill: #10b981 !important;
+  stroke: #10b981 !important;
 }
 
-/* Адаптив для мобильных */
-@media (max-width: 640px) {
-  .group\/tooltip [role="tooltip"] {
-    @apply left-auto right-0 translate-x-0 w-72;
-  }
+.edge-spouse .xyflow__edge-path {
+  stroke: #ec4899 !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 6, 6 !important;
+}
+.edge-spouse .xyflow__edge-arrow path {
+  fill: #ec4899 !important;
+  stroke: #ec4899 !important;
 }
 
-
-/* Глобальные стили для тёмных форм */
-.dark-form input,
-.dark-form textarea,
-.dark-form select {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
-  color: #f1f5f9 !important;
+.edge-sibling .xyflow__edge-path {
+  stroke: #6366f1 !important;
+  stroke-width: 2.5px !important;
+  stroke-dasharray: 4, 4 !important;
+}
+.edge-sibling .xyflow__edge-arrow path {
+  fill: #6366f1 !important;
+  stroke: #6366f1 !important;
 }
 
-.dark-form input::placeholder,
-.dark-form textarea::placeholder {
-  color: #64748b !important;
+/* СТИЛИЗАЦИЯ МИНИКАРТЫ ПОД V12 */
+.xyflow__minimap {
+  background-color: #0b0f19 !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 12px !important;
 }
 
-.dark-form input:focus,
-.dark-form textarea:focus,
-.dark-form select:focus {
-  border-color: #22d3ee !important;
-  outline: none !important;
+/* Яркие узелки людей на миникарте */
+.xyflow__minimap-node:not([class*="generationGroup"]) {
+  fill: #22d3ee !important;
+  stroke: #0891b2 !important;
+  stroke-width: 2px !important;
+  opacity: 1 !important;
 }
 
-/* Стили для Select в тёмной теме */
-.dark-form .dark\:bg-slate-800 {
-  background-color: #1e293b !important;
+/* Скрываем подложки поколений на миникарте */
+.xyflow__minimap-node[class*="generationGroup"] {
+  fill: transparent !important;
+  stroke: transparent !important;
+  opacity: 0 !important;
 }
