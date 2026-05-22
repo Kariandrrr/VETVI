@@ -76,6 +76,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
         defaultValues: prepareInitialData(initialData),
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const isAlive = form.watch('is_alive');
 
     useEffect(() => {
