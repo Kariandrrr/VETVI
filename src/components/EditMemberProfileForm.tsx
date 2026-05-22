@@ -25,6 +25,18 @@ const editProfileSchema = z.object({
     is_alive: z.boolean().optional(),
 });
 
+interface ValidationError {
+    type: string;
+    loc: string[];
+    msg: string;
+    input: string | null;
+    ctx?: { error: string };
+}
+
+interface ApiErrorResponse {
+    detail: ValidationError[] | string;
+}
+
 type EditProfileFormData = z.infer<typeof editProfileSchema>;
 
 interface EditMemberProfileFormProps {
@@ -51,21 +63,30 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
     const [isRemovingAvatar, setIsRemovingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const prepareInitialData = useCallback((data: EditProfileFormData): EditProfileFormData => {
+        return {
+            ...data,
+            date_of_birth: data.date_of_birth === '' ? null : data.date_of_birth,
+            death_date: data.death_date === '' ? null : data.death_date,
+        };
+    }, []);
+
     const form = useForm<EditProfileFormData>({
         resolver: zodResolver(editProfileSchema),
-        defaultValues: initialData,
+        defaultValues: prepareInitialData(initialData),
     });
 
+    const isAlive = form.watch('is_alive');
+
     useEffect(() => {
-        form.reset(initialData);
-    }, [initialData, form]);
+        form.reset(prepareInitialData(initialData));
+    }, [initialData, form, prepareInitialData]);
 
     const updateAvatarPreview = useCallback(() => {
         setAvatarPreview(initialAvatarUrl || null);
     }, [initialAvatarUrl]);
 
     useEffect(() => {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
         updateAvatarPreview();
     }, [updateAvatarPreview]);
 
@@ -97,7 +118,6 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                 setAvatarPreview(null);
                 toast.success('Аватар удалён');
             } catch (err) {
-                // Исправлено: используем err вместо error
                 console.error('Error removing avatar:', err);
                 toast.error('Ошибка при удалении аватара');
             } finally {
@@ -106,14 +126,55 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
         }
     };
 
+    const prepareDataForSubmit = (data: EditProfileFormData): EditProfileFormData => {
+        return {
+            ...data,
+            display_name: data.display_name === '' ? null : data.display_name,
+            bio: data.bio === '' ? null : data.bio,
+            date_of_birth: data.date_of_birth === '' ? null : data.date_of_birth,
+            first_name: data.first_name === '' ? null : data.first_name,
+            last_name: data.last_name === '' ? null : data.last_name,
+            patronymic: data.patronymic === '' ? null : data.patronymic,
+            birth_place: data.birth_place === '' ? null : data.birth_place,
+            death_date: data.death_date === '' ? null : data.death_date,
+            death_place: data.death_place === '' ? null : data.death_place,
+            ...(data.is_alive === true && {
+                death_date: null,
+                death_place: null,
+            }),
+        };
+    };
+
     const handleSubmit = async (data: EditProfileFormData) => {
-        try {
-            await onSubmit(data, avatarFile || undefined);
-        } catch (err) {
-            console.error('Submit error:', err);
+    try {
+        const preparedData = prepareDataForSubmit(data);
+        await onSubmit(preparedData, avatarFile || undefined);
+    } catch (err: unknown) {
+        console.error('Submit error:', err);
+
+        if (err && typeof err === 'object' && 'response' in err) {
+            const error = err as { response?: { data?: unknown } };
+            const responseData = error.response?.data as ApiErrorResponse | undefined;
+
+            if (responseData?.detail) {
+                if (Array.isArray(responseData.detail)) {
+                    const firstError = responseData.detail[0];
+                    const errorMessage = firstError.msg || 'Ошибка валидации';
+                    const errorField = firstError.loc?.join('.') || '';
+                    toast.error(errorField ? `${errorMessage}: ${errorField}` : errorMessage);
+                } else if (typeof responseData.detail === 'string') {
+                    toast.error(responseData.detail);
+                } else {
+                    toast.error('Ошибка при сохранении. Проверьте введённые данные.');
+                }
+            } else {
+                toast.error('Ошибка при сохранении');
+            }
+        } else {
             toast.error('Ошибка при сохранении');
         }
-    };
+    }
+};
 
     const hasAvatar = avatarPreview && !avatarFile;
 
@@ -172,6 +233,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                     <Input
                                         {...field}
                                         value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
                                         className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                                         placeholder="Иванов"
                                     />
@@ -190,6 +252,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                     <Input
                                         {...field}
                                         value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
                                         className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                                         placeholder="Иван"
                                     />
@@ -208,6 +271,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                     <Input
                                         {...field}
                                         value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
                                         className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                                         placeholder="Иванович"
                                     />
@@ -229,6 +293,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                     <Input
                                         {...field}
                                         value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
                                         className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                                         placeholder="Как называть в семье"
                                     />
@@ -244,7 +309,10 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-slate-300">Пол</FormLabel>
-                                <Select value={field.value || 'unknown'} onValueChange={field.onChange}>
+                                <Select
+                                    value={field.value || 'unknown'}
+                                    onValueChange={(val) => field.onChange(val === 'unknown' ? null : val)}
+                                >
                                     <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
                                         <SelectValue />
                                     </SelectTrigger>
@@ -273,6 +341,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                         type="date"
                                         {...field}
                                         value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
                                         className="bg-slate-800 border-slate-700 text-white"
                                     />
                                 </FormControl>
@@ -291,6 +360,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                     <Input
                                         {...field}
                                         value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value || null)}
                                         className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                                         placeholder="Город, страна"
                                     />
@@ -311,6 +381,7 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                 <Textarea
                                     {...field}
                                     value={field.value || ''}
+                                    onChange={(e) => field.onChange(e.target.value || null)}
                                     className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 resize-none"
                                     rows={3}
                                     placeholder="Расскажите немного о себе..."
@@ -321,47 +392,10 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                     )}
                 />
 
+                {/* Блок с информацией о смерти - показываем только админам */}
                 {isAdmin && !isOwner && (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="death_date"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-slate-300">Дата смерти</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="date"
-                                                {...field}
-                                                value={field.value || ''}
-                                                className="bg-slate-800 border-slate-700 text-white"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="death_place"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-slate-300">Место смерти</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                value={field.value || ''}
-                                                className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                                                placeholder="Город, страна"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
+                        {/* Чекбокс "Жив" */}
                         <FormField
                             control={form.control}
                             name="is_alive"
@@ -382,11 +416,66 @@ export const EditMemberProfileForm: React.FC<EditMemberProfileFormProps> = ({
                                 </FormItem>
                             )}
                         />
+
+                        {/* Поля смерти - показываем только если человек НЕ жив */}
+                        {isAlive === false && (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="death_date"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-slate-300">Дата смерти</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="date"
+                                                        {...field}
+                                                        value={field.value || ''}
+                                                        onChange={(e) => field.onChange(e.target.value || null)}
+                                                        className="bg-slate-800 border-slate-700 text-white"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="death_place"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-slate-300">Место смерти</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        value={field.value || ''}
+                                                        onChange={(e) => field.onChange(e.target.value || null)}
+                                                        className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                                                        placeholder="Город, страна"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Подсказка для админа, когда человек жив */}
+                        {isAlive === true && (
+                            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
+                                <p className="text-xs text-emerald-400">
+                                    ℹ️ Человек жив. Поля "Дата смерти" и "Место смерти" скрыты.
+                                </p>
+                            </div>
+                        )}
                     </>
                 )}
 
                 <div className="flex gap-2 justify-end pt-4">
-                    <Button type="button" variant="outline" onClick={() => form.reset()}>
+                    <Button type="button" variant="outline" onClick={() => form.reset(prepareInitialData(initialData))}>
                         Сбросить
                     </Button>
                     <Button
