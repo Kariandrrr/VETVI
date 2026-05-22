@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select, and_, delete
+from sqlalchemy import select, and_, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -22,11 +22,19 @@ async def create_family_group(
     db.add(db_group)
     await db.flush()
 
+    existing_count = await db.scalar(
+        select(func.count())
+        .select_from(FamilyMembership)
+        .where(FamilyMembership.user_id == owner_id)
+    )
+
+    is_first_family = existing_count == 0
+
     membership = FamilyMembership(
         user_id=owner_id,
         family_group_id=db_group.id,
         role=MembershipRole.admin,
-        is_favourite=True,
+        is_favourite=is_first_family,
     )
     db.add(membership)
 

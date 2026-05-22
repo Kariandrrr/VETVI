@@ -77,6 +77,7 @@ async def set_fav_family(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+
     await db.execute(
         text(
             "UPDATE family_memberships SET is_favourite = false WHERE user_id = :user_id"
@@ -84,17 +85,14 @@ async def set_fav_family(
         {"user_id": current_user.id},
     )
 
-    result = await db.execute(
-        text(
-            "UPDATE family_memberships SET is_favourite = true WHERE user_id = :user_id AND family_group_id = :family_id RETURNING id"
-        ),
+    await db.execute(
+        text("""
+             UPDATE family_memberships
+             SET is_favourite = true
+             WHERE user_id = :user_id AND family_group_id = :family_id
+             """),
         {"user_id": current_user.id, "family_id": family_id},
     )
-
-    if not result.first():
-        raise HTTPException(
-            status_code=404, detail="You are not a member of this family group"
-        )
 
     await db.commit()
     return {"status": "success"}
