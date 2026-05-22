@@ -51,29 +51,31 @@ export const CreateFamilyModal = ({ open, onOpenChange }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-[var(--glass-border)] max-w-md p-0 overflow-hidden bg-[var(--glass-bg)] backdrop-blur-xl">
-        {/* Фоновые неоновые акценты */}
-        <div className="absolute -top-12 -right-12 w-40 h-40 bg-[var(--primary)] rounded-full blur-[90px] opacity-20 pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[var(--secondary)] rounded-full blur-[90px] opacity-15 pointer-events-none" />
+      <DialogContent
+  className="glass-card border-[var(--glass-border)] max-w-md p-0 overflow-hidden bg-[var(--glass-bg)] backdrop-blur-xl [&>button:last-child]:hidden"
+>
+  {/* Фоновые неоновые акценты */}
+  <div className="absolute -top-12 -right-12 w-40 h-40 bg-[var(--primary)] rounded-full blur-[90px] opacity-20 pointer-events-none" />
+  <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[var(--secondary)] rounded-full blur-[90px] opacity-15 pointer-events-none" />
 
-        {/* Заголовок */}
-        <DialogHeader className="px-6 pt-6 pb-2 relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
-              <Sparkles className="w-5 h-5 text-[var(--primary)]" />
-            </div>
-            <DialogTitle className="text-2xl font-black text-white tracking-tighter">
-              Создать семейную группу
-            </DialogTitle>
-          </div>
-          <p className="text-sm text-slate-400">
-            Заполните информацию для создания нового семейного архива
-          </p>
+  {/* Заголовок */}
+  <DialogHeader className="px-6 pt-6 pb-2 relative z-10">
+    <div className="flex items-center gap-3 mb-2">
+      <div className="p-2.5 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)]">
+        <Sparkles className="w-5 h-5 text-[var(--primary)]" />
+      </div>
+      <DialogTitle className="text-2xl font-black text-white tracking-tighter">
+        Создать семейную группу
+      </DialogTitle>
+    </div>
+    <p className="text-sm text-slate-400">
+      Заполните информацию для создания нового семейного архива
+    </p>
 
-          <DialogClose className="absolute right-6 top-6 p-2 rounded-full hover:bg-[var(--glass-bg)] hover:text-white transition-colors outline-none">
-            <X className="w-5 h-5 text-slate-400" />
-          </DialogClose>
-        </DialogHeader>
+        <DialogClose className="absolute right-6 top-6 p-2 rounded-full hover:bg-[var(--glass-bg)] hover:text-white transition-colors outline-none z-20">
+          <X className="w-5 h-5 text-slate-400" />
+        </DialogClose>
+  </DialogHeader>
 
         {/* Форма */}
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-5 relative z-10">

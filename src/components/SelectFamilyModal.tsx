@@ -24,7 +24,9 @@ export const SelectFamilyModal = ({ open, onOpenChange, onSelect }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-[var(--glass-border)] max-w-md p-0 overflow-hidden bg-[var(--glass-bg)] backdrop-blur-xl">
+      <DialogContent
+        className="glass-card border-[var(--glass-border)] max-w-md p-0 overflow-hidden bg-[var(--glass-bg)] backdrop-blur-xl [&>button]:hidden"
+      >
         <div className="absolute -top-12 -right-12 w-40 h-40 bg-[var(--primary)] rounded-full blur-[90px] opacity-20 pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[var(--secondary)] rounded-full blur-[90px] opacity-15 pointer-events-none" />
 
@@ -41,7 +43,7 @@ export const SelectFamilyModal = ({ open, onOpenChange, onSelect }: Props) => {
             В какую группу добавить нового родственника?
           </p>
 
-          <DialogClose className="absolute right-6 top-6 p-2 rounded-full hover:bg-[var(--glass-bg)] hover:text-white transition-colors outline-none">
+          <DialogClose className="absolute right-6 top-6 p-2 rounded-full hover:bg-[var(--glass-bg)] hover:text-white transition-colors outline-none z-20">
             <X className="w-5 h-5 text-slate-400" />
           </DialogClose>
         </DialogHeader>

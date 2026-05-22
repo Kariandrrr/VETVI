@@ -98,7 +98,7 @@ return (
             render={({ field }) => (
               <FormItem className="space-y-2">
                 <FormLabel className="text-sm font-semibold text-slate-300 uppercase tracking-wider px-1">
-                  Логин или Email
+                  Email
                 </FormLabel>
                 <FormControl>
                   <Input
