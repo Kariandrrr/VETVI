@@ -207,9 +207,8 @@ export const HomePage = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-8 mt-16 max-w-4xl mx-auto">
           <StatsCard icon="👨👩‍‍👦" title="Всего в архиве" value={members.length.toString()} description="Членов семьи" />
-          <StatsCard icon="🌳" title="Глубина истории" value="0" description="Поколений" />
           <StatsCard icon="🔗" title="Установлено" value={relationships.length.toString()} description="Связей" />
         </div>
       </main>
