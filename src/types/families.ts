@@ -62,12 +62,20 @@ export interface InvitationRead {
 }
 
 export interface Relationship {
-  id: string;
-  family_group_id: string;
-  source_id: string;
-  target_id: string;
-  relationship_type: RelationshipType | string;
-  created_at: string;
+    id: string;
+    family_group_id: string;
+    marriage_date?: string | null;
+    divorce_date?: string | null;
+    created_by: string;
+    created_at: string;
+
+    source_id: string;
+    target_id: string;
+    relationship_type: RelationshipType;
+
+    from_member_id: string;
+    to_member_id: string;
+    rel_type: RelationshipType;
 }
 
 // Хелпер для отображения имени в UI
