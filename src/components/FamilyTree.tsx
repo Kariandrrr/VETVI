@@ -1,32 +1,32 @@
-import { useEffect, useMemo, useRef } from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {
-    ReactFlow,
     Background,
     Controls,
     type Edge,
+    Handle,
     MarkerType,
     MiniMap,
     type Node,
-    useNodesState,
-    useEdgesState,
-    Handle,
+    type NodeProps,
     Position,
-    type NodeProps
+    ReactFlow,
+    useEdgesState,
+    useNodesState
 } from '@xyflow/react';
 
-// Подключаем стили v12, которые прописаны у тебя в index.css
 import '@xyflow/react/dist/style.css';
 
 import dagre from 'dagre';
-import type { FamilyMember, Relationship } from '@/types/families';
-import { getMemberFullName } from '@/types/families';
+import type {FamilyMember, Relationship} from '@/types/families';
+import {getMemberFullName} from '@/types/families';
+import {calculateGenerations} from '@/utils//generationCalculator';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const NODE_WIDTH = 220;
 const NODE_HEIGHT = 80;
-const GENERATION_GAP_Y = 220; // Шаг между поколениями
-const NODE_GAP_X = 160;       // Расстояние по горизонтали, чтобы карточки не слипались
+const GENERATION_GAP_Y = 220;
+const NODE_GAP_X = 160;
 
 const getAvatarUrl = (avatarUrl: string | null | undefined): string | undefined => {
     if (!avatarUrl) return undefined;
@@ -44,7 +44,6 @@ interface IncomingRelationship {
     relationship_type: 'parent_child' | 'spouse' | 'sibling';
 }
 
-// Типизируем кастомную ноду для XYFlow v12
 type MemberNode = Node<{ member: FamilyMember }, 'member'>;
 
 const MemberNodeComponent = ({ data }: NodeProps<MemberNode>) => {
@@ -95,7 +94,6 @@ interface Props {
 }
 
 export const FamilyTree = ({ members, relationships, fullscreen = false }: Props) => {
-    // Явно указываем типы генериков, чтобы убрать ошибку TS2345 (never[])
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
     const flowRef = useRef<HTMLDivElement>(null);
@@ -124,7 +122,6 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
         if (validMembers.length === 0) return;
 
         try {
-            // Инициализируем Dagre
             const g = new dagre.graphlib.Graph();
             g.setDefaultEdgeLabel(() => ({}));
             g.setGraph({
@@ -133,12 +130,10 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
                 ranksep: GENERATION_GAP_Y
             });
 
-            // Передаем узлы
             validMembers.forEach((m) => {
                 g.setNode(m.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
             });
 
-            // Строим связи только для иерархии (родитель-ребенок) внутри Dagre
             validRelationships.forEach((r) => {
                 if (r.relationship_type === 'parent_child') {
                     g.setEdge(r.source_id, r.target_id);
@@ -147,33 +142,8 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
 
             dagre.layout(g);
 
-            // Вычисляем уровни (Y координаты) динамически, чтобы избежать каши
-            const levels = new Map<string, number>();
-            validMembers.forEach(m => levels.set(m.id, 0));
+            const levels = calculateGenerations(validMembers, validRelationships);
 
-            // Проход по связям для выстраивания точных этажей поколений
-            for (let i = 0; i < 4; i++) {
-                validRelationships.forEach(r => {
-                    if (r.relationship_type === 'parent_child') {
-                        const parentLvl = levels.get(r.source_id) ?? 0;
-                        const childLvl = levels.get(r.target_id) ?? 0;
-                        if (childLvl <= parentLvl) {
-                            levels.set(r.target_id, parentLvl + 1);
-                        }
-                    }
-                    if (r.relationship_type === 'spouse' || r.relationship_type === 'sibling') {
-                        const lvl1 = levels.get(r.source_id) ?? 0;
-                        const lvl2 = levels.get(r.target_id) ?? 0;
-                        if (lvl1 !== lvl2) {
-                            const maxLvl = Math.max(lvl1, lvl2);
-                            levels.set(r.source_id, maxLvl);
-                            levels.set(r.target_id, maxLvl);
-                        }
-                    }
-                });
-            }
-
-            // Рендерим ноды родственников
             const computedNodes: Node[] = validMembers.map((m) => {
                 const dagreNode = g.node(m.id);
                 const genLevel = levels.get(m.id) ?? 0;
@@ -182,7 +152,6 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
                     id: m.id,
                     type: 'member',
                     data: { member: m },
-                    // X берем у Dagre, Y — жестко по вычисленному уровню поколения
                     position: {
                         x: dagreNode ? (dagreNode.x - NODE_WIDTH / 2) : 0,
                         y: genLevel * GENERATION_GAP_Y + 60
@@ -190,13 +159,22 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
                 };
             });
 
-            // Отрисовываем линии связей в соответствии с классами из твоего index.css
             const computedEdges: Edge[] = validRelationships.map((r) => {
                 const isSpouse = r.relationship_type === 'spouse';
-                let edgeClassName = 'edge-parent-child';
+                const isSibling = r.relationship_type === 'sibling';
 
-                if (isSpouse) edgeClassName = 'edge-spouse';
-                else if (r.relationship_type === 'sibling') edgeClassName = 'edge-sibling';
+                let strokeColor = '#10b981';
+                let strokeDasharray = undefined;
+                let strokeWidth = '3px';
+
+                if (isSpouse) {
+                    strokeColor = '#ec4899';
+                    strokeDasharray = '6, 6';
+                } else if (isSibling) {
+                    strokeColor = '#6366f1';
+                    strokeDasharray = '4, 4';
+                    strokeWidth = '2.5px';
+                }
 
                 return {
                     id: `${r.source_id}-${r.target_id}-${r.relationship_type}`,
@@ -204,11 +182,16 @@ export const FamilyTree = ({ members, relationships, fullscreen = false }: Props
                     target: r.target_id,
                     type: isSpouse ? 'straight' : 'smoothstep',
                     animated: r.relationship_type === 'parent_child',
-                    className: edgeClassName, // Подхватывает стили цвета линий из глобального CSS
+                    style: {
+                        stroke: strokeColor,
+                        strokeWidth: strokeWidth,
+                        strokeDasharray: strokeDasharray,
+                    },
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
                         width: 16,
                         height: 16,
+                        color: strokeColor,
                     },
                     label: isSpouse ? '💑' : undefined,
                     labelStyle: { fill: '#fff', fontSize: 11, fontWeight: 'bold' },
