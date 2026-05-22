@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select, and_, delete
+from sqlalchemy import select, and_, delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -116,7 +116,7 @@ async def get_members_relationships(
         .where(
             and_(
                 Relationship.family_group_id == family_group_id,
-                and_(
+                or_(
                     Relationship.from_member_id == member_id,
                     Relationship.to_member_id == member_id,
                 ),
@@ -242,20 +242,27 @@ async def validate_spouse_relationship(
     if spouse2_id in ancestors1 or spouse1_id in ancestors2:
         return False, "Impossible to make a marriage"
 
-    stmt = select(Relationship.from_member_id).where(
+    stmt1 = select(Relationship.from_member_id).where(
         and_(
             Relationship.family_group_id == family_group_id,
             Relationship.to_member_id == spouse1_id,
             Relationship.rel_type == RelationshipType.parent_child,
         )
     )
-    result = await db.execute(stmt)
-    parents1 = set(result.scalars().all())
+    result1 = await db.execute(stmt1)
+    parents1 = set(result1.scalars().all())
 
-    result = await db.execute(stmt)
-    parents2 = set(result.scalars().all())
+    stmt2 = select(Relationship.from_member_id).where(
+        and_(
+            Relationship.family_group_id == family_group_id,
+            Relationship.to_member_id == spouse2_id,
+            Relationship.rel_type == RelationshipType.parent_child,
+        )
+    )
+    result2 = await db.execute(stmt2)
+    parents2 = set(result2.scalars().all())
 
-    if parents1 & parents2:
-        return False, "Impossible to make a marriage"
+    if parents1 & parents2 and len(parents1) > 0:
+        return False, "Impossible to make a marriage (siblings)"
 
     return True, None
