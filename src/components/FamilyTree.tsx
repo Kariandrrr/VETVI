@@ -163,7 +163,12 @@ export const FamilyTree = ({ members, relationships = [], fullscreen = false }: 
 
             dagre.layout(g);
 
-            const levels = calculateGenerations(validMembers, normalizedRelationships);
+            let levels = new Map<string, number>();
+            try {
+                levels = calculateGenerations(validMembers, normalizedRelationships);
+            } catch (e) {
+                console.error("Ошибка в расчете поколений:", e);
+            }
 
             const positionsMap = new Map<string, { x: number; y: number }>();
             validMembers.forEach((m) => {
@@ -225,7 +230,7 @@ export const FamilyTree = ({ members, relationships = [], fullscreen = false }: 
                 if (p1 && p2) {
                     const jointId = `joint-${pairKey}`;
                     const jointX = (p1.x + p2.x) / 2 + NODE_WIDTH / 2;
-                    const jointY = Math.max(p1.y, p2.y) + NODE_HEIGHT + 40; // Полка слияния на 40px ниже карточек родителей
+                    const jointY = Math.max(p1.y, p2.y) + NODE_HEIGHT + 40;
 
                     computedNodes.push({
                         id: jointId,
@@ -282,6 +287,36 @@ export const FamilyTree = ({ members, relationships = [], fullscreen = false }: 
                 }
             });
 
+            normalizedRelationships.forEach((r) => {
+                if (r.relationship_type === 'sibling' && r.source_id && r.target_id) {
+                    const posSource = positionsMap.get(r.source_id);
+                    const posTarget = positionsMap.get(r.target_id);
+
+                    let sourceHandleId = 'spouse-right';
+                    let targetHandleId = 'spouse-left-target';
+
+                    if (posSource && posTarget && posSource.x > posTarget.x) {
+                        sourceHandleId = 'spouse-left';
+                        targetHandleId = 'spouse-right-target';
+                    }
+
+                    computedEdges.push({
+                        id: `sibling-${r.source_id}-${r.target_id}`,
+                        source: r.source_id,
+                        target: r.target_id,
+                        sourceHandle: sourceHandleId,
+                        targetHandle: targetHandleId,
+                        type: 'straight',
+                        style: { stroke: '#6366f1', strokeWidth: '3px', strokeDasharray: '4, 4' },
+                        label: '👫',
+                        labelStyle: { fill: '#fff', fontSize: 11, fontWeight: 'bold' },
+                        labelBgPadding: [4, 2],
+                        labelBgBorderRadius: 6,
+                        labelBgStyle: { fill: '#0f172a', fillOpacity: 0.9 },
+                    });
+                }
+            });
+
             setNodes(computedNodes);
             setEdges(computedEdges);
         } catch (error) {
@@ -305,11 +340,7 @@ export const FamilyTree = ({ members, relationships = [], fullscreen = false }: 
     }
 
     return (
-        <div
-            ref={flowRef}
-            className="rounded-2xl border border-slate-800 bg-slate-950/20 relative overflow-hidden"
-            style={containerStyle}
-        >
+        <div ref={flowRef} className="rounded-2xl border border-slate-800 bg-slate-950/20 relative overflow-hidden" style={containerStyle}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -334,11 +365,15 @@ export const FamilyTree = ({ members, relationships = [], fullscreen = false }: 
                 <div className="space-y-2">
                     <div className="flex items-center gap-3">
                         <div className="w-6 h-0.5 bg-emerald-500"></div>
-                        <span>Родитель → Ребенок (Изумрудная)</span>
+                        <span>Родитель → Ребенок</span>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="w-6 h-0.5 border-t-2 border-dashed border-pink-500"></div>
-                        <span>Супруги (Розовый пунктир)</span>
+                        <span>Супруги</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-6 h-0.5 border-t-2 border-dashed border-indigo-500"></div>
+                        <span>Братья / Сестры</span>
                     </div>
                 </div>
             </div>
