@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
@@ -248,12 +248,12 @@ export const RegisterForm = () => {
 
       <p className="text-center text-slate-400 relative z-10">
         Уже в системе?{' '}
-        <Link
-          to="/login"
-          className="text-[var(--secondary)] hover:text-white font-semibold transition-colors decoration-dotted hover:underline"
-        >
-          Войти в аккаунт
-        </Link>
+          <button
+        onClick={() => navigate('/login')}
+        className="text-[var(--secondary)] hover:text-white font-semibold transition-colors decoration-dotted hover:underline cursor-pointer bg-transparent border-none p-0"
+      >
+        Войти в аккаунт
+      </button>
       </p>
     </div>
   );
