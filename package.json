@@ -1,6 +1,10 @@
 {
   "name": "vetvi-root",
   "private": true,
+  "scripts": {
+    "dev:web": "cd packages/web && npm run dev",
+    "dev:back": "cd packages/back && .venv\\Scripts\\activate && uvicorn main:app --reload"
+  },
   "workspaces": [
     "packages/*"
   ]
