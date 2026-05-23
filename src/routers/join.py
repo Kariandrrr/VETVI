@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..core.models import GenderEnum
 from ..service.member_relationship.members import (
     create_family_member,
 )
@@ -50,15 +51,20 @@ async def join_by_token(
         db, invite.family_group_id, current_user.id
     )
     if not existing_member:
+        default_name = getattr(current_user, "display_name", "Участник")
+
         member_in = FamilyMemberCreate(
             family_group_id=invite.family_group_id,
-            first_name=current_user.first_name or "Участник",
-            last_name=current_user.last_name or "",
-            gender=current_user.gender or "unknown",
+            first_name=default_name,
+            last_name="",
+            gender=GenderEnum.unknown,
             avatar_url=getattr(current_user, "avatar_url", None),
             linked_user_id=current_user.id,
         )
-        await create_family_member(db, member_in, current_user.id)
+
+        new_member = await create_family_member(db, member_in, current_user.id)
+        await db.commit()
+        await db.refresh(new_member)
 
     return {
         "status": "success",

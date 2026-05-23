@@ -39,4 +39,4 @@ router.include_router(
     posts_and_profiles_reactions_router, prefix="/reactions", tags=["posts"]
 )
 router.include_router(posts_and_profiles_tags_router, prefix="/tags", tags=["posts"])
-router.include_router(posts_and_profiles_ws_media_router)
+router.include_router(posts_and_profiles_ws_media_router, tags=["ws"])

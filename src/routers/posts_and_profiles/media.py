@@ -21,13 +21,9 @@ router = APIRouter()
 async def upload_media_to_post(
     post_id: UUID,
     file: UploadFile = File(...),
+    family_id: UUID | None = None,
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
-    _=Depends(
-        RoleChecker(
-            [MembershipRole.admin, MembershipRole.editor, MembershipRole.viewer]
-        )
-    ),
 ):
     user_id = str(current_user.id)
     file_id = str(post_id)
@@ -46,23 +42,30 @@ async def upload_media_to_post(
 
         await manager.send_progress(user_id, file_id, 15, "post_validated")
 
-        stmt = select(FamilyMember).where(
-            FamilyMember.linked_user_id == current_user.id,
-            FamilyMember.family_group_id.in_(
-                select(FamilyMember.family_group_id).where(
-                    FamilyMember.linked_user_id == post.author_id
-                )
-            ),
-        )
-        result = await db.execute(stmt)
-        if not result.scalar():
+        has_access = False
+
+        if family_id:
+            stmt = select(FamilyMember).where(
+                FamilyMember.linked_user_id == current_user.id,
+                FamilyMember.family_group_id == family_id,
+                FamilyMember.family_group_id.in_(
+                    select(FamilyMember.family_group_id).where(
+                        FamilyMember.linked_user_id == post.author_id
+                    )
+                ),
+            )
+            result = await db.execute(stmt)
+            has_access = bool(result.scalar())
+        else:
+            has_access = post.author_id == current_user.id
+
+        if not has_access:
             await manager.send_error(user_id, file_id, "Access denied to this post")
             raise HTTPException(
                 status_code=403, detail="You don't have access to this post"
             )
 
         await manager.send_progress(user_id, file_id, 25, "access_granted")
-
         await manager.send_progress(user_id, file_id, 40, "saving_file")
 
         result = await media_service.upload_media(db, post_id, file, current_user.id)
@@ -126,3 +129,24 @@ async def stream_media(
     return FileResponse(
         media.file_path, filename=media.original_name, media_type=media.mime_type
     )
+
+
+@router.delete("/media/{media_id}")
+async def delete_media(
+    media_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    await media_service.delete_media(db, media_id, current_user.id)
+    return {"message": "Media deleted"}
+
+
+@router.patch("/media/{media_id}/order")
+async def reorder_media(
+    media_id: UUID,
+    new_order: int,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    await media_service.reorder_media(db, media_id, new_order, current_user.id)
+    return {"message": "Order updated"}

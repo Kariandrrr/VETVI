@@ -4,21 +4,24 @@ from typing import List
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...core.models import User
+from ...core.models import User, FamilyMember
 from ...core.schemas.post import PostRead, PostCreate, PostUpdate
+from ...deps.family import get_current_member_in_family
 from ...deps.user import get_db, get_current_user
 from ...service.media_and_profiles import posts as post_service
 
 router = APIRouter()
 
 
-@router.post("/posts", response_model=PostRead, status_code=201)
+@router.post("/{family_group_id}/posts", response_model=PostRead, status_code=201)
 async def create_post(
     post_in: PostCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    current_member: FamilyMember = Depends(get_current_member_in_family),
 ):
-    return await post_service.create_post(db, post_in, current_user.id)
+    return await post_service.create_post(
+        db, post_in, current_user.id, current_member.family_group_id)
 
 
 @router.get("/users/{user_id}/posts", response_model=List[PostRead])

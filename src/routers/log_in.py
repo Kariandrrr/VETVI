@@ -57,7 +57,7 @@ async def login(
             "sub": user_id_str,
             "type": "refresh",
         },
-        expires_minutes=60 * 24 * 7,
+        expires_minutes=14 * 24 * 60,
     )
 
     response.set_cookie(
@@ -66,9 +66,10 @@ async def login(
         httponly=settings.auth_jwt.cookie.http_only,
         secure=settings.auth_jwt.cookie.secure,
         samesite=settings.auth_jwt.cookie.same_site,
+        domain=settings.auth_jwt.cookie.domain,
+        path=settings.auth_jwt.cookie.path,
         max_age=settings.auth_jwt.cookie.max_age_refresh,
     )
-
     return Token(access_token=access_token, refresh_token="stored_in_cookie")
 
 
@@ -101,15 +102,18 @@ async def refresh_token(
         )
         new_refresh = encode_jwt(
             {"sub": str(user.id), "type": "refresh"},
-            expires_minutes=60 * 24 * 7,
+            expires_minutes=14 * 24 * 60,
         )
+
         response.set_cookie(
-            key="refresh_token",
+            key=settings.auth_jwt.cookie.name_refresh,
             value=new_refresh,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            max_age=86400,
+            httponly=settings.auth_jwt.cookie.http_only,
+            secure=settings.auth_jwt.cookie.secure,
+            samesite=settings.auth_jwt.cookie.same_site,
+            domain=settings.auth_jwt.cookie.domain,
+            path=settings.auth_jwt.cookie.path,
+            max_age=settings.auth_jwt.cookie.max_age_refresh,
         )
         return {"access_token": new_access, "token_type": "bearer"}
 
@@ -198,3 +202,24 @@ async def delete_user(
     await db.commit()
 
     return {"message": "User deleted", "user_id": user_id}
+
+
+@router.patch("/me", response_model=UserRead)
+async def update_current_user(
+    data: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if data.display_name is not None:
+        current_user.display_name = data.display_name
+
+    if data.avatar_url is not None:
+        current_user.avatar_url = data.avatar_url
+
+    if data.email is not None:
+        current_user.email = data.email
+
+    await db.commit()
+    await db.refresh(current_user)
+
+    return current_user

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import EmailStr, BaseModel
+from pydantic import EmailStr, BaseModel, ConfigDict
 
 from .base import BaseSchema
 from ..models.enums import MembershipRole
@@ -10,17 +10,19 @@ from ..models.enums import MembershipRole
 class UserRead(BaseSchema):
     id: UUID
     email: EmailStr
-    display_name: str
+    display_name: str | None = None
     avatar_url: str | None = None
     role: MembershipRole
-    is_active: bool
+    is_active: bool = True
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
-    display_name: str
+    display_name: str | None = None
     role: MembershipRole = MembershipRole.viewer
 
 

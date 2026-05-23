@@ -1,11 +1,13 @@
 from uuid import UUID
 
-from sqlalchemy import select, and_, delete
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select, and_, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from ..core.models.enums import MembershipRole
 from ..core.models.families import FamilyGroup, FamilyMembership
+from ..core.models.members import FamilyMember
+from ..core.models.users import User
 from ..core.schemas.family_group import FamilyGroupCreate, FamilyGroupUpdate
 
 
@@ -20,10 +22,34 @@ async def create_family_group(
     db.add(db_group)
     await db.flush()
 
+    existing_count = await db.scalar(
+        select(func.count())
+        .select_from(FamilyMembership)
+        .where(FamilyMembership.user_id == owner_id)
+    )
+
+    is_first_family = existing_count == 0
+
     membership = FamilyMembership(
-        user_id=owner_id, family_group_id=db_group.id, role=MembershipRole.admin
+        user_id=owner_id,
+        family_group_id=db_group.id,
+        role=MembershipRole.admin,
+        is_favourite=is_first_family,
     )
     db.add(membership)
+
+    user_result = await db.execute(select(User).where(User.id == owner_id))
+    user = user_result.scalar_one()
+
+    new_member = FamilyMember(
+        family_group_id=db_group.id,
+        linked_user_id=owner_id,
+        first_name=user.display_name or user.email.split("@")[0],
+        last_name="",
+        created_by=owner_id,
+        is_alive=True,
+    )
+    db.add(new_member)
 
     await db.commit()
     await db.refresh(db_group)

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.core.models.enums import MembershipRole
+from src.core.models.enums import MembershipRole, GenderEnum
 
 
 class MemberProfileBase(BaseModel):
@@ -24,7 +24,7 @@ class MemberProfileUpdate(MemberProfileBase):
     last_name: str | None = None
     patronymic: str | None = None
     maiden_name: str | None = None
-    gender: str | None = None
+    gender: GenderEnum | None = None
     birth_place: str | None = None
     death_date: date | None = None
     death_place: str | None = None
@@ -33,17 +33,17 @@ class MemberProfileUpdate(MemberProfileBase):
 
 class MemberProfileRead(MemberProfileBase):
     id: UUID
-    user_id: UUID
+    user_id: UUID | None = None
     family_group_id: UUID
-    role: str
+    role: MembershipRole
     joined_at: datetime
-    linked_user_id: UUID
+    linked_user_id: UUID | None = None
 
-    first_name: str | None = None
-    last_name: str | None = None
+    first_name: str = ""
+    last_name: str = ""
     patronymic: str | None = None
     maiden_name: str | None = None
-    gender: str | None = None
+    gender: GenderEnum | None = None
     birth_place: str | None = None
     death_date: date | None = None
     death_place: str | None = None
