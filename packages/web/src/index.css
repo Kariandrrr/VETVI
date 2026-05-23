@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: rgba(46, 46, 95, 0.88);
+  --foreground: #f8fafc;
+
+  /* НЕОНОВЫЕ АКЦЕНТЫ */
+  --primary: #a855f7;
+  --primary-foreground: #ffffff;
+  --secondary: #22d3ee;
+  --secondary-foreground: #0f172a;
+
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(12px);
+
+  --neon-glow-primary: 0 0 15px rgba(168, 85, 247, 0.4);
+  --neon-glow-secondary: 0 0 15px rgba(34, 211, 238, 0.4);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] antialiased tracking-tight;
+    font-feature-settings: "ss01", "ss03", "cv01";
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-[var(--glass-blur)] rounded-3xl shadow-[var(--shadow-card)];
+  }
+  .neon-input {
+    @apply transition-all duration-300;
+  }
+  .neon-input:focus {
+    @apply ring-2 ring-[var(--primary)] ring-offset-0 border-[var(--primary)];
+    box-shadow: var(--neon-glow-primary);
+  }
+}

@@ -1,0 +1,280 @@
+import {useEffect, useState} from 'react';
+import {useAuth} from '@/hooks/useAuth';
+import {useFamilies} from '@/hooks/useFamilies';
+import {useFamilyTreeData} from '@/hooks/useFamilyTreeData';
+import {Button} from '@/components/ui/button';
+import {Heart, Link2, LogOut, Maximize2, Minimize2, Newspaper, Plus, User, Users, Zap} from 'lucide-react';
+import {useNavigate} from 'react-router-dom';
+import {JoinByLinkModal} from '@/components/JoinByLinkModal';
+import {SelectFamilyModal} from '@/components/SelectFamilyModal';
+import {AddMemberModal} from '@/components/AddMemberModal';
+import {FamilyTree} from '@/components/FamilyTree';
+import logo from '@/assets/logo.png';
+import type {FamilyGroupRead, FamilyMembershipRead} from '@/types/families';
+
+
+export const HomePage = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const [showSelectFamily, setShowSelectFamily] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [isTreeFullscreen, setIsTreeFullscreen] = useState(false);
+
+  const { data: familiesRaw, isLoading: isLoadingFamilies } = useFamilies();
+  const families = Array.isArray(familiesRaw)
+    ? familiesRaw
+    : (familiesRaw as { data?: FamilyGroupRead[] })?.data ?? [];
+
+  const favoriteFamily = families.find((f: FamilyGroupRead) =>
+    f.memberships?.some((m: FamilyMembershipRead) => m.is_favourite === true)
+  );
+
+  const {
+    members,
+    relationships,
+    isLoading: isLoadingTree,
+    refetch,
+  } = useFamilyTreeData(favoriteFamily?.id);
+
+  // Закрытие по Esc
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isTreeFullscreen) setIsTreeFullscreen(false);
+    };
+    if (isTreeFullscreen) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = '';
+    };
+  }, [isTreeFullscreen]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  const handleNewMemberClick = () => setShowSelectFamily(true);
+
+  const handleFamilySelected = (familyId: string) => {
+    setSelectedFamilyId(familyId);
+    setShowSelectFamily(false);
+    setTimeout(() => setShowAddMember(true), 300);
+  };
+
+  const handleAddSuccess = () => {
+    if (refetch) refetch();
+    setShowAddMember(false);
+    setSelectedFamilyId(null);
+  };
+
+  const handleGoToFeed = () => {
+    if (favoriteFamily?.id) {
+      navigate(`/families/${favoriteFamily.id}/feed`);
+    }
+  };
+
+  const primaryBtnClass =
+    "px-6 py-3 bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] hover:from-cyan-400 hover:to-purple-400 text-white font-medium rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2";
+
+    const iconBtnClass =
+    "flex items-center gap-2 px-4 py-2 rounded-xl text-white font-medium transition-all duration-300 hover:-translate-y-0.5 active:scale-95";
+
+  return (
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      {/* Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-black/30 border-b border-[var(--glass-border)]">
+        <div className="max-w-[1600px] mx-auto px-6 py-4">
+          <div className="flex items-center justify-between h-16 gap-6">
+            <div className="flex items-center gap-4">
+              <div className="relative group">
+                <img src={logo} alt="VETVI Logo" className="w-12 h-12 object-contain drop-shadow-[0_0_12px_rgba(168,85,247,0.6)] transition-transform duration-300 group-hover:scale-110" />
+              </div>
+              <div className="hidden md:block">
+                <h1 className="text-2xl font-black text-white tracking-tighter bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">VETVI</h1>
+                <p className="text-xs text-slate-500 tracking-wider uppercase -mt-1">Архив семейных связей</p>
+              </div>
+            </div>
+
+              {/* 🆕 Кнопка "Мой профиль" */}
+                <Button
+                    onClick={() => navigate('/profile')}
+                    className={`${iconBtnClass} bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]`}
+                >
+                    <User className="w-5 h-5" />
+                    <span className="hidden lg:inline">Мой профиль</span>
+                </Button>
+
+            {favoriteFamily && (
+                <Button
+                  onClick={handleGoToFeed}
+                  className={`${iconBtnClass} bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(20,184,166,0.4)]`}
+                >
+                  <Newspaper className="w-5 h-5" />
+                  <span className="hidden lg:inline">Моя лента</span>
+                </Button>
+              )}
+            <div className="flex items-center gap-3">
+              <Button onClick={handleNewMemberClick} className={primaryBtnClass}>
+                <Plus className="w-5 h-5" />
+                Новый родственник
+              </Button>
+              <Button onClick={() => navigate('/families')} className={primaryBtnClass}>
+                <Users className="w-5 h-5" />
+                Семейные группы
+              </Button>
+              <Button onClick={() => setShowJoinModal(true)} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+                <Link2 className="w-5 h-5" />
+                <span className="hidden md:inline">Вступить по ссылке</span>
+              </Button>
+              <Button onClick={handleLogout} variant="ghost" size="icon" className="rounded-full w-11 h-11 text-slate-500 hover:text-red-400 hover:bg-red-950/40 transition-all">
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-[1600px] mx-auto px-6 py-16 space-y-16 relative">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[var(--primary)] rounded-full blur-[180px] opacity-10" />
+
+        {/* Intro Card */}
+        <div className="p-10 glass-card relative group">
+          <div className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-[var(--glass-bg)] flex items-center justify-center border border-[var(--glass-border)]">
+            <Zap className="w-7 h-7 text-[var(--secondary)] drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+          </div>
+          <h2 className="text-3xl font-extrabold text-white tracking-tighter mb-4 max-w-xl">Центр управления деревом</h2>
+          <p className="text-slate-300 text-lg max-w-4xl leading-relaxed">
+            Это ваше цифровое пространство для исследования родословной. Визуализируйте, дополняйте и храните историю вашей семьи в защищенной и современной среде Vetvi. Начните с добавления первого родственника!
+          </p>
+        </div>
+
+        {/* ✅ СЕКЦИЯ ДЕРЕВА */}
+        <div className="glass-card overflow-hidden relative">
+          <div className="border-b border-[var(--glass-border)] p-10 flex items-center justify-between gap-6 flex-wrap">
+            <div>
+              <h2 className="text-3xl font-extrabold text-white tracking-tighter flex items-center gap-3">
+                {favoriteFamily ? favoriteFamily.name : "Семейный архив"}
+                {favoriteFamily && <Heart className="w-6 h-6 text-[var(--primary)] fill-[var(--primary)]" />}
+              </h2>
+              <p className="text-slate-400 text-lg mt-1 max-w-md">
+                {favoriteFamily ? "Интерактивная карта вашей избранной семьи" : "Выберите избранную группу на странице семейных групп"}
+              </p>
+            </div>
+
+            {/* 🔲 Кнопка расширения */}
+            {favoriteFamily && members.length > 0 && (
+              <Button variant="ghost" size="icon" onClick={() => setIsTreeFullscreen(true)} className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] border border-[var(--glass-border)] text-slate-400 hover:text-white hover:bg-[var(--primary)]/20 transition-all" title="Развернуть на весь экран">
+                <Maximize2 className="w-5 h-5" />
+              </Button>
+            )}
+
+            <Button onClick={handleNewMemberClick} className="sm:hidden bg-[var(--secondary)] hover:bg-cyan-300 text-[var(--secondary-foreground)] rounded-full h-12 w-full font-bold shadow-[var(--neon-glow-secondary)] transition-all">
+              <Plus className="w-5 h-5 mr-2" />
+              Добавить родственника
+            </Button>
+          </div>
+
+          <div className="p-4 min-h-[650px] bg-black/10 relative">
+            {isLoadingFamilies || isLoadingTree ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)] mb-4" />
+                <p>Загрузка семейного древа...</p>
+              </div>
+            ) : !favoriteFamily ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <Heart className="w-20 h-20 mb-4 text-slate-600" />
+                <p className="mb-6 text-lg">У вас пока нет избранной семьи.</p>
+                <Button onClick={() => navigate('/families')} className={primaryBtnClass}>Перейти к группам</Button>
+              </div>
+            ) : members.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <Users className="w-16 h-16 mb-4 text-slate-600" />
+                <p className="mb-6 text-lg">В этой семье пока нет участников.</p>
+                <Button onClick={handleNewMemberClick} className={primaryBtnClass}>
+                  <Plus className="w-5 h-5 mr-2" />
+                  Добавить первого родственника
+                </Button>
+              </div>
+            ) : (
+              <FamilyTree members={members} relationships={relationships} fullscreen={false} />            )}
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-8 mt-16 max-w-4xl mx-auto">
+          <StatsCard icon="👨👩‍‍👦" title="Всего в архиве" value={members.length.toString()} description="Членов семьи" />
+          <StatsCard icon="🔗" title="Установлено" value={relationships.length.toString()} description="Связей" />
+        </div>
+      </main>
+
+      {/* Модальные окна */}
+      <SelectFamilyModal open={showSelectFamily} onOpenChange={setShowSelectFamily} onSelect={handleFamilySelected} />
+      {selectedFamilyId && (
+        <AddMemberModal key={`add-member-${selectedFamilyId}`} familyId={selectedFamilyId} open={showAddMember} onOpenChange={setShowAddMember} onAddSuccess={handleAddSuccess} />
+      )}
+      <JoinByLinkModal open={showJoinModal} onOpenChange={setShowJoinModal} />
+
+      {/* 🖥️ Полноэкранный оверлей */}
+            {isTreeFullscreen && favoriteFamily && (
+        <div className="fixed inset-0 z-[100] bg-[var(--background)] flex flex-col">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)] bg-black/30 backdrop-blur-xl shrink-0">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="VETVI" className="w-8 h-8" />
+              <h3 className="text-xl font-bold text-white">{favoriteFamily.name}</h3>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-4 text-sm text-slate-400 mr-4">
+                <span>👥 {members.length} участников</span>
+                <span>🔗 {relationships.length} связей</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsTreeFullscreen(false)}
+                className="w-10 h-10 rounded-xl bg-[var(--glass-bg)] hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all"
+                title="Свернуть (Esc)"
+              >
+                <Minimize2 className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* 👈 Контейнер для дерева - полная высота */}
+          <div className="flex-1 w-full p-4" onClick={(e) => e.stopPropagation()}>
+            <FamilyTree members={members} relationships={relationships} fullscreen={true} />
+          </div>
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xs text-slate-400 pointer-events-none z-[101]">
+            Нажмите <kbd className="px-2 py-0.5 rounded bg-black/30 font-mono">Esc</kbd> или кнопку ⤢ для выхода
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface StatsCardProps {
+  icon: string;
+  title: string;
+  value: string;
+  description: string;
+}
+const StatsCard: React.FC<StatsCardProps> = ({ icon, title, value, description }) => (
+  <div className="glass-card p-10 hover:border-[var(--primary)] hover:scale-[1.02] transition-all duration-300 group relative overflow-hidden">
+    <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="flex items-start justify-between gap-6 relative z-10">
+      <div className="space-y-2">
+        <p className="text-sm text-slate-500 font-semibold tracking-wider uppercase">{title}</p>
+        <p className="text-5xl font-extrabold text-white tracking-tighter bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">{value}</p>
+        <p className="text-sm text-slate-400 pt-1">{description}</p>
+      </div>
+      <span className="text-6xl group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-300">{icon}</span>
+    </div>
+  </div>
+);
