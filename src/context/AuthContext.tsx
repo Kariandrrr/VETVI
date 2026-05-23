@@ -1,42 +1,51 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useCallback, useEffect } from 'react';
-import type {UserRead, UserCreate} from '@/types/auth';
+import type { UserRead, UserCreate } from '@/types/auth';
 import { authAPI } from '@/api/auth';
 
-interface AuthContextType {
+export interface AuthContextType {
   user: UserRead | null;
   loading: boolean;
   error: string | null;
   register: (data: UserCreate) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (data: { display_name?: string; avatar_url?: string | null }) => Promise<UserRead>;
   clearError: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Проверяем пользователя при загрузке
   useEffect(() => {
-    const checkAuth = async () => {
+    let isMounted = true;
+
+    const checkAuth = async (): Promise<void> => {
       const token = localStorage.getItem('access_token');
       if (token) {
         try {
           const userData = await authAPI.me();
-          setUser(userData);
-        } catch (err) {
+          if (isMounted) {
+            setUser(userData);
+          }
+        } catch {
           localStorage.removeItem('access_token');
         }
       }
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
-    checkAuth();
+    void checkAuth(); // ← используем void для игнорирования Promise
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const register = useCallback(async (data: UserCreate) => {
@@ -45,9 +54,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const newUser = await authAPI.register(data);
       setUser(newUser);
-    } catch (err: any) {
-      const message =
-        err.response?.data?.detail || 'Ошибка регистрации';
+    } catch (err) {
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      const message = axiosError.response?.data?.detail || 'Ошибка регистрации';
       setError(message);
       throw err;
     } finally {
@@ -62,9 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await authAPI.login(username, password);
       const userData = await authAPI.me();
       setUser(userData);
-    } catch (err: any) {
-      const message =
-        err.response?.data?.detail || 'Ошибка входа';
+    } catch (err) {
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      const message = axiosError.response?.data?.detail || 'Ошибка входа';
       setError(message);
       throw err;
     } finally {
@@ -77,8 +86,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await authAPI.logout();
       setUser(null);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateUser = useCallback(async (data: { display_name?: string; avatar_url?: string | null }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const updatedUser = await authAPI.updateProfile(data);
+      setUser(updatedUser);
+      return updatedUser;
     } catch (err) {
-      console.error('Logout error:', err);
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      const message = axiosError.response?.data?.detail || 'Ошибка обновления профиля';
+      setError(message);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -95,6 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     register,
     login,
     logout,
+    updateUser,
     clearError,
   };
 

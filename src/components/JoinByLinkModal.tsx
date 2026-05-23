@@ -1,12 +1,11 @@
-import {useState} from 'react';
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {toast} from 'sonner';
-import {useNavigate} from 'react-router-dom';
-import {axiosInstance} from '@/api/auth';
-import type {AxiosError} from 'axios';
-import {Loader2} from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { axiosInstance } from '@/api/auth';
+import { Loader2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Props {
   open: boolean;
@@ -16,13 +15,11 @@ interface Props {
 export const JoinByLinkModal = ({ open, onOpenChange }: Props) => {
   const [token, setToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleJoin = async () => {
     if (!token.trim()) {
-      toast.error('❌ Введите токен', {
-        description: 'Пригласительный токен не может быть пустым',
-      });
+      toast.error('❌ Введите токен');
       return;
     }
 
@@ -35,64 +32,57 @@ export const JoinByLinkModal = ({ open, onOpenChange }: Props) => {
 
       await axiosInstance.post(`/join/${cleanToken}`);
 
-      toast.success('🎉 Добро пожаловать!', {
-        description: 'Вы успешно присоединились к семейной группе',
-        duration: 3000,
-      });
+      await queryClient.invalidateQueries({ queryKey: ['members'] });
+      await queryClient.invalidateQueries({ queryKey: ['familyTree'] });
+      await queryClient.invalidateQueries({ queryKey: ['families'] });
 
+      toast.success('🎉 Добро пожаловать в семью!');
       onOpenChange(false);
-      setToken('');
-      navigate('/families');
-    } catch (err: unknown) {
-      let errorMsg = 'Ошибка при вступлении в группу';
+    } catch (error: unknown) {
+    console.error(error);
 
-      if (err instanceof Error) {
-        const axiosError = err as AxiosError<{ detail?: string }>;
-        const serverMessage = axiosError.response?.data?.detail;
-        errorMsg = serverMessage || err.message || errorMsg;
-      }
+    let message = 'Ошибка при вступлении в группу';
 
-      toast.error('❌ Ошибка', {
-        description: errorMsg,
-        duration: 5000,
-      });
-    } finally {
-      setIsLoading(false);
+    if (error instanceof Error) {
+      message = error.message;
+    } else if (typeof error === 'object' && error !== null && 'response' in error) {
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      message = axiosError.response?.data?.detail || message;
     }
+
+    toast.error('❌ Ошибка', { description: message });
+  }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card border-[var(--glass-border)]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Вступить в семейную группу</DialogTitle>
+          <DialogTitle>Вступить в семейную группу</DialogTitle>
         </DialogHeader>
-        <div className="space-y-6">
-          <div>
-            <label className="text-sm text-slate-400 mb-1 block">
+
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400">
               Пригласительный токен или ссылка
             </label>
             <Input
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="https://vetvi.app/join/... или просто токен"
-              className="bg-black/50"
+              placeholder="Вставьте ссылку или токен..."
               disabled={isLoading}
             />
-            <p className="text-xs text-slate-500 mt-2">
-              Вставьте ссылку или токен, который вам прислали
-            </p>
           </div>
 
           <Button
             onClick={handleJoin}
             disabled={isLoading || !token.trim()}
-            className="w-full bg-gradient-to-r from-[var(--secondary)] to-[var(--primary)] hover:from-cyan-400 hover:to-purple-400 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full"
           >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Проверяем...
+                Присоединяемся...
               </>
             ) : (
               'Присоединиться'

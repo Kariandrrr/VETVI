@@ -6,6 +6,11 @@ import {HomePage} from '@/pages/HomePage';
 import {FamiliesPage} from '@/pages/FamiliesPage';
 import {ProtectedRoute} from '@/components/ProtectedRoute';
 import {JoinPage} from '@/pages/JoinPage';
+import { FamilyTreePage } from '@/pages/FamilyTreePage';
+import { MemberProfilePage } from '@/pages/MemberProfilePage';
+import { FamilyFeedPage } from '@/pages/FamilyFeedPage';
+import { UserProfilePage } from '@/pages/UserProfilePage';
+
 
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {Toaster} from 'sonner';
@@ -31,6 +36,7 @@ function App() {
               }
             />
 
+
             <Route
               path="/"
               element={
@@ -39,9 +45,38 @@ function App() {
                 </ProtectedRoute>
               }
             />
+              <Route path="/family/:id" element={<FamilyTreePage />} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+
+
+            <Route
+              path="/families/:familyId/feed"
+              element={
+                <ProtectedRoute>
+                  <FamilyFeedPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/families/:familyId/members/:memberId"
+              element={
+                <ProtectedRoute>
+                  <MemberProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+                path="/profile"
+                element={
+                    <ProtectedRoute>
+                        <UserProfilePage />
+                    </ProtectedRoute>
+                }
+            />
+              </Routes>
 
             <Toaster
               position="bottom-right"

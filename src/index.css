@@ -3,37 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* Базовый фон - глубокий космос */
-  --background: rgba(46, 46, 95, 0.88); /* Slate 955 */
-  --foreground: #f8fafc; /* Slate 50 */
+  --background: rgba(46, 46, 95, 0.88);
+  --foreground: #f8fafc;
 
-  /* Неоновые акценты */
-  --primary: #a855f7; /* Violet 500 */
+  /* НЕОНОВЫЕ АКЦЕНТЫ */
+  --primary: #a855f7;
   --primary-foreground: #ffffff;
-
-  --secondary: #22d3ee; /* Cyan 400 */
+  --secondary: #22d3ee;
   --secondary-foreground: #0f172a;
 
-  /* Элементы стекла */
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-blur: blur(12px);
 
-  /* Тени и свечения */
   --neon-glow-primary: 0 0 15px rgba(168, 85, 247, 0.4);
   --neon-glow-secondary: 0 0 15px rgba(34, 211, 238, 0.4);
-
-  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-}
-
-/* На всякий случай для светлой темы, но фокус на темной */
-.light {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --glass-bg: rgba(15, 23, 42, 0.03);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --primary: #9333ea;
-  --secondary: #0891b2;
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
 }
 
 @layer base {
@@ -43,12 +28,10 @@
   }
 }
 
-/* Полезный класс для эффекта стекла */
 @layer components {
   .glass-card {
     @apply bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-[var(--glass-blur)] rounded-3xl shadow-[var(--shadow-card)];
   }
-
   .neon-input {
     @apply transition-all duration-300;
   }

@@ -10,6 +10,7 @@ export interface UserRead {
   email: string;
   role: string;
   created_at: string;
+  avatar_url?: string | null;
 }
 
 export interface Token {

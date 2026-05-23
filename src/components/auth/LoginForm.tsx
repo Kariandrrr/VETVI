@@ -1,16 +1,15 @@
 import {useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from '@/components/ui/form';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {useAuth} from '@/hooks/useAuth';
-import {AlertCircle, CheckCircle2, Loader2} from 'lucide-react';
+import {AlertCircle, CheckCircle2, Eye, EyeOff, Loader2} from 'lucide-react';
 import {Alert, AlertDescription} from '@/components/ui/alert';
 import logo from '@/assets/logo.png';
-
 
 const loginSchema = z.object({
   username: z
@@ -27,6 +26,7 @@ export const LoginForm = () => {
   const navigate = useNavigate();
   const { login, error: authError } = useAuth();
   const [successMessage, setSuccessMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -42,7 +42,7 @@ export const LoginForm = () => {
       await login(data.username, data.password);
       setSuccessMessage('Вход выполнен! Переход на главную...');
       setTimeout(() => {
-        navigate('/');
+        navigate('/', { replace: true });
       }, 1500);
     } catch (error) {
       console.error("Caught error in LoginForm:", error);
@@ -51,9 +51,8 @@ export const LoginForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-return (
+  return (
     <div className="w-full max-w-lg mx-auto bg-white/[0.03] border border-white/10 backdrop-blur-xl p-10 rounded-[32px] shadow-2xl space-y-10 relative overflow-hidden">
-
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"></div>
 
       {/* Заголовок с логотипом */}
@@ -73,7 +72,7 @@ return (
         </p>
       </div>
 
-      {/* Алерты в новом стиле */}
+      {/* Алерты */}
       {authError && (
         <Alert variant="destructive" className="rounded-2xl bg-red-950/30 border-red-800 text-red-200">
           <AlertCircle className="h-5 w-5" />
@@ -91,14 +90,13 @@ return (
       {/* Форма */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 relative z-10">
-
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem className="space-y-2">
                 <FormLabel className="text-sm font-semibold text-slate-300 uppercase tracking-wider px-1">
-                  Логин или Email
+                  Email
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -122,21 +120,24 @@ return (
                   <FormLabel className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
                     Пароль
                   </FormLabel>
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs text-cyan-400 hover:text-white transition-colors"
-                  >
-                    Забыли пароль?
-                  </Link>
                 </div>
                 <FormControl>
-                  <Input
-                    placeholder="••••••••"
-                    type="password"
-                    {...field}
-                    disabled={isLoading}
-                    className="rounded-2xl h-12 bg-black/20 border-white/10 text-white focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all"
-                  />
+                  <div className="relative">
+                    <Input
+                      placeholder="••••••••"
+                      type={showPassword ? "text" : "password"}
+                      {...field}
+                      disabled={isLoading}
+                      className="rounded-2xl h-12 bg-black/20 border-white/10 text-white focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -164,12 +165,12 @@ return (
       {/* Ссылка на регистрацию */}
       <p className="text-center text-slate-400 relative z-10 pt-4">
         Нет аккаунта?{' '}
-        <Link
-          to="/register"
-          className="text-cyan-400 hover:text-white font-bold transition-colors decoration-dotted hover:underline"
-        >
-          Создать бесплатно
-        </Link>
+        <button
+        onClick={() => navigate('/register')}
+        className="text-cyan-400 hover:text-white font-bold transition-colors decoration-dotted hover:underline cursor-pointer bg-transparent border-none p-0"
+      >
+        Создать бесплатно
+      </button>
       </p>
     </div>
   );
