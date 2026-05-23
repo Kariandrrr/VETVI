@@ -120,12 +120,6 @@ export const LoginForm = () => {
                   <FormLabel className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
                     Пароль
                   </FormLabel>
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs text-cyan-400 hover:text-white transition-colors"
-                  >
-                    Забыли пароль?
-                  </Link>
                 </div>
                 <FormControl>
                   <div className="relative">
