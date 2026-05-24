@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.core.models.enums import MembershipRole, GenderEnum
+from ...core.models.enums import MembershipRole, GenderEnum
 
 
 class MemberProfileBase(BaseModel):

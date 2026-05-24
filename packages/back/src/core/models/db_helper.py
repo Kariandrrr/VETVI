@@ -1,7 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-from urllib.parse import quote_plus
 
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -10,7 +9,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
 )
 
-from src.core.config import settings
+from ...core.config import settings
 
 log = logging.getLogger(__name__)
 

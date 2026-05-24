@@ -4,9 +4,9 @@ from uuid import UUID
 from sqlalchemy import select, and_, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models.enums import RelationshipType
-from src.core.models.members import FamilyMember, Relationship
-from src.core.schemas.family_members import FamilyMemberCreate, FamilyMemberUpdate
+from ...core.models.enums import RelationshipType
+from ...core.models.members import FamilyMember, Relationship
+from ...core.schemas.family_members import FamilyMemberCreate, FamilyMemberUpdate
 
 
 async def check_member_uniqueness_in_group(

@@ -3,17 +3,17 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models import User
-from src.core.models.enums import MembershipRole
-from src.core.schemas.relationship import (
+from ...core.models import User
+from ...core.models.enums import MembershipRole
+from ...core.schemas.relationship import (
     RelationshipCreate,
     RelationshipRead,
     RelationshipUpdate,
 )
-from src.service.member_relationship import members as member_service
-from src.service.member_relationship import relationships as relationship_service
-from src.deps.family import RoleChecker
-from src.deps.user import get_db, get_current_user
+from ...deps.family import RoleChecker
+from ...deps.user import get_db, get_current_user
+from ...service.member_relationship import members as member_service
+from ...service.member_relationship import relationships as relationship_service
 
 router = APIRouter()
 

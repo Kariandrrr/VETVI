@@ -3,16 +3,16 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models import User
-from src.core.models.enums import MembershipRole
-from src.core.schemas.family_members import (
+from ...core.models import User
+from ...core.models.enums import MembershipRole
+from ...core.schemas.family_members import (
     FamilyMemberCreate,
     FamilyMemberRead,
     FamilyMemberUpdate,
 )
-from src.service.member_relationship import members as member_service
-from src.deps.family import RoleChecker
-from src.deps.user import get_db, get_current_user
+from ...deps.family import RoleChecker
+from ...deps.user import get_db, get_current_user
+from ...service.member_relationship import members as member_service
 
 router = APIRouter()
 
