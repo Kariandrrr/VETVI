@@ -4,9 +4,9 @@ from sqlalchemy import select, and_, delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.core.models.enums import RelationshipType
-from src.core.models.members import FamilyMember, Relationship
-from src.core.schemas.relationship import RelationshipCreate, RelationshipUpdate
+from ...core.models.enums import RelationshipType
+from ...core.models.members import FamilyMember, Relationship
+from ...core.schemas.relationship import RelationshipCreate, RelationshipUpdate
 from .members import get_family_member_by_id, get_all_ancestors
 
 

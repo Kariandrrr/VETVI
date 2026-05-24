@@ -1,5 +1,6 @@
 [tool.poetry]
 package-mode = false
+name = "back"
 
 [tool.poetry.dependencies]
 python = "^3.12"

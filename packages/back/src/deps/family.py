@@ -5,10 +5,10 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.models import User, FamilyMember
+from ..core.models.db_helper import get_db
 from ..core.models.enums import MembershipRole
 from ..core.models.families import FamilyMembership
-from ..deps.user import get_current_user, get_db
-
+from ..deps.user import get_current_user
 
 async def if_family_member(
     db: AsyncSession,
